@@ -1,0 +1,12 @@
+name: 'IA Commit'
+description: 'Agrega cambios, analiza el diff y hace commit con Conventional Commits'
+workflow:
+  - run: 'git add .'
+  - run: 'git diff --cached'
+    register: changes
+  - call: 'antigravity/llm'
+    args:
+      prompt: 'Basado en este diff: {{changes}}, genera un mensaje de commit corto siguiendo el estándar de Conventional Commits (tipo: descripción). Solo devuelve el mensaje, sin comillas.'
+    register: message
+  - run: 'git commit -m \"{{message}}\"'
+  - run: 'git push'
