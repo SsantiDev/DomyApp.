@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # Apps
-    'apps.users',
-    'apps.services',
-    'apps.payments',
-    'apps.reviews',
+    'apps.users.apps.UsersConfig',
+    'apps.services.apps.ServicesConfig',
+    'apps.payments.apps.PaymentsConfig',
+    'apps.reviews.apps.ReviewsConfig',
 ]
+
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -126,3 +128,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
