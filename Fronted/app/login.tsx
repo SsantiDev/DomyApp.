@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, ActivityIndicator, View, Text, TextInput, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../src/context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 type AuthView = 'login' | 'register' | 'forgot-password';
 

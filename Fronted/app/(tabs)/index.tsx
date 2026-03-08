@@ -1,39 +1,31 @@
-import { useQuery } from '@tanstack/react-query';
-import { StyleSheet, ActivityIndicator, Button } from 'react-native';
-
-import { testConnection } from '../../src/services/testService';
-import { Text, View } from '@/components/Themed';
+import React from 'react';
+import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
+import ClientDashboard from '../../components/dashboard/ClientDashboard';
+import WorkerDashboard from '../../components/dashboard/WorkerDashboard';
+import { Text } from '@/components/Themed';
 
 export default function TabOneScreen() {
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['testConnection'],
-    queryFn: testConnection,
-  });
+  const { user, isLoading } = useAuth();
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Connection Test</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#667eea" />
+      </View>
+    );
+  }
 
-      {isLoading && <ActivityIndicator size="large" color="#0000ff" />}
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>Por favor, inicia sesión para continuar.</Text>
+      </View>
+    );
+  }
 
-      {isError && (
-        <View style={styles.centerContent}>
-          <Text style={styles.errorText}>
-            Error: {error instanceof Error ? error.message : 'Unknown error'}
-          </Text>
-          <Button title="Retry Connection" onPress={() => refetch()} />
-        </View>
-      )}
-
-      {data && (
-        <View style={styles.dataContainer}>
-          <Text style={styles.dataTitle}>Response data:</Text>
-          <Text style={styles.dataText}>{JSON.stringify(data, null, 2)}</Text>
-        </View>
-      )}
-    </View>
-  );
+  // Despacho por Rol
+  return user.role === 'WORKER' ? <WorkerDashboard /> : <ClientDashboard />;
 }
 
 const styles = StyleSheet.create({
@@ -42,39 +34,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-  centerContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  dataContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    width: '100%',
-  },
-  dataTitle: {
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  dataText: {
-    fontFamily: 'Courier',
-    fontSize: 12,
-  },
+    backgroundColor: '#fff'
+  }
 });

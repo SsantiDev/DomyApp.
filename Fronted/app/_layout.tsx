@@ -6,11 +6,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../src/services/queryClient';
-import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { queryClient } from '../services/queryClient';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import '../src/App.css';
+import '../index.css';
+import '../App.css';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -49,17 +50,22 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+import { ThemeProvider as OurThemeProvider } from '../context/ThemeContext';
+import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
+
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <RootLayoutNavigator />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <OurThemeProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <NavThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <RootLayoutNavigator />
+          </NavThemeProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </OurThemeProvider>
   );
 }
 

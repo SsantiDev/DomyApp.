@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '', onLogoutStart,
 
                 <div className="sidebar-logo">
                     <img
-                        src="/src/assets/logo.png"
+                        src="/assets/images/icon.png"
                         alt="VIBRA Logo"
                         className="logo-icon"
                     />
