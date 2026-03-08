@@ -7,7 +7,7 @@ export interface TestConnectionResponse {
 
 export const testConnection = async (): Promise<TestConnectionResponse> => {
     try {
-        const response = await api.get<TestConnectionResponse>('/test-connection/');
+        const response = await api.get<TestConnectionResponse>('test-connection/');
         return response.data;
     } catch (error) {
         console.error('Error in testConnection:', error);
