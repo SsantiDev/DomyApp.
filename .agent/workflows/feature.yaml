@@ -1,38 +1,44 @@
 name: 'Dynamic Feature Workflow'
-description: 'Detecta el tipo de cambio automáticamente y gestiona el flujo de ramas con optimización de tests'
+description: 'Gestión profesional de commits atómicos, ramas por tipo y validación continua para el ecosistema Domy'
 workflow:
-  - run: 'git add .'
   - run: 'git diff --cached'
     register: changes
+
   - call: 'antigravity/llm'
     args:
-      prompt: 'Analiza este diff: {{changes}}. Clasifica el cambio en una de estas categorías: feat, fix, docs, refactor, chore, style, test. Responde solo con la palabra de la categoría.'
+      prompt: 'Analiza este diff staged: {{changes}}. Clasifica el cambio en una de estas categorías: feat, fix, docs, refactor, chore, style, test. Responde solo con la palabra de la categoría.'
     register: change_type
-  - input: 'Introduce un nombre corto para la funcionalidad (ej: update-readme):'
+
+  - input: 'Nombre corto del bloque atómico (ej: fix-login-null, feat-user-profile):'
     register: feature_name
+
   - run: 'git checkout -b {{change_type}}/{{feature_name}}'
+
   - call: 'antigravity/llm'
     args:
-      prompt: 'Genera un mensaje de commit corto para este diff: {{changes}}. Debe empezar con el prefijo \"{{change_type}}: \". Solo devuelve el mensaje, sin comillas.'
+      prompt: 'Genera un mensaje de commit convencional para este diff staged: {{changes}}. Debe comenzar estrictamente con "{{change_type}}: ". Usa el infinitivo en inglés. Solo devuelve el mensaje, sin comillas.'
     register: message
-  - run: 'git commit -m \"{{message}}\"'
-  - run: 'git push origin {{change_type}}/{{feature_name}}'
-  - name: 'Running Backend Tests'
+
+  - run: 'git commit -m "{{message}}"'
+
+  - name: 'Validación de Backend'
     if: 'change_type in ["feat", "fix", "refactor", "test"]'
-    run: 'cd Backend; .venv\Scripts\python.exe manage.py test'
-  - name: 'Running Frontend Tests'
+    run: 'cd Backend; ./.venv/bin/python manage.py test'
+
+  - name: 'Validación de Frontend'
     if: 'change_type in ["feat", "fix", "refactor", "test"]'
     run: 'cd Fronted; npm test -- --watchAll=false'
+
+  - run: 'git push origin {{change_type}}/{{feature_name}}'
   - run: 'git checkout develop'
   - run: 'git merge {{change_type}}/{{feature_name}}'
   - run: 'git push origin develop'
   - run: 'git branch -D {{change_type}}/{{feature_name}}'
-  - run: 'git checkout develop'
   - call: 'antigravity/message'
     args:
-      content: '¡Éxito! Feature mergeada y protegida.'
+      content: '✓ Bloque atómico integrado con éxito en develop.'
 
 on_error:
   - call: 'antigravity/message'
     args:
-      content: 'Los tests fallaron. El merge a develop ha sido cancelado.'
+      content: '⚠ Proceso interrumpido. Los tests fallaron o hubo un conflicto. Revisa la rama {{change_type}}/{{feature_name}}.'
