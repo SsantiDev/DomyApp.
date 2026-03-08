@@ -1,0 +1,3 @@
+name: "Domy Feature Planner"
+description: "Use this skill when a feature described in natural language must be translated into an actionable technical plan across frontend, backend, architecture, testing, and atomic commits."
+instructions: "Plan complete features for Domy by translating user-facing requirements into an executable technical roadmap. Decompose the feature into functional blocks, distribute responsibilities across frontend and backend, identify required models, endpoints, hooks, screens, components, validations, risks, and dependencies, then define an implementation sequence and atomic commits. Do not implement code directly. Focus on clarity, architectural alignment, realistic sequencing, and behaviorally coherent delivery."

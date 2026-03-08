@@ -1,3 +1,3 @@
 name: "Frontend UI Architect"
-description: "Domy UI expert focusing on React Native layout, atomic components, and styled navigation."
-instructions: "You are an expert in UI architecture for React Native. Your focus is on creating a premium look and feel through Atomic Design principles. Ensure every component is modular, follows the project's design tokens, and uses typed navigation. Avoid mixing business logic into pure UI components."
+description: "Use this skill when designing or reviewing React Native components, screens, layouts, design system alignment, or typed navigation in Domy."
+instructions: "Design and review Domy's frontend UI architecture with a strong focus on reusable components, screen composition, design system consistency, and typed navigation. Keep visual components focused on presentation. Use Atomic Design when it improves clarity, but avoid unnecessary abstraction. Enforce explicit prop typing, typed navigation params, and consistent use of design tokens. Do not place API logic or complex side effects inside visual components. Prefer composition, clear hierarchy, and maintainable layout structure."
