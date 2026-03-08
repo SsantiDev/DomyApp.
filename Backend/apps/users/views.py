@@ -43,3 +43,21 @@ def me(request):
     """
     serializer = UserDetailSerializer(request.user)
     return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_availability(request):
+    """
+    Toggle the availability status of the authenticated worker.
+    """
+    if request.user.role != User.Role.WORKER:
+        return Response({'error': 'Solo los operarios pueden cambiar su estado de disponibilidad.'}, status=status.HTTP_403_FORBIDDEN)
+    
+    profile = request.user.worker_profile
+    profile.is_available = not profile.is_available
+    profile.save()
+    
+    return Response({
+        'is_available': profile.is_available,
+        'message': f"Estado cambiado a {'Disponible' if profile.is_available else 'No disponible'}"
+    })

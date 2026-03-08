@@ -27,6 +27,7 @@ class WorkerProfile(models.Model):
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
+    is_available = models.BooleanField(default=False)
     average_rating = models.FloatField(default=0.0)
 
     def __str__(self):

@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
 class WorkerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerProfile
-        fields = ('identity_document', 'bio', 'profile_picture', 'is_verified', 'average_rating')
+        fields = ('identity_document', 'bio', 'profile_picture', 'is_verified', 'is_available', 'average_rating')
 
 class ClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
