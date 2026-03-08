@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
-from .serializers import UserDetailSerializer
+from .serializers import UserDetailSerializer, ClientProfileUpdateSerializer
 from .models import User, ClientProfile, WorkerProfile
 
 @api_view(['POST'])
@@ -61,3 +61,22 @@ def toggle_availability(request):
         'is_available': profile.is_available,
         'message': f"Estado cambiado a {'Disponible' if profile.is_available else 'No disponible'}"
     })
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_client_profile(request):
+    """
+    Partially update the authenticated client's profile data.
+    """
+    if request.user.role != User.Role.CLIENT:
+        return Response(
+            {'error': 'Solo los clientes pueden actualizar su perfil desde este endpoint.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    profile, _ = ClientProfile.objects.get_or_create(user=request.user)
+    serializer = ClientProfileUpdateSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        user_serializer = UserDetailSerializer(request.user)
+        return Response(user_serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

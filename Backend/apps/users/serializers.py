@@ -16,6 +16,16 @@ class ClientProfileSerializer(serializers.ModelSerializer):
         model = ClientProfile
         fields = ('address', 'phone_number', 'city')
 
+class ClientProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientProfile
+        fields = ('address', 'phone_number', 'city')
+        extra_kwargs = {
+            'address': {'required': False},
+            'phone_number': {'required': False},
+            'city': {'required': False},
+        }
+
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
 
