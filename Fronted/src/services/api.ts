@@ -3,11 +3,12 @@ import { API_URL } from '../config/env';
 import * as authStorage from './authStorage';
 
 const api = axios.create({
-    baseURL: `${API_URL}/api`,
-    timeout: 10000,
+    baseURL: `${API_URL}/api/`,
+    timeout: 30000,
     headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'ngrok-skip-browser-warning': 'true',
     },
 });
 
