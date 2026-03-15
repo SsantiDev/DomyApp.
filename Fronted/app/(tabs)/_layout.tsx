@@ -1,9 +1,9 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
+import { useTheme } from '../../context/ThemeContext';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 function TabBarIcon(props: {
@@ -14,19 +14,22 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#4CAF93',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
           borderTopWidth: 1,
-          borderTopColor: '#F0F0F0',
-          backgroundColor: '#FFFFFF',
-          height: 60,
-          paddingBottom: 8,
+          borderTopColor: colors.border,
+          backgroundColor: colors.surface,
+          // Remove fixed height and use insets for better compatibility
+          height: 50 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 5,
+          paddingTop: 5,
         },
         tabBarLabelStyle: {
           fontSize: 11,

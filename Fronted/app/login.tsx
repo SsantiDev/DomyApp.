@@ -2,35 +2,21 @@ import React, { useState } from 'react';
 import { Alert, ActivityIndicator, View, Text, TextInput, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type AuthView = 'login' | 'register' | 'forgot-password';
 
-function ThemeToggleLightweight() {
-    const toggleTheme = () => {
-        try {
-            if (typeof window !== 'undefined') {
-                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', newTheme);
-            }
-        } catch (e) { }
-    };
-    return (
-        <Pressable onPress={toggleTheme} style={styles.themeBtn}>
-            <Text style={styles.themeBtnText}>🌓 Tema</Text>
-        </Pressable>
-    );
-}
-
 export default function LoginScreen() {
     const { login, register } = useAuth();
+    const { colors, isDark } = useTheme();
     const router = useRouter();
     const { width } = useWindowDimensions();
-    const isMobile = width < 768; // Responsividad básica
+    const isMobile = width < 768;
 
     const [currentView, setCurrentView] = useState<AuthView>('login');
 
-    // Formularios
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -45,10 +31,11 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!username || !password) {
-            Alert.alert('Error', 'Please enter both username and password.');
+            Alert.alert('Error', 'Por favor ingresa usuario y contraseña.');
             return;
         }
 
+        setLoading(true);
         try {
             await login({ email: username.trim(), password });
             router.replace('/(tabs)');
@@ -87,338 +74,315 @@ export default function LoginScreen() {
         }
     };
 
+    const dynamicStyles = StyleSheet.create({
+        scrollContainer: {
+            flexGrow: 1,
+            backgroundColor: colors.background,
+        },
+        safeArea: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        themeToggleContainer: {
+            position: 'absolute',
+            top: 10,
+            right: 20,
+            zIndex: 1000,
+        },
+        container: {
+            flex: 1,
+            flexDirection: 'row',
+        },
+        containerMobile: {
+            flexDirection: 'column',
+        },
+        leftSide: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 40,
+        },
+        leftSideLogin: {
+            backgroundColor: isDark ? '#1a1a2e' : colors.primary,
+        },
+        leftSideRegister: {
+            backgroundColor: colors.background,
+        },
+        leftContent: {
+            maxWidth: 400,
+            alignItems: 'center',
+        },
+        welcomeTitle: {
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: isDark ? colors.primary : '#ffffff',
+            marginBottom: 16,
+            textAlign: 'center',
+        },
+        welcomeSubtitle: {
+            fontSize: 16,
+            color: isDark ? colors.textLight : '#ffffffcc',
+            textAlign: 'center',
+            lineHeight: 24,
+        },
+        rightSide: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.background,
+        },
+        card: {
+            width: '100%',
+            maxWidth: 450,
+            backgroundColor: colors.surface,
+            padding: 32,
+            borderRadius: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 24,
+            elevation: 10,
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        cardTitle: {
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 32,
+        },
+        formGroup: {
+            gap: 16,
+        },
+        row: {
+            flexDirection: 'row',
+            gap: 16,
+        },
+        input: {
+            borderWidth: 1,
+            borderColor: colors.border,
+            padding: 16,
+            borderRadius: 12,
+            backgroundColor: isDark ? '#1e1e3f' : '#f8fafc',
+            fontSize: 16,
+            color: colors.text,
+        },
+        roleBtn: {
+            borderWidth: 1,
+            borderColor: colors.primary,
+            padding: 16,
+            borderRadius: 12,
+            backgroundColor: isDark ? `${colors.primary}22` : '#ebf4ff',
+        },
+        roleBtnText: {
+            textAlign: 'center',
+            color: colors.primary,
+            fontWeight: '600',
+            fontSize: 16,
+        },
+        primaryBtn: {
+            backgroundColor: colors.primary,
+            padding: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+            marginTop: 8,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 10,
+            elevation: 5,
+        },
+        primaryBtnText: {
+            color: 'white',
+            fontWeight: 'bold',
+            fontSize: 16,
+            letterSpacing: 0.5,
+        },
+        footer: {
+            marginTop: 32,
+            alignItems: 'center',
+            borderTopWidth: 1,
+            borderTopColor: colors.border,
+            paddingTop: 24,
+        },
+        linkText: {
+            color: colors.textMuted,
+            fontSize: 14,
+        },
+        linkHighlight: {
+            color: colors.primary,
+            fontWeight: 'bold',
+        },
+    });
+
     return (
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-            <View style={styles.themeToggleContainer}>
-                <ThemeToggleLightweight />
-            </View>
+        <SafeAreaView style={dynamicStyles.safeArea}>
+            <ScrollView contentContainerStyle={dynamicStyles.scrollContainer} keyboardShouldPersistTaps="handled">
+                <View style={dynamicStyles.themeToggleContainer}>
+                    <ThemeToggle />
+                </View>
 
-            <View style={[styles.container, isMobile && styles.containerMobile]}>
+                <View style={[dynamicStyles.container, isMobile && dynamicStyles.containerMobile]}>
 
-                {/* LADO IZQUIERDO (Se oculta en móvil) */}
-                {!isMobile && (
-                    <View style={[styles.leftSide, currentView === 'register' ? styles.leftSideRegister : styles.leftSideLogin]}>
-                        <View style={styles.leftContent}>
-                            {currentView === 'register' ? (
-                                <View style={{ alignItems: 'center' }}>
-                                    <Text style={styles.welcomeTitle}>Únete a DomyApp</Text>
-                                    <Text style={styles.welcomeSubtitle}>Crea tu cuenta para comenzar tu gestión.</Text>
+                    {!isMobile && (
+                        <View style={[dynamicStyles.leftSide, currentView === 'register' ? dynamicStyles.leftSideRegister : dynamicStyles.leftSideLogin]}>
+                            <View style={dynamicStyles.leftContent}>
+                                {currentView === 'register' ? (
+                                    <View style={{ alignItems: 'center' }}>
+                                        <Text style={[dynamicStyles.welcomeTitle, { color: colors.primary }]}>Únete a DomyApp</Text>
+                                        <Text style={[dynamicStyles.welcomeSubtitle, { color: colors.textLight }]}>Crea tu cuenta para comenzar tu gestión.</Text>
+                                    </View>
+                                ) : (
+                                    <View style={{ alignItems: 'center' }}>
+                                        <Text style={dynamicStyles.welcomeTitle}>Bienvenido a DomyApp</Text>
+                                        <Text style={dynamicStyles.welcomeSubtitle}>
+                                            Accede a tu cuenta para disfrutar de todas las funcionalidades de nuestra plataforma.
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
+
+                    <View style={[dynamicStyles.rightSide, isMobile && { padding: 20 }]}>
+                        <View style={dynamicStyles.card}>
+
+                            {currentView === 'login' && (
+                                <View>
+                                    <Text style={dynamicStyles.cardTitle}>Login</Text>
+                                    <View style={dynamicStyles.formGroup}>
+                                        <TextInput
+                                            style={dynamicStyles.input}
+                                            placeholder="Correo Electrónico"
+                                            placeholderTextColor={colors.textMuted}
+                                            value={username}
+                                            onChangeText={setUsername}
+                                            editable={!loading}
+                                            autoCapitalize="none"
+                                            keyboardType="email-address"
+                                        />
+                                        <TextInput
+                                            style={dynamicStyles.input}
+                                            placeholder="Password"
+                                            placeholderTextColor={colors.textMuted}
+                                            value={password}
+                                            onChangeText={setPassword}
+                                            editable={!loading}
+                                            secureTextEntry
+                                        />
+                                        {loading ? (
+                                            <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 16 }} />
+                                        ) : (
+                                            <Pressable onPress={handleLogin} style={dynamicStyles.primaryBtn}>
+                                                <Text style={dynamicStyles.primaryBtnText}>Iniciar Sesión</Text>
+                                            </Pressable>
+                                        )}
+                                    </View>
+
+                                    <View style={dynamicStyles.footer}>
+                                        <Pressable onPress={() => setCurrentView('forgot-password')} style={{ marginBottom: 16 }}>
+                                            <Text style={dynamicStyles.linkText}>¿Olvidaste tu contraseña?</Text>
+                                        </Pressable>
+                                        <Pressable onPress={() => setCurrentView('register')}>
+                                            <Text style={dynamicStyles.linkText}>¿No tienes una cuenta? <Text style={dynamicStyles.linkHighlight}>Regístrate</Text></Text>
+                                        </Pressable>
+                                    </View>
                                 </View>
-                            ) : (
-                                <View style={{ alignItems: 'center' }}>
-                                    <Text style={styles.welcomeTitle}>Bienvenido a DomyApp</Text>
-                                    <Text style={styles.welcomeSubtitle}>
-                                        Accede a tu cuenta para disfrutar de todas las funcionalidades de nuestra plataforma.
-                                    </Text>
+                            )}
+
+                            {currentView === 'register' && (
+                                <View>
+                                    <Text style={dynamicStyles.cardTitle}>Crear Cuenta</Text>
+                                    <View style={dynamicStyles.formGroup}>
+                                        <View style={dynamicStyles.row}>
+                                            <TextInput
+                                                style={[dynamicStyles.input, { flex: 1 }]}
+                                                placeholder="Nombres"
+                                                placeholderTextColor={colors.textMuted}
+                                                value={regFirstName}
+                                                onChangeText={setRegFirstName}
+                                                editable={!regLoading}
+                                            />
+                                            <TextInput
+                                                style={[dynamicStyles.input, { flex: 1 }]}
+                                                placeholder="Apellidos"
+                                                placeholderTextColor={colors.textMuted}
+                                                value={regLastName}
+                                                onChangeText={setRegLastName}
+                                                editable={!regLoading}
+                                            />
+                                        </View>
+                                        <TextInput
+                                            style={dynamicStyles.input}
+                                            placeholder="Username"
+                                            placeholderTextColor={colors.textMuted}
+                                            value={regUsername}
+                                            onChangeText={setRegUsername}
+                                            editable={!regLoading}
+                                            autoCapitalize="none"
+                                        />
+                                        <TextInput
+                                            style={dynamicStyles.input}
+                                            placeholder="Correo Electrónico"
+                                            placeholderTextColor={colors.textMuted}
+                                            value={regEmail}
+                                            onChangeText={setRegEmail}
+                                            editable={!regLoading}
+                                            keyboardType="email-address"
+                                            autoCapitalize="none"
+                                        />
+                                        <TextInput
+                                            style={dynamicStyles.input}
+                                            placeholder="Contraseña"
+                                            placeholderTextColor={colors.textMuted}
+                                            value={regPassword}
+                                            onChangeText={setRegPassword}
+                                            editable={!regLoading}
+                                            secureTextEntry
+                                        />
+
+                                        <Pressable
+                                            onPress={() => setRegRole(prev => prev === 'CLIENT' ? 'WORKER' : 'CLIENT')}
+                                            style={dynamicStyles.roleBtn}
+                                        >
+                                            <Text style={dynamicStyles.roleBtnText}>
+                                                Rol: {regRole === 'CLIENT' ? 'Cliente' : 'Trabajador'} (Tocar para cambiar)
+                                            </Text>
+                                        </Pressable>
+
+                                        {regLoading ? (
+                                            <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 16 }} />
+                                        ) : (
+                                            <Pressable onPress={handleRegister} style={dynamicStyles.primaryBtn}>
+                                                <Text style={dynamicStyles.primaryBtnText}>Registrarse</Text>
+                                            </Pressable>
+                                        )}
+                                    </View>
+
+                                    <View style={dynamicStyles.footer}>
+                                        <Pressable onPress={() => setCurrentView('login')}>
+                                            <Text style={dynamicStyles.linkText}>¿Ya tienes una cuenta? <Text style={dynamicStyles.linkHighlight}>Inicia sesión</Text></Text>
+                                        </Pressable>
+                                    </View>
+                                </View>
+                            )}
+
+                            {currentView === 'forgot-password' && (
+                                <View>
+                                    <Text style={dynamicStyles.cardTitle}>Recuperar Contraseña</Text>
+                                    <Text style={[dynamicStyles.linkText, { textAlign: 'center', marginBottom: 24 }]}>La recuperación de contraseña está en construcción.</Text>
+                                    <View style={dynamicStyles.footer}>
+                                        <Pressable onPress={() => setCurrentView('login')}>
+                                            <Text style={[dynamicStyles.linkText, dynamicStyles.linkHighlight]}>Volver al Login</Text>
+                                        </Pressable>
+                                    </View>
                                 </View>
                             )}
                         </View>
                     </View>
-                )}
-
-                {/* LADO DERECHO (Formularios) */}
-                <View style={[styles.rightSide, isMobile && { padding: 20 }]}>
-                    <View style={styles.card}>
-
-                        {currentView === 'login' && (
-                            <View>
-                                <Text style={styles.cardTitle}>Login</Text>
-                                <View style={styles.formGroup}>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Correo Electrónico"
-                                        placeholderTextColor="#a0aec0"
-                                        value={username}
-                                        onChangeText={setUsername}
-                                        editable={!loading}
-                                        autoCapitalize="none"
-                                        keyboardType="email-address"
-                                    />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Password"
-                                        placeholderTextColor="#a0aec0"
-                                        value={password}
-                                        onChangeText={setPassword}
-                                        editable={!loading}
-                                        secureTextEntry
-                                    />
-                                    {loading ? (
-                                        <View style={styles.loaderContainer}>
-                                            <ActivityIndicator size="large" color="#667eea" />
-                                        </View>
-                                    ) : (
-                                        <Pressable onPress={handleLogin} style={styles.primaryBtn}>
-                                            <Text style={styles.primaryBtnText}>Iniciar Sesión</Text>
-                                        </Pressable>
-                                    )}
-                                </View>
-
-                                <View style={styles.footer}>
-                                    <Pressable onPress={() => setCurrentView('forgot-password')} style={{ marginBottom: 16 }}>
-                                        <Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text>
-                                    </Pressable>
-                                    <Pressable onPress={() => setCurrentView('register')}>
-                                        <Text style={styles.linkText}>¿No tienes una cuenta? <Text style={styles.linkHighlight}>Regístrate</Text></Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )}
-
-                        {currentView === 'register' && (
-                            <View>
-                                <Text style={styles.cardTitle}>Crear Cuenta</Text>
-                                <View style={styles.formGroup}>
-                                    <View style={styles.row}>
-                                        <TextInput
-                                            style={[styles.input, { flex: 1 }]}
-                                            placeholder="Nombres"
-                                            placeholderTextColor="#a0aec0"
-                                            value={regFirstName}
-                                            onChangeText={setRegFirstName}
-                                            editable={!regLoading}
-                                        />
-                                        <TextInput
-                                            style={[styles.input, { flex: 1 }]}
-                                            placeholder="Apellidos"
-                                            placeholderTextColor="#a0aec0"
-                                            value={regLastName}
-                                            onChangeText={setRegLastName}
-                                            editable={!regLoading}
-                                        />
-                                    </View>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Username"
-                                        placeholderTextColor="#a0aec0"
-                                        value={regUsername}
-                                        onChangeText={setRegUsername}
-                                        editable={!regLoading}
-                                        autoCapitalize="none"
-                                    />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Correo Electrónico"
-                                        placeholderTextColor="#a0aec0"
-                                        value={regEmail}
-                                        onChangeText={setRegEmail}
-                                        editable={!regLoading}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                    />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Contraseña"
-                                        placeholderTextColor="#a0aec0"
-                                        value={regPassword}
-                                        onChangeText={setRegPassword}
-                                        editable={!regLoading}
-                                        secureTextEntry
-                                    />
-
-                                    <Pressable
-                                        onPress={() => setRegRole(prev => prev === 'CLIENT' ? 'WORKER' : 'CLIENT')}
-                                        style={styles.roleBtn}
-                                    >
-                                        <Text style={styles.roleBtnText}>
-                                            Rol: {regRole === 'CLIENT' ? 'Cliente' : 'Trabajador'} (Tocar para cambiar)
-                                        </Text>
-                                    </Pressable>
-
-                                    {regLoading ? (
-                                        <View style={styles.loaderContainer}>
-                                            <ActivityIndicator size="large" color="#667eea" />
-                                        </View>
-                                    ) : (
-                                        <Pressable onPress={handleRegister} style={styles.primaryBtn}>
-                                            <Text style={styles.primaryBtnText}>Registrarse</Text>
-                                        </Pressable>
-                                    )}
-                                </View>
-
-                                <View style={styles.footer}>
-                                    <Pressable onPress={() => setCurrentView('login')}>
-                                        <Text style={styles.linkText}>¿Ya tienes una cuenta? <Text style={styles.linkHighlight}>Inicia sesión</Text></Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )}
-
-                        {currentView === 'forgot-password' && (
-                            <View>
-                                <Text style={styles.cardTitle}>Recuperar Contraseña</Text>
-                                <Text style={styles.constructionText}>La recuperación de contraseña está en construcción.</Text>
-                                <View style={styles.footer}>
-                                    <Pressable onPress={() => setCurrentView('login')}>
-                                        <Text style={[styles.linkText, styles.linkHighlight]}>Volver al Login</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )}
-
-                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    scrollContainer: {
-        flexGrow: 1,
-        backgroundColor: '#f8fafc',
-    },
-    themeToggleContainer: {
-        position: 'absolute',
-        top: 40,
-        right: 20,
-        zIndex: 1000,
-    },
-    themeBtn: {
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.1)',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-    },
-    themeBtnText: {
-        color: '#1a202c',
-        fontWeight: '600',
-    },
-    container: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    containerMobile: {
-        flexDirection: 'column',
-    },
-    leftSide: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 40,
-    },
-    leftSideLogin: {
-        backgroundColor: '#1a1a2e',
-    },
-    leftSideRegister: {
-        backgroundColor: '#f8fafc',
-    },
-    leftContent: {
-        maxWidth: 400,
-        alignItems: 'center',
-    },
-    welcomeTitle: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#667eea',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    welcomeSubtitle: {
-        fontSize: 16,
-        color: '#4a5568',
-        textAlign: 'center',
-        lineHeight: 24,
-    },
-    rightSide: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8fafc',
-    },
-    card: {
-        width: '100%',
-        maxWidth: 450,
-        backgroundColor: '#ffffff',
-        padding: 32,
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 24,
-        elevation: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.05)',
-    },
-    cardTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#1a202c',
-        textAlign: 'center',
-        marginBottom: 32,
-    },
-    formGroup: {
-        gap: 16,
-    },
-    row: {
-        flexDirection: 'row',
-        gap: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        padding: 16,
-        borderRadius: 12,
-        backgroundColor: '#f8fafc',
-        fontSize: 16,
-        color: '#1a202c',
-    },
-    roleBtn: {
-        borderWidth: 1,
-        borderColor: '#667eea',
-        padding: 16,
-        borderRadius: 12,
-        backgroundColor: '#ebf4ff',
-    },
-    roleBtnText: {
-        textAlign: 'center',
-        color: '#4c51bf',
-        fontWeight: '600',
-        fontSize: 16,
-    },
-    loaderContainer: {
-        marginTop: 16,
-        alignItems: 'center',
-    },
-    primaryBtn: {
-        backgroundColor: '#667eea',
-        padding: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-        marginTop: 8,
-        shadowColor: '#667eea',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    primaryBtnText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-        letterSpacing: 0.5,
-    },
-    footer: {
-        marginTop: 32,
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#e2e8f0',
-        paddingTop: 24,
-    },
-    linkText: {
-        color: '#718096',
-        fontSize: 14,
-    },
-    linkHighlight: {
-        color: '#667eea',
-        fontWeight: 'bold',
-    },
-    constructionText: {
-        textAlign: 'center',
-        marginBottom: 24,
-        color: '#718096',
-        lineHeight: 24,
-    }
-});

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { UserDetail } from '../../types/auth';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
     user: UserDetail;
@@ -25,72 +26,73 @@ function getInitials(firstName: string, lastName: string): string {
 }
 
 export default function ProfileHeader({ user }: Props) {
+    const { colors } = useTheme();
     const initials = getInitials(user.first_name, user.last_name);
-    const color = roleColor[user.role] ?? '#4CAF93';
+    const color = roleColor[user.role] ?? colors.primary;
     const label = roleLabel[user.role] ?? user.role;
 
+    const dynamicStyles = StyleSheet.create({
+        container: {
+            alignItems: 'center',
+            paddingVertical: 32,
+            paddingHorizontal: 20,
+            backgroundColor: colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+        },
+        avatar: {
+            width: 88,
+            height: 88,
+            borderRadius: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 8,
+            elevation: 5,
+        },
+        initials: {
+            fontSize: 32,
+            fontWeight: '700',
+            color: '#FFFFFF',
+            letterSpacing: 1,
+        },
+        name: {
+            fontSize: 22,
+            fontWeight: '700',
+            color: colors.text,
+            marginBottom: 4,
+        },
+        email: {
+            fontSize: 14,
+            color: colors.textLight,
+            marginBottom: 12,
+        },
+        badge: {
+            paddingHorizontal: 14,
+            paddingVertical: 5,
+            borderRadius: 20,
+        },
+        badgeText: {
+            fontSize: 13,
+            fontWeight: '600',
+        },
+    });
+
     return (
-        <View style={styles.container}>
-            <View style={[styles.avatar, { backgroundColor: color }]}>
-                <Text style={styles.initials}>{initials}</Text>
+        <View style={dynamicStyles.container}>
+            <View style={[dynamicStyles.avatar, { backgroundColor: color }]}>
+                <Text style={dynamicStyles.initials}>{initials}</Text>
             </View>
-            <Text style={styles.name}>
+            <Text style={dynamicStyles.name}>
                 {user.first_name} {user.last_name}
             </Text>
-            <Text style={styles.email}>{user.email}</Text>
-            <View style={[styles.badge, { backgroundColor: `${color}22` }]}>
-                <Text style={[styles.badgeText, { color }]}>{label}</Text>
+            <Text style={dynamicStyles.email}>{user.email}</Text>
+            <View style={[dynamicStyles.badge, { backgroundColor: `${color}22` }]}>
+                <Text style={[dynamicStyles.badgeText, { color }]}>{label}</Text>
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
-        paddingVertical: 32,
-        paddingHorizontal: 20,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-    },
-    avatar: {
-        width: 88,
-        height: 88,
-        borderRadius: 44,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 14,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    initials: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#FFFFFF',
-        letterSpacing: 1,
-    },
-    name: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#1A1A2E',
-        marginBottom: 4,
-    },
-    email: {
-        fontSize: 14,
-        color: '#6B7280',
-        marginBottom: 12,
-    },
-    badge: {
-        paddingHorizontal: 14,
-        paddingVertical: 5,
-        borderRadius: 20,
-    },
-    badgeText: {
-        fontSize: 13,
-        fontWeight: '600',
-    },
-});

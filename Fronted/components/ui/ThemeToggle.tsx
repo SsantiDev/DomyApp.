@@ -1,30 +1,44 @@
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../../hooks/useTheme';
-import './ThemeToggle.css';
+import React from 'react';
+import { Pressable, StyleSheet } from 'react-native';
+import { Moon, Sun } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 export function ThemeToggle() {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, colors } = useTheme();
+    const isDark = theme === 'dark';
 
     return (
-        <button
-            onClick={toggleTheme}
-            className="theme-toggle"
-            aria-label={`Cambiar a tema ${theme === 'light' ? 'oscuro' : 'claro'}`}
-            title={`Cambiar a tema ${theme === 'light' ? 'oscuro' : 'claro'}`}
+        <Pressable
+            onPress={toggleTheme}
+            style={({ pressed }) => [
+                styles.themeToggle,
+                { backgroundColor: pressed ? `${colors.primary}22` : 'transparent' }
+            ]}
+            accessibilityLabel={`Cambiar a tema ${isDark ? 'claro' : 'oscuro'}`}
         >
-            {/* Icono de Sol (visible en modo claro) */}
-            <Sun
-                className={`theme-icon sun-icon ${theme === 'light' ? 'visible' : 'hidden'}`}
-                size={22}
-                strokeWidth={1.5}
-            />
-
-            {/* Icono de Luna (visible en modo oscuro) */}
-            <Moon
-                className={`theme-icon moon-icon ${theme === 'dark' ? 'visible' : 'hidden'}`}
-                size={22}
-                strokeWidth={1.5}
-            />
-        </button>
+            {isDark ? (
+                <Sun
+                    size={22}
+                    color={colors.primary}
+                    strokeWidth={2}
+                />
+            ) : (
+                <Moon
+                    size={22}
+                    color={colors.primary}
+                    strokeWidth={2}
+                />
+            )}
+        </Pressable>
     );
 }
+
+const styles = StyleSheet.create({
+    themeToggle: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});

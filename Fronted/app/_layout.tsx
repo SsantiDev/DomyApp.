@@ -50,22 +50,44 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-import { ThemeProvider as OurThemeProvider } from '../context/ThemeContext';
+import { ThemeProvider as OurThemeProvider, useTheme as useOurTheme } from '../context/ThemeContext';
 import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
     <OurThemeProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <NavThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <RootLayoutNavigator />
-          </NavThemeProvider>
-        </QueryClientProvider>
-      </AuthProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <NavigationWrapper />
+          </QueryClientProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
     </OurThemeProvider>
+  );
+}
+
+function NavigationWrapper() {
+  const { theme, colors, isDark } = useOurTheme();
+
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.primary,
+    },
+  };
+
+  return (
+    <NavThemeProvider value={navigationTheme}>
+      <RootLayoutNavigator />
+    </NavThemeProvider>
   );
 }
 
