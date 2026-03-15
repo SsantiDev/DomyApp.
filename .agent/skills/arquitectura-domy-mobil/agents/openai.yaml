@@ -1,0 +1,4 @@
+interface:
+  display_name: "Arquitectura Domy Mobil"
+  short_description: "Diseño y validación de arquitectura técnica para Domy en Mobil"
+  category: "Engineering"
