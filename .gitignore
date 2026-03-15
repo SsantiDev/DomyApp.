@@ -46,8 +46,9 @@ Desktop.ini
 
 # Project specific
 backend/.venv/
-fronted/node_modules/
-fronted/.expo/
+Fronted/node_modules/
+Fronted/.expo/
+Backend/venv/
 
 Estructura.txt
 Fronted/config/env.ts
