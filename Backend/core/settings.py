@@ -146,3 +146,11 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Email Configuration (Gmail)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'notificacionesdomyapp@gmail.com'
+EMAIL_HOST_PASSWORD = 'pvop dxoh role ombk'
+DEFAULT_FROM_EMAIL = f"Domy App <{EMAIL_HOST_USER}>"

@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from .models import User, WorkerProfile, ClientProfile
+from .services import EmailService
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -10,3 +11,6 @@ def create_user_profile(sender, instance, created, **kwargs):
             WorkerProfile.objects.get_or_create(user=instance)
         elif instance.role == User.Role.CLIENT:
             ClientProfile.objects.get_or_create(user=instance)
+        
+        # Trigger welcome email
+        EmailService.send_welcome_email(instance)
