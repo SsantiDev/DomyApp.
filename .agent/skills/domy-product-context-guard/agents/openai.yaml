@@ -1,0 +1,4 @@
+interface:
+  display_name: "Domy Product Context Guard"
+  short_description: "Contexto estratégico y evaluación de decisiones de producto para Domy"
+  category: "Product"
