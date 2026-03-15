@@ -7,7 +7,9 @@ import WorkerDashboard from '../../components/dashboard/WorkerDashboard';
 import { Text } from '@/components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function TabOneScreen() {
+import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
+
+export default function TabIndexScreen() {
   const { user, isLoading } = useAuth();
   const { colors } = useTheme();
 
@@ -28,9 +30,9 @@ export default function TabOneScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'left', 'right']}>
+    <NativeMainLayout>
       {user.role === 'WORKER' ? <WorkerDashboard /> : <ClientDashboard />}
-    </SafeAreaView>
+    </NativeMainLayout>
   );
 }
 

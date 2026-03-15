@@ -11,10 +11,10 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetProfile, useUpdateProfile } from '../../hooks/useProfile';
-import { ClientProfile } from '../../types/auth';
+import { ClientProfile, WorkerProfile } from '../../types/auth';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileDataSection from '../../components/profile/ProfileDataSection';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 
 export default function ProfileScreen() {
     const { logout } = useAuth();
@@ -23,35 +23,48 @@ export default function ProfileScreen() {
     const updateProfile = useUpdateProfile();
 
     const [isEditing, setIsEditing] = useState(false);
-    const [form, setForm] = useState<Partial<ClientProfile>>({});
+    const [form, setForm] = useState<Partial<ClientProfile & WorkerProfile>>({});
 
     useEffect(() => {
-        if (user?.profile && user.role === 'CLIENT') {
-            const p = user.profile as ClientProfile;
-            setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
+        if (user?.profile) {
+            if (user.role === 'CLIENT') {
+                const p = user.profile as ClientProfile;
+                setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
+            } else if (user.role === 'WORKER') {
+                const p = user.profile as WorkerProfile;
+                setForm({ bio: p.bio, identity_document: p.identity_document });
+            }
         }
     }, [user]);
 
-    const handleFieldChange = (field: keyof ClientProfile, value: string) => {
+    const handleFieldChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSave = () => {
-        updateProfile.mutate(form, {
+        if (!user) return;
+
+        updateProfile.mutate({ data: form, role: user.role }, {
             onSuccess: () => {
                 setIsEditing(false);
                 Alert.alert('✓ Guardado', 'Tu perfil se actualizó correctamente.');
             },
-            onError: () => {
-                Alert.alert('Error', 'No se pudo guardar el perfil. Inténtalo de nuevo.');
+            onError: (err: any) => {
+                const msg = err.response?.data?.error || 'No se pudo guardar el perfil.';
+                Alert.alert('Error', msg);
             },
         });
     };
 
     const handleCancelEdit = () => {
-        if (user?.profile && user.role === 'CLIENT') {
-            const p = user.profile as ClientProfile;
-            setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
+        if (user?.profile) {
+            if (user.role === 'CLIENT') {
+                const p = user.profile as ClientProfile;
+                setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
+            } else if (user.role === 'WORKER') {
+                const p = user.profile as WorkerProfile;
+                setForm({ bio: p.bio, identity_document: p.identity_document });
+            }
         }
         setIsEditing(false);
     };
@@ -103,61 +116,10 @@ export default function ProfileScreen() {
             color: '#FFF',
             fontWeight: '600',
         },
-        actionBar: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            paddingVertical: 14,
-            backgroundColor: colors.surface,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-        },
-        title: {
-            fontSize: 20,
-            fontWeight: '700',
-            color: colors.text,
-        },
-        editBtn: {
-            paddingHorizontal: 16,
-            paddingVertical: 7,
-            borderWidth: 1.5,
-            borderColor: colors.primary,
-            borderRadius: 8,
-        },
-        editText: {
-            color: colors.primary,
-            fontWeight: '600',
+        email: {
             fontSize: 14,
-        },
-        editActions: {
-            flexDirection: 'row',
-            gap: 8,
-        },
-        cancelBtn: {
-            paddingHorizontal: 14,
-            paddingVertical: 7,
-            borderRadius: 8,
-            borderWidth: 1.5,
-            borderColor: colors.border,
-        },
-        cancelText: {
             color: colors.textLight,
-            fontWeight: '600',
-            fontSize: 14,
-        },
-        saveBtn: {
-            paddingHorizontal: 18,
-            paddingVertical: 7,
-            backgroundColor: colors.primary,
-            borderRadius: 8,
-            minWidth: 76,
-            alignItems: 'center',
-        },
-        saveText: {
-            color: '#FFFFFF',
-            fontWeight: '700',
-            fontSize: 14,
+            marginBottom: 12,
         },
         logoutSection: {
             padding: 24,
@@ -200,45 +162,22 @@ export default function ProfileScreen() {
     }
 
     return (
-        <SafeAreaView style={dynamicStyles.safeArea} edges={['top', 'left', 'right']}>
-            <View style={dynamicStyles.actionBar}>
-                <Text style={dynamicStyles.title}>Mi Perfil</Text>
-                {user.role === 'CLIENT' && (
-                    isEditing ? (
-                        <View style={dynamicStyles.editActions}>
-                            <TouchableOpacity onPress={handleCancelEdit} style={dynamicStyles.cancelBtn}>
-                                <Text style={dynamicStyles.cancelText}>Cancelar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={handleSave}
-                                style={dynamicStyles.saveBtn}
-                                disabled={updateProfile.isPending}
-                            >
-                                {updateProfile.isPending ? (
-                                    <ActivityIndicator size="small" color="#FFF" />
-                                ) : (
-                                    <Text style={dynamicStyles.saveText}>Guardar</Text>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    ) : (
-                        <TouchableOpacity onPress={() => setIsEditing(true)} style={dynamicStyles.editBtn}>
-                            <Text style={dynamicStyles.editText}>Editar</Text>
-                        </TouchableOpacity>
-                    )
-                )}
-            </View>
-
+        <NativeMainLayout>
             <ScrollView style={dynamicStyles.scroll} showsVerticalScrollIndicator={false}>
-                <ProfileHeader user={user} />
+                <ProfileHeader
+                    user={user}
+                    isEditing={isEditing}
+                    onEdit={() => setIsEditing(true)}
+                    onSave={handleSave}
+                    onCancel={handleCancelEdit}
+                    isSaving={updateProfile.isPending}
+                />
 
-                {user.role === 'CLIENT' && (
-                    <ProfileDataSection
-                        data={form}
-                        isEditing={isEditing}
-                        onChange={handleFieldChange}
-                    />
-                )}
+                <ProfileDataSection
+                    data={form}
+                    isEditing={isEditing}
+                    onChange={handleFieldChange}
+                />
 
                 <View style={dynamicStyles.logoutSection}>
                     <TouchableOpacity style={dynamicStyles.logoutButton} onPress={handleLogout}>
@@ -246,6 +185,6 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </NativeMainLayout>
     );
 }
