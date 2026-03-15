@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable } from 'react-native';
-import { User, LogOut, Settings, Moon, Sun, UserCircle } from 'lucide-react-native';
+import { User, LogOut, Settings, Moon, Sun, UserCircle, Star } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
@@ -9,6 +9,9 @@ export const UserMenu = () => {
     const { user, logout } = useAuth();
     const { colors, toggleTheme, isDark } = useTheme();
     const [visible, setVisible] = useState(false);
+
+    const isWorker = user?.role === 'WORKER';
+    const averageRating = user?.profile?.average_rating;
 
     const handleLogout = async () => {
         setVisible(false);
@@ -33,9 +36,19 @@ export const UserMenu = () => {
                 onPress={() => setVisible(true)}
             >
                 <UserCircle size={24} color={colors.primary} />
-                <Text style={[styles.userName, { color: colors.text }]}>
-                    {user?.username || 'Usuario'}
-                </Text>
+                <View style={styles.userInfo}>
+                    <Text style={[styles.userName, { color: colors.text }]}>
+                        {user?.username || 'Usuario'}
+                    </Text>
+                    {isWorker && averageRating > 0 && (
+                        <View style={[styles.ratingBadge, { backgroundColor: colors.warning + '10' }]}>
+                            <Star size={10} color={colors.warning} fill={colors.warning} />
+                            <Text style={[styles.ratingText, { color: colors.warning }]}>
+                                {averageRating.toFixed(1)}
+                            </Text>
+                        </View>
+                    )}
+                </View>
             </TouchableOpacity>
 
             <Modal
@@ -83,7 +96,24 @@ const styles = StyleSheet.create({
     userName: {
         marginLeft: SPACING.sm,
         fontSize: TYPOGRAPHY.body.fontSize,
-        fontWeight: '500',
+        fontWeight: '700',
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    ratingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        marginLeft: 6,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: RADIUS.sm,
+    },
+    ratingText: {
+        fontSize: 11,
+        fontWeight: '800',
     },
     overlay: {
         flex: 1,

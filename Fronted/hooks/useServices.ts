@@ -1,0 +1,103 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '../services/api';
+import { Category, ServiceRequest, CreateServiceRequestDTO } from '../types/services';
+
+export const useCategories = () => {
+    return useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            const { data } = await api.get<Category[]>('/services/categories/');
+            return data;
+        }
+    });
+};
+
+export const useServiceRequests = () => {
+    return useQuery({
+        queryKey: ['service-requests'],
+        queryFn: async () => {
+            const { data } = await api.get<ServiceRequest[]>('/services/requests/');
+            return data;
+        }
+    });
+};
+
+export const useCreateServiceRequest = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (newRequest: CreateServiceRequestDTO) => {
+            const { data } = await api.post<ServiceRequest>('/services/requests/', newRequest);
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+        }
+    });
+};
+
+export const useAcceptService = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (requestId: number) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${requestId}/accept/`);
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+        }
+    });
+};
+export const useGetServiceDetail = (id: number) => {
+    return useQuery({
+        queryKey: ['service-requests', id],
+        queryFn: async () => {
+            const { data } = await api.get<ServiceRequest>(`/services/requests/${id}/`);
+            return data;
+        },
+        enabled: !!id,
+    });
+};
+
+export const useStartService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/start/`);
+            return data;
+        },
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
+
+export const useCompleteService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/complete/`);
+            return data;
+        },
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
+
+export const useRateService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, rating, comment }: { id: number; rating: number; comment: string }) => {
+            const { data } = await api.post(`/services/requests/${id}/rate/`, { rating, comment });
+            return data;
+        },
+        onSuccess: (_, { id }) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
