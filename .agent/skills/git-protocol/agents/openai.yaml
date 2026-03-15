@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Protocol"
+  short_description: "Commits atómicos, ramas por intención y flujo Git automatizado hacia develop"
+  category: "Engineering"
