@@ -1,0 +1,4 @@
+interface:
+  display_name: "Domy Refactor Guard"
+  short_description: "Refactorización segura y preservación de comportamiento en Domy"
+  category: "Engineering"
