@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { AppHeader } from '../../components/layout/AppHeader';
+import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -22,6 +24,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        header: () => <AppHeader />,
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: colors.border,
@@ -35,14 +38,13 @@ export default function TabLayout() {
           fontSize: 11,
           fontWeight: '600',
         },
-        headerShown: useClientOnlyValue(false, true),
+        headerShown: true,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Inicio',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -50,7 +52,6 @@ export default function TabLayout() {
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-          headerShown: false,
         }}
       />
     </Tabs>
