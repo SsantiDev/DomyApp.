@@ -23,7 +23,7 @@ class User(AbstractUser):
 
 class WorkerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='worker_profile')
-    identity_document = models.CharField(max_length=64, unique=True)
+    identity_document = models.CharField(max_length=64, unique=True, null=True, blank=True)
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)

@@ -3,8 +3,17 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
-from .serializers import UserDetailSerializer, ClientProfileUpdateSerializer
+from django.db import transaction
+import logging
+from .serializers import (
+    UserDetailSerializer, 
+    ClientProfileUpdateSerializer, 
+    WorkerProfileUpdateSerializer,
+    UserRegistrationSerializer
+)
 from .models import User, ClientProfile, WorkerProfile
+
+logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -12,28 +21,17 @@ def register(request):
     """
     Register a new user (Client or Worker)
     """
-    data = request.data
-    try:
-        if User.objects.filter(username=data.get('username')).exists():
-            return Response({'error': 'El nombre de usuario ya existe.'}, status=status.HTTP_400_BAD_REQUEST)
-        if User.objects.filter(email=data.get('email')).exists():
-            return Response({'error': 'El correo electrónico ya está registrado.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = User.objects.create_user(
-            username=data.get('username'),
-            email=data.get('email'),
-            password=data.get('password'),
-            first_name=data.get('first_name', ''),
-            last_name=data.get('last_name', ''),
-            role=data.get('role', User.Role.CLIENT)
-        )
-
-        serializer = UserDetailSerializer(user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        import traceback
-        print(traceback.format_exc()) # Log detailed error on server
-        return Response({'error': f"Error en el servidor: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            with transaction.atomic():
+                user = serializer.save()
+                detail_serializer = UserDetailSerializer(user)
+                return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.exception("Error during user registration")
+            return Response({'error': f"Error al crear usuario: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -75,6 +73,26 @@ def update_client_profile(request):
 
     profile, _ = ClientProfile.objects.get_or_create(user=request.user)
     serializer = ClientProfileUpdateSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        user_serializer = UserDetailSerializer(request.user)
+        return Response(user_serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_worker_profile(request):
+    """
+    Partially update the authenticated worker's profile data.
+    """
+    if request.user.role != User.Role.WORKER:
+        return Response(
+            {'error': 'Solo los operarios pueden actualizar su perfil desde este endpoint.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
+    serializer = WorkerProfileUpdateSerializer(profile, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         user_serializer = UserDetailSerializer(request.user)

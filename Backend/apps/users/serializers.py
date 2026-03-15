@@ -26,6 +26,15 @@ class ClientProfileUpdateSerializer(serializers.ModelSerializer):
             'city': {'required': False},
         }
 
+class WorkerProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkerProfile
+        fields = ('identity_document', 'bio')
+        extra_kwargs = {
+            'identity_document': {'required': False},
+            'bio': {'required': False},
+        }
+
 class UserDetailSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
 
@@ -43,3 +52,14 @@ class UserDetailSerializer(serializers.ModelSerializer):
                 return ClientProfileSerializer(obj.client_profile).data
             return None
         return None
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password', 'first_name', 'last_name', 'role')
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
