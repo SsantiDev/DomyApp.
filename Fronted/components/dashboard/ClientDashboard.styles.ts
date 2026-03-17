@@ -1,0 +1,316 @@
+import { StyleSheet } from 'react-native';
+import { SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+
+export const getStyles = (colors: any) => StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    scrollContent: {
+        paddingHorizontal: SPACING.lg,
+        paddingTop: SPACING.lg,
+        paddingBottom: SPACING.xxl,
+    },
+    header: {
+        marginBottom: SPACING.xl,
+    },
+    greetingHeader: {
+        marginTop: SPACING.sm,
+    },
+    greeting: {
+        fontSize: 32,
+        fontWeight: '800',
+        color: colors.text,
+        letterSpacing: -0.5,
+    },
+    subtitle: {
+        fontSize: 16,
+        marginTop: 4,
+        color: colors.textLight,
+        fontWeight: '500',
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '800',
+        marginBottom: SPACING.md,
+        color: colors.text,
+        letterSpacing: -0.3,
+    },
+    // Service Carousel
+    carouselContainer: {
+        marginBottom: SPACING.xl,
+        marginHorizontal: -SPACING.lg, // Allows cards to bleed to edges
+        paddingLeft: SPACING.lg,
+    },
+    serviceCard: {
+        width: 200,
+        backgroundColor: colors.surface,
+        borderRadius: RADIUS.xl,
+        padding: SPACING.lg,
+        marginRight: SPACING.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+    },
+    categoryIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: RADIUS.lg,
+        backgroundColor: colors.primary + '15',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: SPACING.md,
+    },
+    categoryName: {
+        fontSize: 16,
+        fontWeight: '800',
+        color: colors.text,
+        marginBottom: 4,
+    },
+    categoryPrice: {
+        fontSize: 13,
+        color: colors.primary,
+        fontWeight: '700',
+    },
+    // Status Card Enhancement
+    statusCard: {
+        marginBottom: SPACING.xl,
+        padding: SPACING.lg,
+        backgroundColor: colors.primary + '08',
+        borderColor: colors.primary + '20',
+        borderWidth: 1,
+        borderRadius: RADIUS.xl,
+    },
+    statusHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+    },
+    statusInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    statusTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.primary,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    badge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: RADIUS.full,
+    },
+    badgeText: {
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    activeServiceName: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: colors.text,
+    },
+    addressText: {
+        fontSize: 14,
+        color: colors.textLight,
+        marginTop: 2,
+    },
+    workerInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginTop: SPACING.lg,
+        paddingTop: SPACING.md,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    avatarMini: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.primary,
+    },
+    workerText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    detailLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: SPACING.md,
+    },
+    detailLinkText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.primary,
+    },
+    // Promo Banner (Subtle version)
+    promoCard: {
+        padding: SPACING.lg,
+        borderRadius: RADIUS.xl,
+        marginBottom: SPACING.xl,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    promoTag: {
+        backgroundColor: colors.primary + '15',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: RADIUS.full,
+        alignSelf: 'flex-start',
+        marginBottom: SPACING.sm,
+    },
+    promoTagText: {
+        color: colors.primary,
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    promoTitle: {
+        color: colors.text,
+        fontSize: 18,
+        fontWeight: '800',
+        marginBottom: 2,
+    },
+    promoSubtitle: {
+        color: colors.textLight,
+        fontSize: 13,
+        fontWeight: '500',
+    },
+    // Action Bar (Search/Request Style)
+    actionBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.surface,
+        borderRadius: RADIUS.xl,
+        padding: SPACING.md,
+        marginBottom: SPACING.xl,
+        borderWidth: 1,
+        borderColor: colors.border,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+    },
+    actionBarText: {
+        flex: 1,
+        fontSize: 15,
+        color: colors.textLight,
+        marginLeft: SPACING.sm,
+        fontWeight: '500',
+    },
+    actionBarIcon: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: colors.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    // Process Steps
+    stepsSection: {
+        marginTop: SPACING.md,
+        padding: SPACING.xl,
+        backgroundColor: colors.surface,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    stepItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.lg,
+        marginBottom: SPACING.lg,
+    },
+    stepNumber: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: colors.primary + '15',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    stepNumberText: {
+        color: colors.primary,
+        fontWeight: '800',
+        fontSize: 14,
+    },
+    stepContent: {
+        flex: 1,
+    },
+    stepTitle: {
+        fontSize: 15,
+        fontWeight: '700',
+        color: colors.text,
+    },
+    stepDesc: {
+        fontSize: 12,
+        color: colors.textLight,
+        marginTop: 2,
+    },
+    // History Items
+    historyItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: SPACING.lg,
+        borderRadius: RADIUS.xl,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginBottom: SPACING.md,
+    },
+    historyIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.success + '10',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: SPACING.md,
+    },
+    historyInfo: {
+        flex: 1,
+    },
+    historyCategory: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
+    },
+    historyDate: {
+        fontSize: 13,
+        color: colors.textLight,
+        marginTop: 2,
+    },
+    rateTag: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: RADIUS.full,
+        marginRight: 8,
+    },
+    rateTagText: {
+        fontSize: 11,
+        fontWeight: '800',
+        textTransform: 'uppercase',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+    }
+});
+
