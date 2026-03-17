@@ -22,11 +22,29 @@ class User(AbstractUser):
         return f"{self.email} ({self.role})"
 
 class WorkerProfile(models.Model):
+    class VerificationStatus(models.TextChoices):
+        NONE = 'NONE', 'Sin iniciar'
+        PENDING = 'PENDING', 'Pendiente de revisión'
+        APPROVED = 'APPROVED', 'Aprobado'
+        REJECTED = 'REJECTED', 'Rechazado'
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='worker_profile')
     identity_document = models.CharField(max_length=64, unique=True, null=True, blank=True)
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    
+    # Verification fields
     is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.NONE
+    )
+    document_front = models.ImageField(upload_to='verifications/', blank=True, null=True)
+    document_back = models.ImageField(upload_to='verifications/', blank=True, null=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    
     is_available = models.BooleanField(default=False)
     average_rating = models.FloatField(default=0.0)
 
