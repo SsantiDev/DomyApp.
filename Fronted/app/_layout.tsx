@@ -106,7 +106,14 @@ function RootLayoutNavigator() {
       router.replace('/login');
     } else if (user && inAuthGroup) {
       // Redirect away from the login page.
-      router.replace('/(tabs)');
+      if (user.role === 'ADMIN') {
+        router.replace('/admin-dashboard');
+      } else {
+        router.replace('/(tabs)');
+      }
+    } else if (user && segments[0] === '(tabs)' && user.role === 'ADMIN') {
+      // Redirigir admin si intenta entrar a las pestañas de cliente/obrero
+      router.replace('/admin-dashboard');
     }
   }, [user, isLoading, segments]);
 
@@ -114,6 +121,7 @@ function RootLayoutNavigator() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="admin-dashboard" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
     </Stack>
   );

@@ -11,6 +11,7 @@ media
 env/
 venv/
 ENV/
+env.ts
 
 # Node.js
 node_modules/

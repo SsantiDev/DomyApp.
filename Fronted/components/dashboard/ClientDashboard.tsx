@@ -1,114 +1,199 @@
-import React, { useState, useMemo } from 'react';
-import { StyleSheet, ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useMemo } from 'react';
+import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { UserMenu } from '../ui/UserMenu';
 import { Button } from '../ui/NativeButton';
 import { Card } from '../ui/NativeCard';
-import { SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { SPACING } from '../../constants/theme';
 import { ServiceRequestModal } from '../services/ServiceRequestModal';
-import { useServiceRequests } from '../../hooks/useServices';
-import { useRouter } from 'expo-router';
-import { Sparkles, History, ShieldCheck, Clock, CheckCircle, User, ChevronRight } from 'lucide-react-native';
+import { useClientDashboard } from '../../hooks/useClientDashboard';
+import { getStyles } from './ClientDashboard.styles';
+import { Plus, Wrench, Zap, Home, Utensils, Sparkles, History, ShieldCheck, Clock, CheckCircle, User, ChevronRight } from 'lucide-react-native';
+
+const CategoryIcon = ({ name, color, size = 22 }: { name: string; color: string; size?: number }) => {
+    switch (name) {
+        case 'broom': return <Sparkles color={color} size={size} />;
+        case 'zap': return <Zap color={color} size={size} />;
+        case 'home': return <Home color={color} size={size} />;
+        case 'wrench': return <Wrench color={color} size={size} />;
+        case 'utensils': return <Utensils color={color} size={size} />;
+        default: return <Sparkles color={color} size={size} />;
+    }
+};
 
 export default function ClientDashboard() {
     const { colors } = useTheme();
-    const router = useRouter();
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const { data: requests, isLoading } = useServiceRequests();
+    const styles = useMemo(() => getStyles(colors), [colors]);
+    const {
+        isModalVisible,
+        isLoading,
+        activeRequest,
+        completedRequests,
+        categories,
+        navigateToDetail,
+        toggleModal
+    } = useClientDashboard();
 
-    const activeRequest = useMemo(() =>
-        requests?.find(r => r.status === 'PENDING' || r.status === 'ACCEPTED' || r.status === 'IN_PROGRESS'),
-        [requests]);
-
-    const completedRequests = useMemo(() =>
-        requests?.filter(r => r.status === 'COMPLETED').slice(0, 3) || [],
-        [requests]);
+    if (isLoading && !categories) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator color={colors.primary} size="large" />
+            </View>
+        );
+    }
 
     return (
-        <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.header}>
-                <UserMenu />
                 <View style={styles.greetingHeader}>
-                    <Text style={[styles.greeting, { color: colors.text }]}>¡Hola!</Text>
-                    <Text style={[styles.subtitle, { color: colors.textLight }]}>La ayuda que necesitas, a un clic.</Text>
+                    <Text style={styles.greeting}>¡Hola!</Text>
+                    <Text style={styles.subtitle}>¿En qué podemos ayudarte hoy?</Text>
                 </View>
             </View>
 
-            {isLoading ? (
-                <ActivityIndicator color={colors.primary} style={{ marginBottom: SPACING.xl }} />
-            ) : activeRequest ? (
-                <Card style={[styles.statusCard, { borderColor: colors.primary + '30' }]}>
-                    <View style={styles.statusHeader}>
-                        <View style={styles.statusInfo}>
-                            <Clock size={16} color={colors.primary} />
-                            <Text style={[styles.statusTitle, { color: colors.text }]}>
-                                {activeRequest.status === 'PENDING' ? 'Buscando Operaria' :
-                                    activeRequest.status === 'ACCEPTED' ? 'Servicio Confirmado' : 'Labor en Proceso'}
-                            </Text>
-                        </View>
-                        <View style={[styles.badge, { backgroundColor: activeRequest.status === 'PENDING' ? colors.warning + '20' : colors.success + '20' }]}>
-                            <Text style={[styles.badgeText, { color: activeRequest.status === 'PENDING' ? colors.warning : colors.success }]}>
-                                {activeRequest.status === 'PENDING' ? 'Pendiente' :
-                                    activeRequest.status === 'ACCEPTED' ? 'Asignado' : 'En Labor'}
-                            </Text>
-                        </View>
-                    </View>
+            {/* Main Action Bar (Integrated Button) */}
+            <TouchableOpacity
+                style={styles.actionBar}
+                onPress={() => toggleModal(true)}
+                activeOpacity={0.7}
+            >
+                <Plus size={20} color={colors.primary} />
+                <Text style={styles.actionBarText}>Solicitar nuevo servicio...</Text>
+                <View style={styles.actionBarIcon}>
+                    <ChevronRight size={18} color="#FFF" />
+                </View>
+            </TouchableOpacity>
 
-                    <View style={styles.statusContent}>
-                        <Text style={[styles.categoryName, { color: colors.text }]}>{activeRequest.category_name}</Text>
-                        <Text style={[styles.addressText, { color: colors.textLight }]}>{activeRequest.address}</Text>
-
-                        {activeRequest.worker && (
-                            <View style={styles.workerInfo}>
-                                <View style={[styles.avatarMini, { backgroundColor: colors.primary }]}>
-                                    <User size={14} color="#FFF" />
-                                </View>
-                                <Text style={[styles.workerText, { color: colors.text }]}>
-                                    {activeRequest.status === 'IN_PROGRESS' ? 'Tu operaria está trabajando' : 'Tu operaria está en camino'}
+            {/* Active Request Alert (if any) */}
+            {activeRequest && (
+                <View style={{ marginBottom: SPACING.xl }}>
+                    <Text style={styles.sectionTitle}>Servicio en curso</Text>
+                    <Card style={styles.statusCard}>
+                        <View style={styles.statusHeader}>
+                            <View style={styles.statusInfo}>
+                                <Clock size={16} color={colors.primary} />
+                                <Text style={styles.statusTitle}>
+                                    {activeRequest.status === 'PENDING' ? 'Buscando Operaria' :
+                                        activeRequest.status === 'ACCEPTED' ? 'Servicio Confirmado' : 'Labor en Proceso'}
                                 </Text>
                             </View>
-                        )}
+                            <View style={[styles.badge, { backgroundColor: activeRequest.status === 'PENDING' ? colors.warning + '20' : colors.success + '20' }]}>
+                                <Text style={[styles.badgeText, { color: activeRequest.status === 'PENDING' ? colors.warning : colors.success }]}>
+                                    {activeRequest.status === 'PENDING' ? 'Pendiente' :
+                                        activeRequest.status === 'ACCEPTED' ? 'Asignado' : 'En Labor'}
+                                </Text>
+                            </View>
+                        </View>
 
-                        <TouchableOpacity
-                            style={[styles.detailLink, { marginTop: SPACING.md }]}
-                            onPress={() => router.push(`/service-detail/${activeRequest.id}`)}
-                        >
-                            <Text style={[styles.detailLinkText, { color: colors.primary }]}>Ver detalles y mapa</Text>
-                            <ChevronRight size={16} color={colors.primary} />
-                        </TouchableOpacity>
-                    </View>
-                </Card>
-            ) : (
-                <View style={styles.promoCard}>
-                    <View style={styles.promoContent}>
-                        <Sparkles color="#FFF" size={24} />
-                        <Text style={styles.promoText}>Profesionaliza tu hogar con operarias verificadas por Domy.</Text>
-                    </View>
+                        <View>
+                            <Text style={styles.activeServiceName}>{activeRequest.category_name}</Text>
+                            <Text style={styles.addressText}>{activeRequest.address}</Text>
+
+                            {activeRequest.worker && (
+                                <View style={styles.workerInfo}>
+                                    <View style={styles.avatarMini}>
+                                        <User size={18} color="#FFF" />
+                                    </View>
+                                    <Text style={styles.workerText}>
+                                        {activeRequest.status === 'IN_PROGRESS' ? 'Tu operaria está trabajando' : 'Tu operaria está en camino'}
+                                    </Text>
+                                </View>
+                            )}
+
+                            <TouchableOpacity
+                                style={styles.detailLink}
+                                onPress={() => navigateToDetail(activeRequest.id)}
+                            >
+                                <Text style={styles.detailLinkText}>Seguir mi servicio</Text>
+                                <ChevronRight size={16} color={colors.primary} />
+                            </TouchableOpacity>
+                        </View>
+                    </Card>
                 </View>
             )}
 
-            <View style={styles.actionSection}>
-                <Button
-                    title={activeRequest ? "Solicitar otro servicio" : "Solicitar servicio"}
-                    onPress={() => setIsModalVisible(true)}
-                />
+            {/* Services Carousel */}
+            <View>
+                <Text style={styles.sectionTitle}>Servicios Disponibles</Text>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.carouselContainer}
+                    contentContainerStyle={{ paddingRight: SPACING.lg }}
+                >
+                    {categories?.map((cat) => (
+                        <TouchableOpacity
+                            key={cat.id}
+                            style={styles.serviceCard}
+                            onPress={() => toggleModal(true)}
+                        >
+                            <View style={styles.categoryIcon}>
+                                <CategoryIcon name={cat.icon_name} color={colors.primary} />
+                            </View>
+                            <Text style={styles.categoryName} numberOfLines={1}>{cat.name}</Text>
+                            <Text style={styles.categoryPrice}>Desde ${Number(cat.base_price).toLocaleString()}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
+            {/* Subtle Promo Banner */}
+            <View style={styles.promoCard}>
+                <View style={styles.promoTag}>
+                    <Text style={styles.promoTagText}>Beneficio Exclusivo</Text>
+                </View>
+                <Text style={styles.promoTitle}>¡Tu hogar en buenas manos!</Text>
+                <Text style={styles.promoSubtitle}>Ahorra un 15% en tu primer servicio de limpieza profunda.</Text>
+            </View>
+
+            {/* How it Works Section */}
+            <Text style={styles.sectionTitle}>¿Cómo funciona Domy?</Text>
+            <View style={styles.stepsSection}>
+                <View style={styles.stepItem}>
+                    <View style={styles.stepNumber}>
+                        <Text style={styles.stepNumberText}>1</Text>
+                    </View>
+                    <View style={styles.stepContent}>
+                        <Text style={styles.stepTitle}>Elige tu servicio</Text>
+                        <Text style={styles.stepDesc}>Selecciona entre variedad de servicios especializados.</Text>
+                    </View>
+                </View>
+                <View style={styles.stepItem}>
+                    <View style={styles.stepNumber}>
+                        <Text style={styles.stepNumberText}>2</Text>
+                    </View>
+                    <View style={styles.stepContent}>
+                        <Text style={styles.stepTitle}>Danos los detalles</Text>
+                        <Text style={styles.stepDesc}>Indica la dirección y el horario que mejor te convenga.</Text>
+                    </View>
+                </View>
+                <View style={styles.stepItem}>
+                    <View style={styles.stepNumber}>
+                        <Text style={styles.stepNumberText}>3</Text>
+                    </View>
+                    <View style={styles.stepContent}>
+                        <Text style={styles.stepTitle}>¡Y listo!</Text>
+                        <Text style={styles.stepDesc}>Una operaria profesional y verificada llegará a tu hogar.</Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Recent History */}
             {completedRequests.length > 0 && (
-                <View style={styles.recentSection}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Servicios Recientes</Text>
+                <View style={{ marginTop: SPACING.xl }}>
+                    <Text style={styles.sectionTitle}>Últimas labores</Text>
                     {completedRequests.map((req) => (
                         <TouchableOpacity
                             key={req.id}
-                            style={[styles.historyItem, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                            onPress={() => router.push(`/service-detail/${req.id}`)}
+                            style={styles.historyItem}
+                            onPress={() => navigateToDetail(req.id)}
                         >
                             <View style={styles.historyIcon}>
                                 <CheckCircle size={20} color={colors.success} />
                             </View>
                             <View style={styles.historyInfo}>
-                                <Text style={[styles.historyCategory, { color: colors.text }]}>{req.category_name}</Text>
-                                <Text style={[styles.historyDate, { color: colors.textLight }]}>
+                                <Text style={styles.historyCategory}>{req.category_name}</Text>
+                                <Text style={styles.historyDate}>
                                     {new Date(req.scheduled_at).toLocaleDateString()}
                                 </Text>
                             </View>
@@ -123,191 +208,11 @@ export default function ClientDashboard() {
                 </View>
             )}
 
-            <View style={styles.infoGrid}>
-                <Card style={styles.infoCard}>
-                    <ShieldCheck color={colors.primary} size={24} />
-                    <Text style={[styles.infoTitle, { color: colors.text }]}>Seguridad</Text>
-                    <Text style={[styles.infoDesc, { color: colors.textLight }]}>Operarias 100% verificadas.</Text>
-                </Card>
-                <Card style={styles.infoCard}>
-                    <History color={colors.primary} size={24} />
-                    <Text style={[styles.infoTitle, { color: colors.text }]}>Trazabilidad</Text>
-                    <Text style={[styles.infoDesc, { color: colors.textLight }]}>Historial y pagos claros.</Text>
-                </Card>
-            </View>
-
             <ServiceRequestModal
                 visible={isModalVisible}
-                onClose={() => setIsModalVisible(false)}
+                onClose={() => toggleModal(false)}
             />
         </ScrollView>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: SPACING.lg,
-        paddingTop: SPACING.lg,
-    },
-    header: {
-        marginBottom: SPACING.xl,
-    },
-    greetingHeader: {
-        marginTop: SPACING.lg,
-    },
-    greeting: {
-        fontSize: TYPOGRAPHY.h1.fontSize,
-        fontWeight: TYPOGRAPHY.h1.fontWeight,
-    },
-    subtitle: {
-        fontSize: TYPOGRAPHY.body.fontSize,
-        marginTop: SPACING.xs
-    },
-    statusCard: {
-        marginBottom: SPACING.xl,
-        padding: SPACING.lg,
-        borderWidth: 1,
-    },
-    statusHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.md,
-    },
-    statusInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    statusTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: RADIUS.full,
-    },
-    badgeText: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-    statusContent: {
-        gap: 4,
-    },
-    categoryName: {
-        fontSize: 18,
-        fontWeight: '800',
-    },
-    addressText: {
-        fontSize: 13,
-    },
-    workerInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: SPACING.md,
-        paddingTop: SPACING.md,
-        borderTopWidth: 1,
-        borderTopColor: '#f1f5f9',
-    },
-    avatarMini: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    workerText: {
-        fontSize: 13,
-        fontWeight: '600',
-    },
-    promoCard: {
-        backgroundColor: '#7B61FF',
-        borderRadius: RADIUS.xl,
-        padding: SPACING.xl,
-        marginBottom: SPACING.xl,
-    },
-    promoContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.md,
-    },
-    promoText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
-        flex: 1,
-    },
-    actionSection: {
-        marginBottom: SPACING.xl,
-    },
-    infoGrid: {
-        flexDirection: 'row',
-        gap: SPACING.md,
-        marginBottom: SPACING.xl,
-    },
-    infoCard: {
-        flex: 1,
-        gap: SPACING.sm,
-    },
-    infoTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    infoDesc: {
-        fontSize: 12,
-    },
-    detailLink: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    detailLinkText: {
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    recentSection: {
-        marginBottom: SPACING.xl,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '800',
-        marginBottom: SPACING.md,
-    },
-    historyItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        borderRadius: RADIUS.lg,
-        borderWidth: 1,
-        marginBottom: 10,
-    },
-    historyIcon: {
-        marginRight: 12,
-    },
-    historyInfo: {
-        flex: 1,
-    },
-    historyCategory: {
-        fontSize: 15,
-        fontWeight: '700',
-    },
-    historyDate: {
-        fontSize: 12,
-        marginTop: 2,
-    },
-    rateTag: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: RADIUS.full,
-        marginRight: 8,
-    },
-    rateTagText: {
-        fontSize: 11,
-        fontWeight: '800',
-        textTransform: 'uppercase',
-    }
-});
