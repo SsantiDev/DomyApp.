@@ -9,9 +9,13 @@ from .serializers import (
     UserDetailSerializer, 
     ClientProfileUpdateSerializer, 
     WorkerProfileUpdateSerializer,
-    UserRegistrationSerializer
+    UserRegistrationSerializer,
+    WorkerVerificationSerializer,
+    WorkerAdminDetailSerializer
 )
 from .models import User, ClientProfile, WorkerProfile
+from .permissions import IsAdminUser
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -98,3 +102,77 @@ def update_worker_profile(request):
         user_serializer = UserDetailSerializer(request.user)
         return Response(user_serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def submit_verification(request):
+    """
+    Upload document images for worker identity verification.
+    """
+    if request.user.role != User.Role.WORKER:
+        return Response(
+            {'error': 'Solo los operarios pueden enviar documentos de verificación.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    profile = request.user.worker_profile
+    if profile.verification_status == WorkerProfile.VerificationStatus.APPROVED:
+        return Response(
+            {'error': 'Tu perfil ya está verificado.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    serializer = WorkerVerificationSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({
+            'message': 'Documentos enviados correctamente. Tu perfil está ahora en revisión.',
+            'status': profile.verification_status
+        })
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_pending_verifications(request):
+    """
+    List all worker profiles that are pending verification.
+    """
+    pending = WorkerProfile.objects.filter(
+        verification_status=WorkerProfile.VerificationStatus.PENDING
+    ).select_related('user')
+    serializer = WorkerAdminDetailSerializer(pending, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def process_verification(request, pk):
+    """
+    Approve or reject a worker's verification.
+    """
+    try:
+        profile = WorkerProfile.objects.get(pk=pk)
+    except WorkerProfile.DoesNotExist:
+        return Response({'detail': 'Worker profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    action = request.data.get('action') # 'approve' or 'reject'
+    reason = request.data.get('reason', '')
+
+    if action == 'approve':
+        profile.verification_status = WorkerProfile.VerificationStatus.APPROVED
+        profile.is_verified = True
+        profile.verified_at = timezone.now()
+        profile.rejection_reason = ''
+        profile.save()
+        return Response({'status': 'approved'})
+    
+    elif action == 'reject':
+        if not reason:
+            return Response({'error': 'Reason is required for rejection'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        profile.verification_status = WorkerProfile.VerificationStatus.REJECTED
+        profile.is_verified = False
+        profile.rejection_reason = reason
+        profile.save()
+        return Response({'status': 'rejected'})
+
+    return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)

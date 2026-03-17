@@ -9,7 +9,28 @@ class UserSerializer(serializers.ModelSerializer):
 class WorkerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerProfile
-        fields = ('identity_document', 'bio', 'profile_picture', 'is_verified', 'is_available', 'average_rating')
+        fields = (
+            'identity_document', 'bio', 'profile_picture', 
+            'is_verified', 'verification_status', 'document_front', 
+            'document_back', 'rejection_reason', 'verified_at',
+            'is_available', 'average_rating'
+        )
+        read_only_fields = ('is_verified', 'verification_status', 'rejection_reason', 'verified_at', 'average_rating')
+
+class WorkerVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkerProfile
+        fields = ('identity_document', 'document_front', 'document_back')
+        extra_kwargs = {
+            'identity_document': {'required': True},
+            'document_front': {'required': True},
+            'document_back': {'required': True},
+        }
+
+    def update(self, instance, validated_data):
+        # When documents are uploaded, set status to PENDING
+        instance.verification_status = WorkerProfile.VerificationStatus.PENDING
+        return super().update(instance, validated_data)
 
 class ClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,3 +84,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+class UserAdminDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'first_name', 'last_name')
+
+class WorkerAdminDetailSerializer(serializers.ModelSerializer):
+    user = UserAdminDetailSerializer(read_only=True)
+    
+    class Meta:
+        model = WorkerProfile
+        fields = (
+            'id', 'user', 'identity_document', 'verification_status', 
+            'document_front', 'document_back', 'verified_at', 'rejection_reason'
+        )
