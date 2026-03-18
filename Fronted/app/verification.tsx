@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera, FileText, CheckCircle, ChevronLeft, Upload, AlertCircle } from 'lucide-react-native';
@@ -46,8 +46,13 @@ export default function VerificationScreen() {
             return;
         }
 
+        if (!idNumber.trim()) {
+            Alert.alert('Falta documento', 'Por favor ingresa tu número de documento de identidad.');
+            return;
+        }
+
         submit({
-            identity_document: 'VERIFY_REQ', // In a real app we'd have a text input for this
+            identity_document: idNumber.trim(),
             document_front: frontImage,
             document_back: backImage,
         }, {
@@ -140,9 +145,35 @@ export default function VerificationScreen() {
 
                 {step === 1 && (
                     <View>
-                        <Text style={styles.title}>Foto Frontal</Text>
+                        <Text style={styles.title}>Datos del Documento</Text>
                         <Text style={styles.description}>
-                            Captura la parte frontal de tu cédula de ciudadanía. Asegúrate de que los datos sean legibles y no haya reflejos.
+                            Ingresa tu número de identificación y captura la parte frontal de tu cédula.
+                        </Text>
+
+                        <View style={{ marginBottom: 20 }}>
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8 }}>
+                                Número de Identificación
+                            </Text>
+                            <TextInput
+                                style={{
+                                    backgroundColor: colors.surface,
+                                    borderWidth: 1,
+                                    borderColor: colors.border,
+                                    borderRadius: RADIUS.md,
+                                    padding: 12,
+                                    color: colors.text,
+                                    fontSize: 16,
+                                }}
+                                value={idNumber}
+                                onChangeText={setIdNumber}
+                                placeholder="Ej: 123456789"
+                                placeholderTextColor={colors.textMuted}
+                                keyboardType="numeric"
+                            />
+                        </View>
+
+                        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 8 }}>
+                            Foto Frontal
                         </Text>
                         <TouchableOpacity style={styles.uploadCard} onPress={() => pickImage('front')}>
                             {frontImage ? (

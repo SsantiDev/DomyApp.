@@ -115,6 +115,10 @@ def submit_verification(request):
         )
 
     profile = request.user.worker_profile
+    print(f"DEBUG - User: {request.user.email} | Profile ID: {profile.pk}")
+    print(f"DEBUG - Received Data: {request.data}")
+    print(f"DEBUG - Files: {request.FILES}")
+
     if profile.verification_status == WorkerProfile.VerificationStatus.APPROVED:
         return Response(
             {'error': 'Tu perfil ya está verificado.'},
@@ -128,7 +132,7 @@ def submit_verification(request):
             'message': 'Documentos enviados correctamente. Tu perfil está ahora en revisión.',
             'status': profile.verification_status
         })
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    print(f"DEBUG - Serializer Errors: {serializer.errors}")
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])

@@ -111,7 +111,7 @@ export default function WorkerDashboard() {
             activeOpacity={0.8}
             style={{ marginBottom: 16 }}
           >
-            <Card style={{
+            <Card variant="flat" style={{
               backgroundColor: user?.profile?.verification_status === 'PENDING' ? colors.primary + '10' :
                 user?.profile?.verification_status === 'REJECTED' ? colors.danger + '10' :
                   colors.warning + '10',
@@ -122,7 +122,6 @@ export default function WorkerDashboard() {
               alignItems: 'center',
               padding: 12,
               gap: 12,
-              borderWidth: 1,
             }}>
               {user?.profile?.verification_status === 'PENDING' ? (
                 <Clock size={24} color={colors.primary} />
@@ -154,7 +153,7 @@ export default function WorkerDashboard() {
           </TouchableOpacity>
         )}
 
-        <Card style={[
+        <Card variant="flat" style={[
           styles.availabilityCard,
           { backgroundColor: isAvailable ? colors.primary : colors.surface }
         ]}>
@@ -226,7 +225,7 @@ export default function WorkerDashboard() {
 
           {activeRequests.length > 0 ? (
             activeRequests.map(req => (
-              <Card key={req.id} style={styles.serviceCard}>
+              <Card variant="flat" key={req.id} style={styles.serviceCard}>
                 <View style={styles.cardHeader}>
                   <View style={styles.categoryInfo}>
                     <Text style={styles.categoryTitle}>{req.category_name}</Text>
@@ -286,7 +285,7 @@ export default function WorkerDashboard() {
             </Card>
           ) : pendingRequests.length > 0 ? (
             pendingRequests.map(req => (
-              <Card key={req.id} style={[styles.serviceCard, { borderColor: colors.primary + '20', borderWidth: 1 }]}>
+              <Card variant="flat" key={req.id} style={styles.serviceCard}>
                 <View style={styles.requestContent}>
                   <View style={styles.reqMain}>
                     <Text style={styles.categoryTitle}>{req.category_name}</Text>
@@ -338,7 +337,7 @@ export default function WorkerDashboard() {
                 key={req.id}
                 onPress={() => router.push(`/service-detail/${req.id}`)}
               >
-                <Card style={styles.reviewItem}>
+                <Card variant="flat" style={styles.reviewItem}>
                   <View style={styles.reviewHeader}>
                     <Text style={styles.reviewCategory}>{req.category_name}</Text>
                     <View style={styles.reviewStars}>

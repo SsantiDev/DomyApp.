@@ -38,7 +38,8 @@
           "photosPermission": "La aplicación necesita acceso a tus fotos para subir documentos de verificación.",
           "cameraPermission": "La aplicación necesita acceso a tu cámara para capturar tus documentos de identidad."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

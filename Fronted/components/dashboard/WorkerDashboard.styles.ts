@@ -54,8 +54,6 @@ export const getStyles = (colors: any) => StyleSheet.create({
         alignItems: 'center',
         padding: SPACING.md,
         borderRadius: RADIUS.xl,
-        borderWidth: 1,
-        borderColor: colors.border,
     },
     availInfo: {
         flexDirection: 'row',
@@ -270,7 +268,6 @@ export const getStyles = (colors: any) => StyleSheet.create({
         padding: SPACING.lg,
         marginBottom: SPACING.md,
         borderRadius: RADIUS.lg,
-        borderWidth: 0,
         backgroundColor: colors.surface,
     },
     reviewHeader: {

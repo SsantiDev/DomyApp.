@@ -29,10 +29,10 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: colors.border,
           backgroundColor: colors.surface,
-          // Remove fixed height and use insets for better compatibility
-          height: 50 + insets.bottom,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 5,
-          paddingTop: 5,
+          // Even more generous height for vertical balance
+          height: 75 + (insets.bottom > 0 ? insets.bottom : 0),
+          paddingBottom: insets.bottom > 0 ? insets.bottom + 8 : 16,
+          paddingTop: 12,
         },
         tabBarLabelStyle: {
           fontSize: 11,

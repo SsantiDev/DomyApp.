@@ -12,8 +12,9 @@ import {
     TextInput,
     Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import MapView, { Marker, Polyline } from 'react-native-maps';
+import { useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -57,6 +58,7 @@ export default function ServiceDetailScreen() {
     const rateService = useRateService();
     const reportIncident = useReportIncident();
     const { data: incidents } = useGetServiceIncidents(Number(id));
+    const styles = useMemo(() => getStyles(colors, isDark), [colors, isDark]);
 
     // Rating State
     const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
@@ -167,12 +169,15 @@ export default function ServiceDetailScreen() {
 
     return (
         <NativeMainLayout>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <ChevronLeft size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Detalles de la Labor</Text>
-            </View>
+            <Stack.Screen
+                options={{
+                    title: 'Seguimiento de Labor',
+                    headerTitleStyle: {
+                        fontWeight: '800',
+                        fontSize: 18,
+                    },
+                }}
+            />
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Map View */}
@@ -214,14 +219,20 @@ export default function ServiceDetailScreen() {
 
                 {/* Status Section */}
                 <View style={styles.statusSection}>
-                    <Card style={[styles.statusCard, { backgroundColor: colors.surface }]}>
+                    <Card variant="flat" style={styles.statusCard}>
                         <View style={styles.statusHeader}>
-                            <Text style={[styles.statusLabel, { color: colors.textLight }]}>Estado Actual</Text>
-                            <View style={[styles.badge, { backgroundColor: service.status === 'COMPLETED' ? colors.success : colors.primary + '20' }]}>
-                                <Text style={[styles.badgeText, { color: service.status === 'COMPLETED' ? '#FFF' : colors.primary }]}>
-                                    {service.status === 'ACCEPTED' ? 'Aceptada' :
-                                        service.status === 'IN_PROGRESS' ? 'En Labor' :
-                                            service.status === 'COMPLETED' ? 'Completado' : service.status}
+                            <View>
+                                <Text style={[styles.statusLabel, { color: colors.textLight }]}>Estado de la Labor</Text>
+                                <Text style={[styles.statusValueText, { color: colors.text }]}>
+                                    {service.status === 'ACCEPTED' ? 'Programada' :
+                                        service.status === 'IN_PROGRESS' ? 'En ejecución' :
+                                            service.status === 'COMPLETED' ? 'Finalizada con éxito' : service.status}
+                                </Text>
+                            </View>
+                            <View style={[styles.badge, { backgroundColor: service.status === 'COMPLETED' ? colors.success + '15' : colors.primary + '10' }]}>
+                                <View style={[styles.dot, { backgroundColor: service.status === 'COMPLETED' ? colors.success : colors.primary }]} />
+                                <Text style={[styles.badgeText, { color: service.status === 'COMPLETED' ? colors.success : colors.primary }]}>
+                                    {service.status}
                                 </Text>
                             </View>
                         </View>
@@ -265,7 +276,7 @@ export default function ServiceDetailScreen() {
 
                 {/* Info Cards */}
                 <View style={styles.infoSection}>
-                    <Card style={styles.infoCard}>
+                    <Card variant="flat" style={styles.infoCard}>
                         <View style={styles.sectionHeader}>
                             <Briefcase size={20} color={colors.primary} />
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>Servicio</Text>
@@ -285,7 +296,7 @@ export default function ServiceDetailScreen() {
                         </View>
                     </Card>
 
-                    <Card style={styles.infoCard}>
+                    <Card variant="flat" style={styles.infoCard}>
                         <View style={styles.sectionHeader}>
                             <MapPin size={20} color={colors.primary} />
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>Ubicación</Text>
@@ -293,7 +304,7 @@ export default function ServiceDetailScreen() {
                         <Text style={[styles.addressText, { color: colors.text }]}>{service.address}</Text>
                     </Card>
 
-                    <Card style={styles.infoCard}>
+                    <Card variant="flat" style={styles.infoCard}>
                         <View style={styles.sectionHeader}>
                             <User size={20} color={colors.primary} />
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>Cliente</Text>
@@ -309,7 +320,7 @@ export default function ServiceDetailScreen() {
 
                     {/* Incident Display */}
                     {incidents && incidents.length > 0 && (
-                        <Card style={[styles.infoCard, { borderColor: colors.danger + '40' }]}>
+                        <Card variant="flat" style={[styles.infoCard, { borderTopWidth: 2, borderTopColor: colors.danger + '40' }]}>
                             <View style={styles.sectionHeader}>
                                 <ShieldAlert size={20} color={colors.danger} />
                                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Reporte de Incidencias</Text>
@@ -479,36 +490,37 @@ export default function ServiceDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: SPACING.lg,
-        paddingTop: Platform.OS === 'ios' ? 0 : SPACING.lg,
+        display: 'none', // Removed as we use Stack header
     },
-    backBtn: {
-        padding: 4,
-        marginRight: 12,
+    statusValueText: {
+        fontSize: 16,
+        fontWeight: '700',
+        marginTop: 2,
     },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '800',
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginRight: 6,
     },
     content: {
         flex: 1,
     },
     mapContainer: {
-        height: 250,
+        height: 220,
         marginHorizontal: SPACING.lg,
+        marginTop: SPACING.lg,
         borderRadius: RADIUS.xl,
         overflow: 'hidden',
-        borderWidth: 1,
         position: 'relative',
+        backgroundColor: colors.surface,
     },
     map: {
         flex: 1,
@@ -546,7 +558,7 @@ const styles = StyleSheet.create({
     },
     statusCard: {
         padding: SPACING.md,
-        borderWidth: 0,
+        backgroundColor: 'transparent', // Card already sets surface color
     },
     statusHeader: {
         flexDirection: 'row',
@@ -561,9 +573,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: RADIUS.full,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     badgeText: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '800',
         textTransform: 'uppercase',
     },
@@ -573,27 +587,28 @@ const styles = StyleSheet.create({
     },
     infoSection: {
         padding: SPACING.lg,
-        gap: SPACING.md,
+        gap: SPACING.lg,
     },
     infoCard: {
-        padding: SPACING.lg,
+        padding: SPACING.xl,
+        borderRadius: RADIUS.xl,
     },
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        marginBottom: 12,
+        gap: 12,
+        marginBottom: 16,
     },
     sectionTitle: {
-        fontSize: 12,
-        fontWeight: '800',
+        fontSize: 13,
+        fontWeight: '900',
         textTransform: 'uppercase',
-        letterSpacing: 1,
+        letterSpacing: 1.2,
     },
     categoryTitle: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: '800',
-        marginBottom: 8,
+        marginBottom: 10,
     },
     row: {
         flexDirection: 'row',
@@ -708,7 +723,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(0,0,0,0.05)',
+        borderTopColor: colors.border,
     },
     incidentHeader: {
         flexDirection: 'row',
