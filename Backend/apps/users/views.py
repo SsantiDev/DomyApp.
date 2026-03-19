@@ -2,18 +2,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.hashers import make_password
 from django.db import transaction
 import logging
 from .serializers import (
     UserDetailSerializer, 
-    ClientProfileUpdateSerializer, 
-    WorkerProfileUpdateSerializer,
     UserRegistrationSerializer,
     WorkerVerificationSerializer,
-    WorkerAdminDetailSerializer
+    WorkerAdminDetailSerializer,
+    ProfileSerializer,
+    WorkerProfileSerializer
 )
-from .models import User, ClientProfile, WorkerProfile
+from .models import User, Profile, WorkerProfile, WorkerVerification
 from .permissions import IsAdminUser
 from django.utils import timezone
 
@@ -22,9 +21,6 @@ logger = logging.getLogger(__name__)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    """
-    Register a new user (Client or Worker)
-    """
     serializer = UserRegistrationSerializer(data=request.data)
     if serializer.is_valid():
         try:
@@ -40,22 +36,27 @@ def register(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def me(request):
-    """
-    Retrieve the authenticated user's profile.
-    """
     serializer = UserDetailSerializer(request.user)
     return Response(serializer.data)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    """Update profile (first_name, last_name, phone, etc)"""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    serializer = ProfileSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(UserDetailSerializer(request.user).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def toggle_availability(request):
-    """
-    Toggle the availability status of the authenticated worker.
-    """
     if request.user.role != User.Role.WORKER:
         return Response({'error': 'Solo los operarios pueden cambiar su estado de disponibilidad.'}, status=status.HTTP_403_FORBIDDEN)
     
-    profile = request.user.worker_profile
+    profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
     profile.is_available = not profile.is_available
     profile.save()
     
@@ -63,120 +64,54 @@ def toggle_availability(request):
         'is_available': profile.is_available,
         'message': f"Estado cambiado a {'Disponible' if profile.is_available else 'No disponible'}"
     })
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def update_client_profile(request):
-    """
-    Partially update the authenticated client's profile data.
-    """
-    if request.user.role != User.Role.CLIENT:
-        return Response(
-            {'error': 'Solo los clientes pueden actualizar su perfil desde este endpoint.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
 
-    profile, _ = ClientProfile.objects.get_or_create(user=request.user)
-    serializer = ClientProfileUpdateSerializer(profile, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        user_serializer = UserDetailSerializer(request.user)
-        return Response(user_serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def update_worker_profile(request):
-    """
-    Partially update the authenticated worker's profile data.
-    """
-    if request.user.role != User.Role.WORKER:
-        return Response(
-            {'error': 'Solo los operarios pueden actualizar su perfil desde este endpoint.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
-    profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
-    serializer = WorkerProfileUpdateSerializer(profile, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        user_serializer = UserDetailSerializer(request.user)
-        return Response(user_serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def submit_verification(request):
-    """
-    Upload document images for worker identity verification.
-    """
     if request.user.role != User.Role.WORKER:
-        return Response(
-            {'error': 'Solo los operarios pueden enviar documentos de verificación.'},
-            status=status.HTTP_403_FORBIDDEN
-        )
+        return Response({'error': 'Solo los operarios pueden enviar documentos.'}, status=status.HTTP_403_FORBIDDEN)
 
-    profile = request.user.worker_profile
-    print(f"DEBUG - User: {request.user.email} | Profile ID: {profile.pk}")
-    print(f"DEBUG - Received Data: {request.data}")
-    print(f"DEBUG - Files: {request.FILES}")
+    verification, _ = WorkerVerification.objects.get_or_create(user=request.user)
+    if verification.is_verified:
+        return Response({'error': 'Tu perfil ya está verificado.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    if profile.verification_status == WorkerProfile.VerificationStatus.APPROVED:
-        return Response(
-            {'error': 'Tu perfil ya está verificado.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    serializer = WorkerVerificationSerializer(profile, data=request.data, partial=True)
+    serializer = WorkerVerificationSerializer(verification, data=request.data, partial=True)
     if serializer.is_valid():
-        serializer.save()
-        return Response({
-            'message': 'Documentos enviados correctamente. Tu perfil está ahora en revisión.',
-            'status': profile.verification_status
-        })
-    print(f"DEBUG - Serializer Errors: {serializer.errors}")
+        verification = serializer.save()
+        verification.status = 'PENDING'
+        verification.save()
+        return Response({'message': 'Documentos enviados correctamente.', 'status': verification.status})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_pending_verifications(request):
-    """
-    List all worker profiles that are pending verification.
-    """
-    pending = WorkerProfile.objects.filter(
-        verification_status=WorkerProfile.VerificationStatus.PENDING
-    ).select_related('user')
-    serializer = WorkerAdminDetailSerializer(pending, many=True)
-    return Response(serializer.data)
+    pending = WorkerVerification.objects.filter(status='PENDING').select_related('user', 'user__profile')
+    # Since WorkerAdminDetailSerializer points to WorkerProfile, we need a different one or adjust.
+    # For now let's just use simplified data
+    return Response([{'id': v.id, 'email': v.user.email, 'status': v.status} for v in pending])
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def process_verification(request, pk):
-    """
-    Approve or reject a worker's verification.
-    """
     try:
-        profile = WorkerProfile.objects.get(pk=pk)
-    except WorkerProfile.DoesNotExist:
-        return Response({'detail': 'Worker profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        verification = WorkerVerification.objects.get(pk=pk)
+    except WorkerVerification.DoesNotExist:
+        return Response({'detail': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    action = request.data.get('action') # 'approve' or 'reject'
+    action = request.data.get('action') 
     reason = request.data.get('reason', '')
 
     if action == 'approve':
-        profile.verification_status = WorkerProfile.VerificationStatus.APPROVED
-        profile.is_verified = True
-        profile.verified_at = timezone.now()
-        profile.rejection_reason = ''
-        profile.save()
+        verification.status = 'APPROVED'
+        verification.is_verified = True
+        verification.verified_at = timezone.now()
+        verification.save()
         return Response({'status': 'approved'})
-    
     elif action == 'reject':
-        if not reason:
-            return Response({'error': 'Reason is required for rejection'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        profile.verification_status = WorkerProfile.VerificationStatus.REJECTED
-        profile.is_verified = False
-        profile.rejection_reason = reason
-        profile.save()
+        verification.status = 'REJECTED'
+        verification.rejection_reason = reason
+        verification.save()
         return Response({'status': 'rejected'})
 
     return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)

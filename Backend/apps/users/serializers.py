@@ -1,101 +1,70 @@
 from rest_framework import serializers
-from .models import User, WorkerProfile, ClientProfile
+from .models import User, Profile, WorkerProfile, WorkerVerification
 
-class UserSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('id', 'email', 'username', 'role', 'first_name', 'last_name')
+        model = Profile
+        fields = ('first_name', 'last_name', 'phone_number', 'profile_picture', 'address', 'city')
 
 class WorkerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerProfile
-        fields = (
-            'identity_document', 'bio', 'profile_picture', 
-            'is_verified', 'verification_status', 'document_front', 
-            'document_back', 'rejection_reason', 'verified_at',
-            'is_available', 'average_rating'
-        )
-        read_only_fields = ('is_verified', 'verification_status', 'rejection_reason', 'verified_at', 'average_rating')
+        fields = ('bio', 'is_available', 'average_rating')
+        read_only_fields = ('average_rating',)
 
 class WorkerVerificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WorkerProfile
-        fields = ('identity_document', 'document_front', 'document_back')
-        extra_kwargs = {
-            'identity_document': {'required': True},
-            'document_front': {'required': True},
-            'document_back': {'required': True},
-        }
+        model = WorkerVerification
+        fields = ('identity_document', 'document_front', 'document_back', 'is_verified', 'status', 'rejection_reason', 'verified_at')
+        read_only_fields = ('is_verified', 'status', 'rejection_reason', 'verified_at')
 
-    def update(self, instance, validated_data):
-        # When documents are uploaded, set status to PENDING
-        instance.verification_status = WorkerProfile.VerificationStatus.PENDING
-        return super().update(instance, validated_data)
-
-class ClientProfileSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ClientProfile
-        fields = ('address', 'phone_number', 'city')
-
-class ClientProfileUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ClientProfile
-        fields = ('address', 'phone_number', 'city')
-        extra_kwargs = {
-            'address': {'required': False},
-            'phone_number': {'required': False},
-            'city': {'required': False},
-        }
-
-class WorkerProfileUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WorkerProfile
-        fields = ('identity_document', 'bio')
-        extra_kwargs = {
-            'identity_document': {'required': False},
-            'bio': {'required': False},
-        }
+        model = User
+        fields = ('id', 'email', 'role')
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    profile = serializers.SerializerMethodField()
+    profile = ProfileSerializer()
+    worker_info = WorkerProfileSerializer(required=False)
+    verification = WorkerVerificationSerializer(required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'role', 'first_name', 'last_name', 'profile')
-
-    def get_profile(self, obj):
-        if obj.role == User.Role.WORKER:
-            if hasattr(obj, 'worker_profile'):
-                return WorkerProfileSerializer(obj.worker_profile).data
-            return None
-        elif obj.role == User.Role.CLIENT:
-            if hasattr(obj, 'client_profile'):
-                return ClientProfileSerializer(obj.client_profile).data
-            return None
-        return None
+        fields = ('id', 'email', 'role', 'profile', 'worker_info', 'verification')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    # Include profile fields in registration if needed, or keep it simple
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'first_name', 'last_name', 'role')
+        fields = ('email', 'password', 'role', 'first_name', 'last_name')
 
     def create(self, validated_data):
+        first_name = validated_data.pop('first_name', '')
+        last_name = validated_data.pop('last_name', '')
         user = User.objects.create_user(**validated_data)
+        
+        # Profile is created in signals, but we can update names here
+        if hasattr(user, 'profile'):
+            user.profile.first_name = first_name
+            user.profile.last_name = last_name
+            user.profile.save()
+        
         return user
 
 class UserAdminDetailSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name')
+        fields = ('id', 'email', 'role', 'profile')
 
 class WorkerAdminDetailSerializer(serializers.ModelSerializer):
     user = UserAdminDetailSerializer(read_only=True)
+    verification = WorkerVerificationSerializer(read_only=True)
     
     class Meta:
         model = WorkerProfile
-        fields = (
-            'id', 'user', 'identity_document', 'verification_status', 
-            'document_front', 'document_back', 'verified_at', 'rejection_reason'
-        )
+        fields = ('id', 'user', 'bio', 'is_available', 'average_rating', 'verification')

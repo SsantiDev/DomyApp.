@@ -22,9 +22,12 @@ class EmailService:
             else:
                 template_name = 'users/emails/welcome_client.html'
             
+            # Fetch first name from profile if available
+            first_name = user.profile.first_name if hasattr(user, 'profile') else ''
+            
             context = {
                 'user': user,
-                'first_name': user.first_name or user.username,
+                'first_name': first_name or user.email.split('@')[0],
             }
             
             html_content = render_to_string(template_name, context)
