@@ -46,7 +46,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
     address = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, default='Medellín')
+    city = models.CharField(max_length=100, default='Medellín', db_index=True)
 
     def __str__(self):
         return f"Profile: {self.first_name} {self.last_name} ({self.user.email})"
@@ -56,7 +56,7 @@ class WorkerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='worker_info')
     bio = models.TextField(blank=True)
     is_available = models.BooleanField(default=False)
-    average_rating = models.FloatField(default=0.0)
+    average_rating = models.FloatField(default=0.0, db_index=True)
 
     def __str__(self):
         return f"Worker Detail: {self.user.email}"
@@ -78,3 +78,11 @@ class WorkerVerification(models.Model):
 
     def __str__(self):
         return f"Verification: {self.user.email} - {self.status}"
+
+class PasswordResetCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='reset_code')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reset code for {self.user.email}"

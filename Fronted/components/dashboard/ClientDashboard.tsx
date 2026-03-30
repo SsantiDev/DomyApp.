@@ -8,6 +8,7 @@ import { SPACING } from '../../constants/theme';
 import { ServiceRequestModal } from '../services/ServiceRequestModal';
 import { useClientDashboard } from '../../hooks/useClientDashboard';
 import { getStyles } from './ClientDashboard.styles';
+import { WorkerSearch } from './WorkerSearch';
 import { Plus, Wrench, Zap, Home, Utensils, Sparkles, History, ShieldCheck, Clock, CheckCircle, User, ChevronRight } from 'lucide-react-native';
 
 const CategoryIcon = ({ name, color, size = 22 }: { name: string; color: string; size?: number }) => {
@@ -111,6 +112,9 @@ export default function ClientDashboard() {
                     </Card>
                 </View>
             )}
+
+            {/* Worker Search & Filtering */}
+            <WorkerSearch />
 
             {/* Services Carousel */}
             <View>

@@ -177,6 +177,7 @@ export default function ProfileScreen() {
                     data={form}
                     isEditing={isEditing}
                     onChange={handleFieldChange}
+                    role={user.role as 'CLIENT' | 'WORKER'}
                 />
 
                 <View style={dynamicStyles.logoutSection}>

@@ -1,7 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
 from . import views
 
+router = SimpleRouter()
+router.register(r'workers', views.WorkerViewSet, basename='worker')
+
 urlpatterns = [
+    path('', include(router.urls)),
     path('me/', views.me, name='user_me'),
     path('register/', views.register, name='user_register'),
     path('profile/', views.update_profile, name='update_profile'), # Shared profile update
@@ -11,4 +16,8 @@ urlpatterns = [
     # Admin View Paths
     path('admin/pending-verifications/', views.get_pending_verifications, name='admin_pending_verifications'),
     path('admin/verify-worker/<int:pk>/', views.process_verification, name='admin_process_verification'),
+    
+    # Password Reset
+    path('password-reset/request/', views.request_password_reset, name='password_reset_request'),
+    path('password-reset/confirm/', views.confirm_password_reset, name='password_reset_confirm'),
 ]

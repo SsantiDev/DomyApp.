@@ -17,10 +17,14 @@ export default function LoginScreen() {
         loading,
         loginData,
         setLoginData,
+        loginError,
+        setLoginError,
         registerData,
         setRegisterData,
         handleLogin,
         handleRegister,
+        handleRequestReset,
+        handleConfirmReset,
     } = useAuthForm();
 
     return (
@@ -32,11 +36,12 @@ export default function LoginScreen() {
                     {currentView === 'login' && (
                         <LoginForm
                             data={loginData}
-                            setData={setLoginData}
+                            setData={(d) => { setLoginError(''); setLoginData(d); }}
                             onSubmit={handleLogin}
                             loading={loading}
                             onSwitchToRegister={() => setCurrentView('register')}
                             onForgotPassword={() => setCurrentView('forgot-password')}
+                            errorMessage={loginError}
                         />
                     )}
 
@@ -51,7 +56,12 @@ export default function LoginScreen() {
                     )}
 
                     {currentView === 'forgot-password' && (
-                        <ForgotPasswordForm onBackToLogin={() => setCurrentView('login')} />
+                        <ForgotPasswordForm 
+                            onBackToLogin={() => setCurrentView('login')}
+                            onRequestReset={handleRequestReset}
+                            onConfirmReset={handleConfirmReset}
+                            loading={loading}
+                        />
                     )}
                 </AuthLayout>
             </ScrollView>
