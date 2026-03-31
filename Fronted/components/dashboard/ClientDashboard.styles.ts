@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { SPACING, TYPOGRAPHY, RADIUS } from '../../constants/theme';
+import { SPACING, RADIUS } from '../../constants/theme';
 
 export const getStyles = (colors: any) => StyleSheet.create({
     container: {
@@ -9,211 +9,338 @@ export const getStyles = (colors: any) => StyleSheet.create({
     scrollContent: {
         paddingHorizontal: SPACING.lg,
         paddingTop: SPACING.lg,
-        paddingBottom: SPACING.xxl,
+        paddingBottom: SPACING.xxl + SPACING.lg,
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+    },
+
+    // ── Header ──────────────────────────────────────────────────────────────
     header: {
         marginBottom: SPACING.xl,
     },
-    greetingHeader: {
-        marginTop: SPACING.sm,
-    },
-    greeting: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: colors.text,
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: 16,
-        marginTop: 4,
-        color: colors.textLight,
-        fontWeight: '500',
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '800',
-        marginBottom: SPACING.md,
-        color: colors.text,
-        letterSpacing: -0.3,
-    },
-    // Service Carousel
-    carouselContainer: {
-        marginBottom: SPACING.xl,
-        marginHorizontal: -SPACING.lg, // Allows cards to bleed to edges
-        paddingLeft: SPACING.lg,
-    },
-    serviceCard: {
-        width: 200,
-        backgroundColor: colors.surface,
-        borderRadius: RADIUS.xl,
-        padding: SPACING.lg,
-        marginRight: SPACING.md,
-        borderWidth: 1,
-        borderColor: colors.border,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-    },
-    categoryIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: RADIUS.lg,
-        backgroundColor: colors.primary + '15',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: SPACING.md,
-    },
-    categoryName: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    categoryPrice: {
-        fontSize: 13,
-        color: colors.primary,
-        fontWeight: '700',
-    },
-    // Status Card Enhancement
-    statusCard: {
-        marginBottom: SPACING.xl,
-        padding: SPACING.lg,
-        backgroundColor: colors.primary + '08',
-        borderColor: colors.primary + '20',
-        borderWidth: 1,
-        borderRadius: RADIUS.xl,
-    },
-    statusHeader: {
+    headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: SPACING.md,
+        alignItems: 'flex-start',
     },
-    statusInfo: {
+    greeting: {
+        fontSize: 30,
+        fontWeight: '800',
+        color: colors.text,
+        letterSpacing: -0.8,
+    },
+    subtitle: {
+        fontSize: 15,
+        marginTop: SPACING.xs,
+        color: colors.textMuted,
+        fontWeight: '500',
+    },
+    headerBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-    },
-    statusTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.primary,
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-    },
-    badge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
+        gap: SPACING.xs,
+        backgroundColor: colors.primary + '18',
+        paddingHorizontal: SPACING.smd,
+        paddingVertical: SPACING.sm,
         borderRadius: RADIUS.full,
     },
-    badgeText: {
-        fontSize: 10,
+    headerBadgeText: {
+        color: colors.primary,
+        fontSize: 13,
+        fontWeight: '700',
+    },
+
+    // ── CTA Button ───────────────────────────────────────────────────────────
+    ctaButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: colors.primary,
+        borderRadius: RADIUS.xl + 4,
+        paddingHorizontal: SPACING.lg,
+        paddingVertical: SPACING.md,
+        marginBottom: SPACING.xl,
+        elevation: 8,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.38,
+        shadowRadius: 16,
+    },
+    ctaLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.md,
+    },
+    ctaIconWrap: {
+        width: 40,
+        height: 40,
+        borderRadius: RADIUS.lg,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    ctaTitle: {
+        fontSize: 16,
         fontWeight: '800',
-        textTransform: 'uppercase',
+        color: '#fff',
+        letterSpacing: -0.3,
+    },
+    ctaSubtitle: {
+        fontSize: 12,
+        color: 'rgba(255,255,255,0.72)',
+        fontWeight: '500',
+    },
+
+    // ── Sections ─────────────────────────────────────────────────────────────
+    section: {
+        marginBottom: SPACING.xl,
+    },
+    sectionTitle: {
+        fontSize: 17,
+        fontWeight: '800',
+        marginBottom: SPACING.md,
+        color: colors.text,
+        letterSpacing: -0.4,
+    },
+
+    // ── Active Status Card ────────────────────────────────────────────────────
+    statusCard: {
+        backgroundColor: colors.surface,
+        borderRadius: RADIUS.xl + 4,
+        padding: SPACING.lg,
+        borderWidth: 1,
+        borderColor: colors.primary + '28',
+        elevation: 4,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+    },
+    progressRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.xs,
+    },
+    progressDot: {
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        backgroundColor: colors.border,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: colors.border,
+    },
+    progressDotActive: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    progressLine: {
+        flex: 1,
+        height: 2,
+        backgroundColor: colors.border,
+        marginHorizontal: SPACING.xs,
+    },
+    progressLineActive: {
+        backgroundColor: colors.primary,
+    },
+    progressLabels: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: SPACING.md,
+    },
+    progressLabel: {
+        fontSize: 10,
+        color: colors.textMuted,
+        fontWeight: '600',
+        textAlign: 'center',
+        flex: 1,
+    },
+    progressLabelActive: {
+        color: colors.primary,
+        fontWeight: '800',
+    },
+    statusDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginBottom: SPACING.md,
     },
     activeServiceName: {
         fontSize: 20,
         fontWeight: '800',
         color: colors.text,
+        letterSpacing: -0.3,
     },
     addressText: {
-        fontSize: 14,
+        fontSize: 13,
         color: colors.textLight,
-        marginTop: 2,
+        marginTop: SPACING.xs,
+        fontWeight: '500',
     },
-    workerInfo: {
+    workerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        marginTop: SPACING.lg,
+        gap: SPACING.sm,
+        marginTop: SPACING.md,
         paddingTop: SPACING.md,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },
     avatarMini: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.primary,
     },
     workerText: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '600',
-        color: colors.text,
+        color: colors.textLight,
     },
-    detailLink: {
+    trackButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: SPACING.xs,
         marginTop: SPACING.md,
+        alignSelf: 'flex-start',
     },
-    detailLinkText: {
+    trackButtonText: {
         fontSize: 14,
         fontWeight: '700',
         color: colors.primary,
     },
-    // Promo Banner (Subtle version)
-    promoCard: {
-        padding: SPACING.lg,
-        borderRadius: RADIUS.xl,
-        marginBottom: SPACING.xl,
+
+    // ── Service Carousel ──────────────────────────────────────────────────────
+    carouselContainer: {
+        marginHorizontal: -SPACING.lg,
+        paddingLeft: SPACING.lg,
+    },
+    serviceCard: {
+        width: 128,
         backgroundColor: colors.surface,
+        borderRadius: RADIUS.xl,
+        padding: SPACING.md,
+        marginRight: SPACING.sm,
         borderWidth: 1,
         borderColor: colors.border,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+    },
+    categoryIconWrap: {
+        width: 50,
+        height: 50,
+        borderRadius: RADIUS.lg,
+        backgroundColor: colors.categoryBg,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: SPACING.sm,
+    },
+    categoryName: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: SPACING.xs,
+        lineHeight: 18,
+    },
+    categoryPrice: {
+        fontSize: 12,
+        color: colors.primary,
+        fontWeight: '700',
+    },
+
+    // ── Promo Banner ──────────────────────────────────────────────────────────
+    promoCard: {
+        borderRadius: RADIUS.xl + 4,
+        marginBottom: SPACING.xl,
+        backgroundColor: colors.primaryDark || colors.primary,
+        overflow: 'hidden',
+        minHeight: 140,
+        elevation: 6,
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.32,
+        shadowRadius: 16,
+    },
+    promoContent: {
+        padding: SPACING.lg,
+        paddingRight: SPACING.xxxl,
     },
     promoTag: {
-        backgroundColor: colors.primary + '15',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        paddingHorizontal: SPACING.smd,
+        paddingVertical: SPACING.xs,
         borderRadius: RADIUS.full,
         alignSelf: 'flex-start',
         marginBottom: SPACING.sm,
     },
     promoTagText: {
-        color: colors.primary,
+        color: '#fff',
         fontSize: 10,
         fontWeight: '800',
         textTransform: 'uppercase',
+        letterSpacing: 0.6,
     },
     promoTitle: {
-        color: colors.text,
-        fontSize: 18,
+        color: '#fff',
+        fontSize: 24,
         fontWeight: '800',
-        marginBottom: 2,
+        lineHeight: 30,
+        marginBottom: SPACING.xs,
+        letterSpacing: -0.6,
     },
     promoSubtitle: {
-        color: colors.textLight,
+        color: 'rgba(255,255,255,0.78)',
         fontSize: 13,
         fontWeight: '500',
+        lineHeight: 18,
     },
-    // Action Bar (Search/Request Style)
-    actionBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    promoCircle1: {
+        position: 'absolute',
+        width: 130,
+        height: 130,
+        borderRadius: 65,
+        backgroundColor: 'rgba(255,255,255,0.08)',
+        right: -30,
+        bottom: -35,
+    },
+    promoCircle2: {
+        position: 'absolute',
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        right: 60,
+        top: -20,
+    },
+
+    // ── How it works ──────────────────────────────────────────────────────────
+    stepsCard: {
         backgroundColor: colors.surface,
         borderRadius: RADIUS.xl,
-        padding: SPACING.md,
-        marginBottom: SPACING.xl,
         borderWidth: 1,
         borderColor: colors.border,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
+        overflow: 'hidden',
     },
-    actionBarText: {
-        flex: 1,
-        fontSize: 15,
-        color: colors.textLight,
-        marginLeft: SPACING.sm,
-        fontWeight: '500',
+    stepItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: SPACING.md,
+        padding: SPACING.lg,
     },
-    actionBarIcon: {
+    stepItemDivided: {
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    stepNumberWrap: {
         width: 32,
         height: 32,
         borderRadius: 16,
@@ -221,31 +348,8 @@ export const getStyles = (colors: any) => StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // Process Steps
-    stepsSection: {
-        marginTop: SPACING.md,
-        padding: SPACING.xl,
-        backgroundColor: colors.surface,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    stepItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.lg,
-        marginBottom: SPACING.lg,
-    },
-    stepNumber: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.primary + '15',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     stepNumberText: {
-        color: colors.primary,
+        color: '#fff',
         fontWeight: '800',
         fontSize: 14,
     },
@@ -256,61 +360,59 @@ export const getStyles = (colors: any) => StyleSheet.create({
         fontSize: 15,
         fontWeight: '700',
         color: colors.text,
+        marginBottom: SPACING.xs,
     },
     stepDesc: {
-        fontSize: 12,
+        fontSize: 13,
         color: colors.textLight,
-        marginTop: 2,
+        lineHeight: 19,
     },
-    // History Items
+
+    // ── History ───────────────────────────────────────────────────────────────
     historyItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: SPACING.lg,
+        gap: SPACING.sm,
+        padding: SPACING.md,
         borderRadius: RADIUS.xl,
         backgroundColor: colors.surface,
         borderWidth: 1,
         borderColor: colors.border,
-        marginBottom: SPACING.md,
+        marginBottom: SPACING.sm,
     },
     historyIcon: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.success + '10',
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: colors.success + '18',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: SPACING.md,
     },
     historyInfo: {
         flex: 1,
     },
     historyCategory: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '700',
         color: colors.text,
     },
     historyDate: {
-        fontSize: 13,
-        color: colors.textLight,
-        marginTop: 2,
+        fontSize: 12,
+        color: colors.textMuted,
+        marginTop: SPACING.xs,
     },
     rateTag: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        paddingHorizontal: SPACING.smd,
+        paddingVertical: SPACING.xs,
         borderRadius: RADIUS.full,
-        marginRight: 8,
+        backgroundColor: colors.warning + '18',
     },
     rateTagText: {
         fontSize: 11,
         fontWeight: '800',
         textTransform: 'uppercase',
     },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-    }
 });
-

@@ -94,22 +94,18 @@ export const WorkerSearch = () => {
             />
 
             {/* Rating Filter Row */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 6 }}>
+            <View style={styles.ratingFilterRow}>
                 <TrendingUp size={14} color={colors.textMuted} />
-                <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: '600', marginRight: 2 }}>Calificación mínima:</Text>
+                <Text style={styles.ratingFilterLabel}>Calificación mínima:</Text>
                 {RATING_FILTERS.map((rf) => {
                     const isActive = minRating === rf.value;
                     return (
                         <TouchableOpacity
                             key={String(rf.value)}
-                            style={[
-                                styles.filterChip,
-                                isActive && styles.filterChipActive,
-                                { paddingVertical: 4, paddingHorizontal: 10 }
-                            ]}
+                            style={[styles.filterChip, styles.filterChipSmall, isActive && styles.filterChipActive]}
                             onPress={() => setMinRating(rf.value)}
                         >
-                            <Text style={[styles.filterText, isActive && styles.filterTextActive, { fontSize: 12 }]}>
+                            <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
                                 {rf.label}
                             </Text>
                         </TouchableOpacity>
@@ -118,11 +114,11 @@ export const WorkerSearch = () => {
 
                 {/* Sort Toggle */}
                 <TouchableOpacity
-                    style={[styles.filterChip, { paddingVertical: 4, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 4 }]}
+                    style={[styles.filterChip, styles.filterChipSmall, styles.sortToggle]}
                     onPress={() => setSortAsc(prev => !prev)}
                 >
                     <Star size={11} color={colors.primary} fill={colors.primary} />
-                    <Text style={[styles.filterText, { fontSize: 12, color: colors.primary, fontWeight: '700' }]}>
+                    <Text style={styles.sortToggleText}>
                         {sortAsc ? 'Menor → Mayor' : 'Mayor → Menor'}
                     </Text>
                 </TouchableOpacity>
@@ -130,12 +126,12 @@ export const WorkerSearch = () => {
 
             {/* Worker List - FlatList horizontal */}
             {isLoading ? (
-                <View style={{ height: 160, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={styles.loadingWorkers}>
                     <ActivityIndicator color={colors.primary} size="large" />
                 </View>
             ) : isError ? (
                 <View style={styles.noResults}>
-                    <Text style={{ color: colors.danger as string, fontSize: 13 }}>Error al cargar. Intenta de nuevo.</Text>
+                    <Text style={styles.errorText}>Error al cargar. Intenta de nuevo.</Text>
                 </View>
             ) : workers.length > 0 ? (
                 <FlatList
@@ -143,7 +139,7 @@ export const WorkerSearch = () => {
                     data={workers}
                     keyExtractor={item => String(item.id)}
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingRight: 16 }}
+                    contentContainerStyle={styles.workerList}
                     renderItem={({ item: worker }: { item: Worker }) => (
                         <View style={styles.workerCard}>
                             <View style={styles.workerHeader}>

@@ -3,8 +3,7 @@ import { SPACING, RADIUS } from '../../constants/theme';
 
 export const getStyles = (colors: any) => StyleSheet.create({
     container: {
-        marginTop: SPACING.xl,
-        marginBottom: SPACING.xxl,
+        marginBottom: SPACING.xl,
     },
     header: {
         flexDirection: 'row',
@@ -33,7 +32,7 @@ export const getStyles = (colors: any) => StyleSheet.create({
         marginLeft: SPACING.sm,
         color: colors.text,
         fontSize: 15,
-        paddingVertical: 8,
+        paddingVertical: SPACING.sm,
     },
     filtersRow: {
         flexDirection: 'row',
@@ -44,6 +43,7 @@ export const getStyles = (colors: any) => StyleSheet.create({
         paddingVertical: SPACING.xs,
         borderRadius: RADIUS.full,
         borderWidth: 1,
+        borderColor: colors.border,
         marginRight: SPACING.sm,
         backgroundColor: colors.surface,
     },
@@ -98,16 +98,15 @@ export const getStyles = (colors: any) => StyleSheet.create({
     cityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 2,
     },
     cityText: {
         fontSize: 12,
         color: colors.textMuted,
-        marginLeft: 4,
+        marginLeft: SPACING.xs,
     },
     bioText: {
         fontSize: 13,
-        color: colors.textSecondary,
+        color: colors.textLight,
         marginBottom: SPACING.md,
         lineHeight: 18,
     },
@@ -121,15 +120,15 @@ export const getStyles = (colors: any) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: colors.warning + '15',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: SPACING.xs,
         borderRadius: RADIUS.sm,
     },
     ratingText: {
         fontSize: 12,
         fontWeight: '700',
         color: colors.warning,
-        marginLeft: 4,
+        marginLeft: SPACING.xs,
     },
     availableBadge: {
         width: 10,
@@ -151,5 +150,43 @@ export const getStyles = (colors: any) => StyleSheet.create({
         color: colors.textMuted,
         fontSize: 15,
         marginTop: SPACING.md,
-    }
+    },
+
+    // ── Rating Filter Row ──────────────────────────────────────────────────────
+    ratingFilterRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: SPACING.md,
+        flexWrap: 'wrap',
+        gap: SPACING.sm,
+    },
+    ratingFilterLabel: {
+        fontSize: 12,
+        color: colors.textMuted,
+        fontWeight: '600',
+    },
+    filterChipSmall: {
+        paddingVertical: SPACING.xs,
+        paddingHorizontal: SPACING.smd,
+    },
+    sortToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.xs,
+        marginLeft: SPACING.xs,
+    },
+    sortToggleText: {
+        fontSize: 12,
+        color: colors.primary,
+        fontWeight: '700',
+    },
+    loadingWorkers: {
+        height: 160,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        color: colors.danger,
+        fontSize: 13,
+    },
 });
