@@ -9,7 +9,7 @@ class Command(BaseCommand):
             {
                 "name": "Limpieza",
                 "description": "Limpieza general de casas y apartamentos.",
-                "icon_name": "broom",
+                "icon_name": "sparkles",
                 "base_price": 50000.00
             },
             {
@@ -29,6 +29,18 @@ class Command(BaseCommand):
                 "description": "Reparaciones eléctricas menores.",
                 "icon_name": "zap",
                 "base_price": 60000.00
+            },
+            {
+                "name": "Jardinería",
+                "description": "Mantenimiento de jardines, poda y riego.",
+                "icon_name": "leaf",
+                "base_price": 70000.00
+            },
+            {
+                "name": "Cuidado de Mascotas",
+                "description": "Paseo y cuidado básico de mascotas.",
+                "icon_name": "paw-print",
+                "base_price": 50000.00
             }
         ]
 
