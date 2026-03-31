@@ -38,6 +38,7 @@ Desktop.ini
 .env.development.local
 .env.test.local
 .env.production.local
+env.ts
 
 # IDEs/Editors
 .vscode/
@@ -53,4 +54,3 @@ Backend/venv/
 
 Estructura.txt
 Fronted/config/env.ts
-.cursor/
