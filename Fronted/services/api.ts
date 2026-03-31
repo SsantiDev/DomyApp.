@@ -46,7 +46,10 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // ── Skip token refresh for auth endpoints (login will always 401 on wrong password) ──
+        const isAuthEndpoint = originalRequest.url?.includes('auth/token');
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
@@ -92,7 +95,11 @@ api.interceptors.response.use(
 
         const status = error.response ? error.response.status : 'NETWORK_ERROR';
         const url = originalRequest ? originalRequest.url : 'unknown';
-        console.error(`[API Response Error] [${status}] ${url}:`, error.message);
+
+        // Only log unexpected errors, not normal auth failures handled by the UI
+        if (!isAuthEndpoint || status !== 401) {
+            console.warn(`[API] [${status}] ${url}: ${error.message}`);
+        }
 
         return Promise.reject(error);
     }

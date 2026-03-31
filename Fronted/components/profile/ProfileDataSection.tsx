@@ -10,6 +10,7 @@ interface Props {
     data: ProfileData;
     isEditing: boolean;
     onChange: (field: string, value: string) => void;
+    role: 'CLIENT' | 'WORKER';
 }
 
 interface FieldConfig {
@@ -20,22 +21,21 @@ interface FieldConfig {
     multiline?: boolean;
 }
 
-export default function ProfileDataSection({ data, isEditing, onChange }: Props) {
+export default function ProfileDataSection({ data, isEditing, onChange, role }: Props) {
     const { colors } = useTheme();
 
     const getFields = (): FieldConfig[] => {
-        // If data contains 'address', it's likely a client (or has client fields)
-        if ('address' in data || 'phone_number' in data) {
+        if (role === 'WORKER') {
             return [
-                { key: 'city', label: 'Ciudad', placeholder: 'Ej: Medellín' },
-                { key: 'address', label: 'Dirección', placeholder: 'Ej: Calle 10 # 20-30' },
-                { key: 'phone_number', label: 'Teléfono', placeholder: 'Ej: +573001234567', keyboardType: 'phone-pad' },
+                { key: 'identity_document', label: 'Documento de Identidad', placeholder: 'C.C. 12345678' },
+                { key: 'bio', label: 'Biografía / Especialidad', placeholder: 'Ej: Especialista en limpieza profunda con 5 años de experiencia...', multiline: true },
             ];
         }
-        // If it has bio or identity_document, it's a worker
+        // CLIENT
         return [
-            { key: 'identity_document', label: 'Documento de Identidad', placeholder: 'C.C. 12345678', keyboardType: 'default' },
-            { key: 'bio', label: 'Biografía', placeholder: 'Cuéntanos un poco sobre ti...', multiline: true },
+            { key: 'city', label: 'Ciudad', placeholder: 'Ej: Medellín' },
+            { key: 'address', label: 'Dirección', placeholder: 'Ej: Calle 10 # 20-30' },
+            { key: 'phone_number', label: 'Teléfono', placeholder: 'Ej: +573001234567', keyboardType: 'phone-pad' },
         ];
     };
 
@@ -95,7 +95,7 @@ export default function ProfileDataSection({ data, isEditing, onChange }: Props)
     return (
         <View style={dynamicStyles.section}>
             <Text style={dynamicStyles.sectionTitle}>
-                {'address' in data ? 'Información de contacto' : 'Información Profesional'}
+                {role === 'WORKER' ? 'Información Profesional' : 'Información de contacto'}
             </Text>
             {fields.map(({ key, label, placeholder, keyboardType, multiline }) => (
                 <View key={key} style={dynamicStyles.row}>

@@ -13,7 +13,6 @@ import {
     Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -180,40 +179,20 @@ export default function ServiceDetailScreen() {
             />
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Map View */}
-                <View style={[styles.mapContainer, { borderColor: colors.border }]}>
-                    <MapView
-                        style={styles.map}
-                        initialRegion={{
-                            ...destCoords,
-                            latitudeDelta: 0.015,
-                            longitudeDelta: 0.015,
-                        }}
-                        userInterfaceStyle={isDark ? 'dark' : 'light'}
-                    >
-                        <Marker coordinate={destCoords} title="Destino">
-                            <View style={[styles.marker, { backgroundColor: colors.primary }]}>
-                                <MapPin size={20} color="#FFF" />
-                            </View>
-                        </Marker>
-                        <Marker coordinate={originCoords} title="Tú">
-                            <View style={[styles.marker, { backgroundColor: colors.success }]}>
-                                <User size={16} color="#FFF" />
-                            </View>
-                        </Marker>
-                        <Polyline
-                            coordinates={[originCoords, destCoords]}
-                            strokeColor={colors.primary}
-                            strokeWidth={3}
-                            lineDashPattern={[5, 5]}
-                        />
-                    </MapView>
+                {/* Map View Placeholder (react-native-maps not supported on web) */}
+                <View style={[styles.mapContainer, { borderColor: colors.border, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 12 }]}>
+                    <View style={{ alignItems: 'center', gap: 8 }}>
+                        <MapPin size={40} color={colors.primary} />
+                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, textAlign: 'center', paddingHorizontal: 16 }}>
+                            {service.address}
+                        </Text>
+                    </View>
                     <TouchableOpacity
-                        style={[styles.navBtn, { backgroundColor: colors.primary }]}
+                        style={[styles.navBtn, { backgroundColor: colors.primary, position: 'relative', bottom: 'auto', right: 'auto' }]}
                         onPress={handleOpenNavigation}
                     >
                         <Navigation size={20} color="#FFF" />
-                        <Text style={styles.navBtnText}>Navegar</Text>
+                        <Text style={styles.navBtnText}>Abrir en Mapa</Text>
                     </TouchableOpacity>
                 </View>
 

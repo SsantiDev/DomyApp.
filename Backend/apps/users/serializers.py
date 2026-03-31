@@ -68,3 +68,14 @@ class WorkerAdminDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerProfile
         fields = ('id', 'user', 'bio', 'is_available', 'average_rating', 'verification')
+
+class WorkerListSerializer(serializers.ModelSerializer):
+    """Lite serializer for public search/listing"""
+    first_name = serializers.CharField(source='user.profile.first_name')
+    last_name = serializers.CharField(source='user.profile.last_name')
+    city = serializers.CharField(source='user.profile.city')
+    email = serializers.EmailField(source='user.email')
+    
+    class Meta:
+        model = WorkerProfile
+        fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating')

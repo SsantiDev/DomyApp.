@@ -4,7 +4,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/NativeCard';
 import { Button } from '../ui/NativeButton';
 import { NativeInput } from '../ui/NativeInput';
-import { SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING } from '../../constants/theme';
+import { AlertCircle } from 'lucide-react-native';
+import { RADIUS } from '../../constants/theme';
 
 interface LoginFormProps {
     data: any;
@@ -13,6 +15,7 @@ interface LoginFormProps {
     loading: boolean;
     onSwitchToRegister: () => void;
     onForgotPassword: () => void;
+    errorMessage?: string;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
@@ -22,12 +25,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     loading,
     onSwitchToRegister,
     onForgotPassword,
+    errorMessage,
 }) => {
     const { colors } = useTheme();
 
     return (
         <Card style={styles.card}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Login</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Iniciar Sesión</Text>
+
+            {/* ── Error Banner ── */}
+            {!!errorMessage && (
+                <View style={styles.errorBanner}>
+                    <AlertCircle size={16} color="#DC2626" style={{ marginRight: 8, flexShrink: 0 }} />
+                    <Text style={styles.errorBannerText}>{errorMessage}</Text>
+                </View>
+            )}
+
             <View style={styles.formGroup}>
                 <NativeInput
                     label="Correo Electrónico"
@@ -77,7 +90,23 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: 32,
+        marginBottom: 24,
+    },
+    errorBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FEF2F2',
+        borderColor: '#FECACA',
+        borderWidth: 1,
+        borderRadius: RADIUS.md,
+        padding: 12,
+        marginBottom: 16,
+    },
+    errorBannerText: {
+        color: '#DC2626',
+        fontSize: 13,
+        lineHeight: 18,
+        flex: 1,
     },
     formGroup: {
         width: '100%',
@@ -89,7 +118,7 @@ const styles = StyleSheet.create({
         marginTop: 32,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderTopColor: '#edf2f7', // Fallback border color or use colors.border
+        borderTopColor: '#edf2f7',
         paddingTop: 24,
     },
     linkText: {
