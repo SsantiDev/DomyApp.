@@ -8,6 +8,7 @@ interface NativeInputProps extends TextInputProps {
     error?: string;
     containerStyle?: ViewStyle;
     inputStyle?: TextStyle;
+    compact?: boolean;
 }
 
 export const NativeInput: React.FC<NativeInputProps> = ({
@@ -15,18 +16,24 @@ export const NativeInput: React.FC<NativeInputProps> = ({
     error,
     containerStyle,
     inputStyle,
+    compact,
     ...props
 }) => {
     const { colors, isDark } = useTheme();
 
     return (
-        <View style={[styles.container, containerStyle]}>
+        <View style={[
+            styles.container,
+            compact && { marginBottom: SPACING.sm },
+            containerStyle
+        ]}>
             {label && (
                 <Text style={[styles.label, { color: colors.textLight }]}>{label}</Text>
             )}
             <TextInput
                 style={[
                     styles.input,
+                    compact && { padding: SPACING.sm },
                     {
                         borderColor: error ? colors.danger : colors.border,
                         color: colors.text,
@@ -37,6 +44,7 @@ export const NativeInput: React.FC<NativeInputProps> = ({
                 placeholderTextColor={colors.textMuted}
                 {...props}
             />
+
             {error && (
                 <Text style={[styles.error, { color: colors.danger }]}>{error}</Text>
             )}

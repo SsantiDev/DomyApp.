@@ -1,5 +1,6 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
@@ -25,9 +26,14 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-            <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-                <ThemeToggle style={styles.themeToggle} />
-
+            <View style={styles.themeToggleContainer}>
+                <ThemeToggle />
+            </View>
+            <ScrollView 
+                contentContainerStyle={styles.scrollContainer} 
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+            >
                 <AuthLayout currentView={currentView}>
                     {currentView === 'login' && (
                         <LoginForm
@@ -50,6 +56,7 @@ export default function LoginScreen() {
                         />
                     )}
 
+
                     {currentView === 'forgot-password' && (
                         <ForgotPasswordForm onBackToLogin={() => setCurrentView('login')} />
                     )}
@@ -63,13 +70,14 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
     },
+    themeToggleContainer: {
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        alignItems: 'flex-end',
+        zIndex: 1000,
+    },
     scrollContainer: {
         flexGrow: 1,
-    },
-    themeToggle: {
-        position: 'absolute',
-        top: 10,
-        right: 20,
-        zIndex: 1000,
+        justifyContent: 'center',
     },
 });

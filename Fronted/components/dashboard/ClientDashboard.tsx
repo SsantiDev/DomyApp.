@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { UserMenu } from '../ui/UserMenu';
 import { Button } from '../ui/NativeButton';
 import { Card } from '../ui/NativeCard';
 import { SPACING } from '../../constants/theme';

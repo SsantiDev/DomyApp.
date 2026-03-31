@@ -12,6 +12,7 @@ interface ButtonProps {
     style?: ViewStyle | ViewStyle[];
     textStyle?: TextStyle | TextStyle[];
     icon?: React.ReactNode;
+    compact?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
     style,
     textStyle,
     icon,
+    compact = false,
 }) => {
     const { colors } = useTheme();
     const isPrimary = variant === 'primary';
@@ -31,6 +33,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     const getButtonStyle = () => {
         const base: ViewStyle[] = [styles.base];
+        if (compact) base.push(styles.compactBase);
         if (isPrimary) base.push({ backgroundColor: colors.primary });
         if (isSecondary) base.push({ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border });
         if (isOutline) base.push({ backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.primary });
@@ -40,11 +43,13 @@ export const Button: React.FC<ButtonProps> = ({
 
     const getTextStyle = () => {
         const base: TextStyle[] = [styles.text];
+        if (compact) base.push(styles.compactText);
         if (isPrimary) base.push({ color: colors.white });
         if (isSecondary) base.push({ color: colors.text });
         if (isOutline) base.push({ color: colors.primary });
         return base;
     };
+
 
     return (
         <TouchableOpacity
@@ -68,11 +73,15 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
     base: {
-        padding: SPACING.lg,
+        padding: SPACING.md,
         borderRadius: RADIUS.xl,
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 56,
+        minHeight: 52,
+    },
+    compactBase: {
+        padding: SPACING.sm,
+        minHeight: 44,
     },
     content: {
         flexDirection: 'row',
@@ -86,4 +95,8 @@ const styles = StyleSheet.create({
         fontSize: TYPOGRAPHY.h3.fontSize,
         fontWeight: TYPOGRAPHY.h3.fontWeight,
     },
+    compactText: {
+        fontSize: TYPOGRAPHY.caption.fontSize,
+    },
 });
+
