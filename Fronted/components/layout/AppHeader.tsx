@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserMenu } from '../ui/UserMenu';
+import { ThemeToggle } from '../ui/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING, TYPOGRAPHY } from '../../constants/theme';
 import { StatusBar } from 'expo-status-bar';
@@ -21,7 +22,10 @@ export const AppHeader = () => {
             <StatusBar style={isDark ? 'light' : 'dark'} translucent />
             <View style={[styles.content, { paddingTop: insets.top, height: 56 + insets.top }]}>
                 <Text style={[styles.title, { color: colors.text }]}>Domy</Text>
-                <UserMenu />
+                <View style={styles.rightContent}>
+                    <ThemeToggle />
+                    <UserMenu />
+                </View>
             </View>
         </View>
     );
@@ -54,5 +58,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         letterSpacing: 0.5,
+    },
+    rightContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.sm,
     },
 });

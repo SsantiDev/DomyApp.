@@ -13,7 +13,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/NativeButton';
 import { Card } from '../ui/NativeCard';
 import { SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
-import { X, ChevronRight, Calendar, MapPin, ClipboardList, CheckCircle2, Sparkles, Zap, Home, Wrench, Utensils, Clock } from 'lucide-react-native';
+import { X, ChevronRight, Calendar, MapPin, ClipboardList, CheckCircle2, Sparkles, Zap, Home, Wrench, Utensils, Clock, WashingMachine, Leaf, PawPrint } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useCategories, useCreateServiceRequest } from '../../hooks/useServices';
@@ -28,11 +28,15 @@ type Step = 'CATEGORY' | 'DETAILS' | 'CONFIRM' | 'SUCCESS';
 
 const CategoryIcon = ({ name, color, size = 26 }: { name: string; color: string; size?: number }) => {
     switch (name) {
+        case 'sparkles':
         case 'broom': return <Sparkles color={color} size={size} />;
         case 'zap': return <Zap color={color} size={size} />;
         case 'home': return <Home color={color} size={size} />;
         case 'wrench': return <Wrench color={color} size={size} />;
         case 'utensils': return <Utensils color={color} size={size} />;
+        case 'washing-machine': return <WashingMachine color={color} size={size} />;
+        case 'leaf': return <Leaf color={color} size={size} />;
+        case 'paw-print': return <PawPrint color={color} size={size} />;
         default: return <Sparkles color={color} size={size} />;
     }
 };
