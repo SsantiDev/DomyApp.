@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { UserDetail } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING } from '../../constants/theme';
 import { Edit3, Check, X } from 'lucide-react-native';
+import { getStyles } from './ProfileHeader.styles';
 
 interface Props {
     user: UserDetail;
@@ -41,103 +42,23 @@ export default function ProfileHeader({
     isSaving
 }: Props) {
     const { colors } = useTheme();
+    const styles = useMemo(() => getStyles(colors), [colors]);
     const initials = getInitials(user.first_name, user.last_name);
     const color = roleColor[user.role] ?? colors.primary;
     const label = roleLabel[user.role] ?? user.role;
 
-    const dynamicStyles = StyleSheet.create({
-        container: {
-            alignItems: 'center',
-            paddingTop: 16,
-            paddingBottom: 40,
-            paddingHorizontal: 20,
-            backgroundColor: colors.surface,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-        },
-        controlsRow: {
-            width: '100%',
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            marginBottom: 24,
-            minHeight: 40,
-        },
-        avatar: {
-            width: 96,
-            height: 96,
-            borderRadius: 48,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 16,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 10,
-            elevation: 8,
-        },
-        initials: {
-            fontSize: 36,
-            fontWeight: '700',
-            color: '#FFFFFF',
-            letterSpacing: 1,
-        },
-        name: {
-            fontSize: 24,
-            fontWeight: '700',
-            color: colors.text,
-            marginBottom: 4,
-        },
-        email: {
-            fontSize: 14,
-            color: colors.textLight,
-            marginBottom: 16,
-        },
-        badge: {
-            paddingHorizontal: 16,
-            paddingVertical: 6,
-            borderRadius: 20,
-        },
-        badgeText: {
-            fontSize: 13,
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-        },
-        actionButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            borderRadius: RADIUS.md,
-            gap: 6,
-        },
-        editBtn: {
-            backgroundColor: colors.primary + '15',
-        },
-        saveBtn: {
-            backgroundColor: colors.primary,
-        },
-        cancelBtn: {
-            backgroundColor: colors.border,
-        },
-        btnText: {
-            fontSize: 14,
-            fontWeight: '600',
-        }
-    });
-
     return (
-        <View style={dynamicStyles.container}>
-            <View style={dynamicStyles.controlsRow}>
+        <View style={styles.container}>
+            <View style={styles.controlsRow}>
                 {isEditing ? (
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                        <TouchableOpacity onPress={onCancel} style={[dynamicStyles.actionButton, dynamicStyles.cancelBtn]}>
+                    <View style={{ flexDirection: 'row', gap: SPACING.sm }}>
+                        <TouchableOpacity onPress={onCancel} style={[styles.actionButton, styles.cancelBtn]}>
                             <X size={18} color={colors.textLight} />
-                            <Text style={[dynamicStyles.btnText, { color: colors.textLight }]}>Cancelar</Text>
+                            <Text style={[styles.btnText, { color: colors.textLight }]}>Cancelar</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={onSave}
-                            style={[dynamicStyles.actionButton, dynamicStyles.saveBtn]}
+                            style={[styles.actionButton, styles.saveBtn]}
                             disabled={isSaving}
                         >
                             {isSaving ? (
@@ -145,31 +66,31 @@ export default function ProfileHeader({
                             ) : (
                                 <>
                                     <Check size={18} color="#FFF" />
-                                    <Text style={[dynamicStyles.btnText, { color: '#FFF' }]}>Guardar</Text>
+                                    <Text style={[styles.btnText, { color: '#FFF' }]}>Guardar</Text>
                                 </>
                             )}
                         </TouchableOpacity>
                     </View>
                 ) : (
-                    <TouchableOpacity onPress={onEdit} style={[dynamicStyles.actionButton, dynamicStyles.editBtn]}>
+                    <TouchableOpacity onPress={onEdit} style={[styles.actionButton, styles.editBtn]}>
                         <Edit3 size={18} color={colors.primary} />
-                        <Text style={[dynamicStyles.btnText, { color: colors.primary }]}>Editar</Text>
+                        <Text style={[styles.btnText, { color: colors.primary }]}>Editar</Text>
                     </TouchableOpacity>
                 )}
             </View>
 
-            <View style={[dynamicStyles.avatar, { backgroundColor: color }]}>
-                <Text style={dynamicStyles.initials}>{initials}</Text>
+            <View style={[styles.avatar, { backgroundColor: color }]}>
+                <Text style={styles.initials}>{initials}</Text>
             </View>
 
-            <Text style={dynamicStyles.name}>
+            <Text style={styles.name}>
                 {user.first_name} {user.last_name}
             </Text>
 
-            <Text style={dynamicStyles.email}>{user.email}</Text>
+            <Text style={styles.email}>{user.email}</Text>
 
-            <View style={[dynamicStyles.badge, { backgroundColor: `${color}22` }]}>
-                <Text style={[dynamicStyles.badgeText, { color }]}>{label}</Text>
+            <View style={[styles.badge, { backgroundColor: `${color}22` }]}>
+                <Text style={[styles.badgeText, { color }]}>{label}</Text>
             </View>
         </View>
     );

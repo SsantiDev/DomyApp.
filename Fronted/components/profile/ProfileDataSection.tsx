@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TextInput } from 'react-native';
 import { ClientProfile, WorkerProfile } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
-import { SPACING, RADIUS } from '../../constants/theme';
+import { getStyles } from './ProfileDataSection.styles';
 
 type ProfileData = Partial<ClientProfile & WorkerProfile>;
 
@@ -23,6 +23,7 @@ interface FieldConfig {
 
 export default function ProfileDataSection({ data, isEditing, onChange, role }: Props) {
     const { colors } = useTheme();
+    const styles = useMemo(() => getStyles(colors), [colors]);
 
     const getFields = (): FieldConfig[] => {
         if (role === 'WORKER') {
@@ -41,68 +42,17 @@ export default function ProfileDataSection({ data, isEditing, onChange, role }: 
 
     const fields = getFields();
 
-    const dynamicStyles = StyleSheet.create({
-        section: {
-            backgroundColor: colors.surface,
-            marginTop: SPACING.md,
-            paddingHorizontal: SPACING.lg,
-            paddingVertical: SPACING.sm,
-            borderTopWidth: 1,
-            borderBottomWidth: 1,
-            borderColor: colors.border,
-        },
-        sectionTitle: {
-            fontSize: 13,
-            fontWeight: '600',
-            color: colors.textLight,
-            textTransform: 'uppercase',
-            letterSpacing: 0.8,
-            paddingVertical: SPACING.md,
-        },
-        row: {
-            paddingVertical: SPACING.md,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-        },
-        label: {
-            fontSize: 12,
-            color: colors.textMuted,
-            marginBottom: 4,
-            fontWeight: '500',
-        },
-        value: {
-            fontSize: 16,
-            color: colors.text,
-            fontWeight: '400',
-        },
-        empty: {
-            color: colors.textMuted,
-            fontStyle: 'italic',
-        },
-        input: {
-            fontSize: 16,
-            color: colors.text,
-            borderWidth: 1,
-            borderColor: colors.primary,
-            borderRadius: RADIUS.md,
-            paddingHorizontal: SPACING.md,
-            paddingVertical: SPACING.sm,
-            backgroundColor: colors.primary + '11',
-            minHeight: 40,
-        },
-    });
-
     return (
-        <View style={dynamicStyles.section}>
-            <Text style={dynamicStyles.sectionTitle}>
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
                 {role === 'WORKER' ? 'Información Profesional' : 'Información de contacto'}
             </Text>
             {fields.map(({ key, label, placeholder, keyboardType, multiline }) => (
-                <View key={key} style={dynamicStyles.row}>
-                    <Text style={dynamicStyles.label}>{label}</Text>
+                <View key={key} style={styles.row}>
+                    <Text style={styles.label}>{label}</Text>
                     {isEditing ? (
                         <TextInput
-                            style={[dynamicStyles.input, multiline && { minHeight: 80, textAlignVertical: 'top' }]}
+                            style={[styles.input, multiline && { minHeight: 80, textAlignVertical: 'top' }]}
                             value={(data as any)[key] ?? ''}
                             onChangeText={(val) => onChange(key, val)}
                             placeholder={placeholder}
@@ -111,7 +61,7 @@ export default function ProfileDataSection({ data, isEditing, onChange, role }: 
                             multiline={multiline}
                         />
                     ) : (
-                        <Text style={[dynamicStyles.value, !(data as any)[key] && dynamicStyles.empty]}>
+                        <Text style={[styles.value, !(data as any)[key] && styles.empty]}>
                             {(data as any)[key] || 'No especificado'}
                         </Text>
                     )}

@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, useWindowDimensions } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING } from '../../constants/theme';
+import { getStyles } from './AuthLayout.styles';
 
 interface AuthLayoutProps {
     children: React.ReactNode;
@@ -12,6 +13,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, currentView })
     const { colors, isDark } = useTheme();
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
+    const styles = useMemo(() => getStyles(colors), [colors]);
 
     return (
         <View style={[styles.container, isMobile && styles.containerMobile]}>
@@ -44,40 +46,3 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, currentView })
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'row',
-    },
-    containerMobile: {
-        flexDirection: 'column',
-    },
-    leftSide: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 40,
-    },
-    leftContent: {
-        maxWidth: 400,
-        alignItems: 'center',
-    },
-    welcomeTitle: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    welcomeSubtitle: {
-        fontSize: 16,
-        color: '#ffffffcc',
-        textAlign: 'center',
-        lineHeight: 24,
-    },
-    rightSide: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});

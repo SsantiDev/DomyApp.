@@ -19,7 +19,7 @@ export const NativeInput: React.FC<NativeInputProps> = ({
     compact,
     ...props
 }) => {
-    const { colors, isDark } = useTheme();
+    const { colors } = useTheme();
 
     return (
         <View style={[
@@ -37,7 +37,7 @@ export const NativeInput: React.FC<NativeInputProps> = ({
                     {
                         borderColor: error ? colors.danger : colors.border,
                         color: colors.text,
-                        backgroundColor: isDark ? '#1e1e3f' : '#f8fafc',
+                        backgroundColor: colors.surface,
                     },
                     inputStyle
                 ]}

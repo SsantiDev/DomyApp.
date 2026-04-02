@@ -57,7 +57,7 @@ export const getStyles = (colors: any) => StyleSheet.create({
         fontWeight: '500',
     },
     filterTextActive: {
-        color: '#FFF',
+        color: '#ffffff',
     },
     workerList: {
         paddingRight: SPACING.lg,
@@ -136,7 +136,7 @@ export const getStyles = (colors: any) => StyleSheet.create({
         borderRadius: 5,
         backgroundColor: colors.success,
         borderWidth: 2,
-        borderColor: '#FFF',
+        borderColor: '#ffffff',
         position: 'absolute',
         bottom: 0,
         right: 0,

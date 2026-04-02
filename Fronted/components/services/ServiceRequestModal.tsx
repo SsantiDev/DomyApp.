@@ -3,7 +3,6 @@ import {
     Modal,
     View,
     Text,
-    StyleSheet,
     TouchableOpacity,
     ScrollView,
     TextInput,
@@ -12,7 +11,8 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/NativeButton';
 import { Card } from '../ui/NativeCard';
-import { SPACING, RADIUS, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING, RADIUS } from '../../constants/theme';
+import { getStyles } from './ServiceRequestModal.styles';
 import { X, ChevronRight, Calendar, MapPin, ClipboardList, CheckCircle2, Sparkles, Zap, Home, Wrench, Utensils, Clock, WashingMachine, Leaf, PawPrint } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
@@ -125,163 +125,7 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
         }
     };
 
-    const styles = StyleSheet.create({
-        overlay: {
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            justifyContent: 'flex-end',
-        },
-        content: {
-            backgroundColor: colors.surface,
-            borderTopLeftRadius: RADIUS.xl,
-            borderTopRightRadius: RADIUS.xl,
-            maxHeight: '90%',
-        },
-        header: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: SPACING.xl,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border + '10',
-        },
-        footer: {
-            padding: SPACING.xl,
-            paddingBottom: insets.bottom > 0 ? insets.bottom + SPACING.md : SPACING.xl,
-            borderTopWidth: 1,
-            borderTopColor: colors.border + '10',
-            backgroundColor: colors.surface,
-        },
-        body: {
-            padding: SPACING.xl,
-        },
-        title: {
-            fontSize: TYPOGRAPHY.h2.fontSize,
-            fontWeight: TYPOGRAPHY.h2.fontWeight,
-            color: colors.text,
-        },
-        subtitle: {
-            fontSize: 14,
-            color: colors.textLight,
-            marginBottom: SPACING.lg,
-        },
-        categoryContainer: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: SPACING.md,
-            marginBottom: SPACING.xl,
-        },
-        categoryItem: {
-            width: '47%',
-            padding: SPACING.lg,
-            borderRadius: RADIUS.lg,
-            borderWidth: 2,
-            alignItems: 'center',
-            gap: SPACING.sm,
-        },
-        inputContainer: {
-            marginBottom: SPACING.lg,
-        },
-        label: {
-            fontSize: 14,
-            fontWeight: '600',
-            color: colors.text,
-            marginBottom: SPACING.xs,
-        },
-        input: {
-            backgroundColor: colors.background,
-            borderRadius: RADIUS.md,
-            padding: SPACING.md,
-            color: colors.text,
-            borderWidth: 1,
-            borderColor: colors.border,
-            fontSize: 15,
-        },
-        dateButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: colors.background,
-            borderRadius: RADIUS.md,
-            padding: SPACING.md,
-            borderWidth: 1,
-            borderColor: colors.border,
-            gap: 12,
-        },
-        dateButtonText: {
-            color: colors.text,
-            fontSize: 15,
-            fontWeight: '600',
-            textTransform: 'capitalize',
-        },
-        sectionHeader: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: SPACING.sm,
-            marginTop: SPACING.xs,
-        },
-        sectionHeaderText: {
-            fontSize: 14,
-            fontWeight: '700',
-            color: colors.primary,
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-        },
-        summaryCard: {
-            padding: SPACING.lg,
-            gap: SPACING.md,
-            marginBottom: SPACING.xl,
-        },
-        summaryRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: SPACING.sm,
-        },
-        successContainer: {
-            alignItems: 'center',
-            paddingVertical: SPACING.xxl,
-            gap: SPACING.md,
-        },
-        priceTag: {
-            fontSize: 28,
-            fontWeight: '900',
-            color: colors.primary,
-        },
-        divider: {
-            height: 1,
-            backgroundColor: colors.border,
-            marginVertical: SPACING.lg,
-            borderStyle: 'dashed',
-            borderRadius: 1,
-        },
-        summaryItem: {
-            flexDirection: 'row',
-            gap: 12,
-            marginBottom: SPACING.md,
-        },
-        summaryLabel: {
-            fontSize: 12,
-            color: colors.textLight,
-            fontWeight: '700',
-            textTransform: 'uppercase',
-            letterSpacing: 0.5,
-            marginBottom: 2,
-        },
-        summaryValue: {
-            fontSize: 15,
-            color: colors.text,
-            fontWeight: '600',
-        },
-        paymentNote: {
-            backgroundColor: colors.primary + '08',
-            padding: SPACING.md,
-            borderRadius: RADIUS.md,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            marginTop: SPACING.sm,
-        }
-    });
+    const styles = useMemo(() => getStyles(colors, insets.bottom), [colors, insets.bottom]);
 
     const renderStep = () => {
         switch (step) {

@@ -1,12 +1,12 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, Pressable } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/NativeCard';
 import { Button } from '../ui/NativeButton';
 import { NativeInput } from '../ui/NativeInput';
 import { SPACING } from '../../constants/theme';
 import { AlertCircle } from 'lucide-react-native';
-import { RADIUS } from '../../constants/theme';
+import { getStyles } from './LoginForm.styles';
 
 interface LoginFormProps {
     data: any;
@@ -28,15 +28,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     errorMessage,
 }) => {
     const { colors } = useTheme();
+    const styles = useMemo(() => getStyles(colors), [colors]);
 
     return (
         <Card style={styles.card}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Iniciar Sesión</Text>
+            <Text style={styles.cardTitle}>Iniciar Sesión</Text>
 
             {/* ── Error Banner ── */}
             {!!errorMessage && (
                 <View style={styles.errorBanner}>
-                    <AlertCircle size={16} color="#DC2626" style={{ marginRight: 8, flexShrink: 0 }} />
+                    <AlertCircle size={16} color={colors.danger} style={{ marginRight: SPACING.sm, flexShrink: 0 }} />
                     <Text style={styles.errorBannerText}>{errorMessage}</Text>
                 </View>
             )}
@@ -81,47 +82,3 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    card: {
-        width: '100%',
-        maxWidth: 450,
-    },
-    cardTitle: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 24,
-    },
-    errorBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FEF2F2',
-        borderColor: '#FECACA',
-        borderWidth: 1,
-        borderRadius: RADIUS.md,
-        padding: 12,
-        marginBottom: 16,
-    },
-    errorBannerText: {
-        color: '#DC2626',
-        fontSize: 13,
-        lineHeight: 18,
-        flex: 1,
-    },
-    formGroup: {
-        width: '100%',
-    },
-    submitBtn: {
-        marginTop: SPACING.sm,
-    },
-    footer: {
-        marginTop: 32,
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: '#edf2f7',
-        paddingTop: 24,
-    },
-    linkText: {
-        fontSize: 14,
-    },
-});

@@ -79,14 +79,14 @@ export const getStyles = (colors: any) => StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: RADIUS.lg,
-        backgroundColor: '#fff',
+        backgroundColor: colors.white,
         alignItems: 'center',
         justifyContent: 'center',
     },
     ctaTitle: {
         fontSize: 16,
         fontWeight: '800',
-        color: '#fff',
+        color: colors.white,
         letterSpacing: -0.3,
     },
     ctaSubtitle: {
@@ -283,14 +283,14 @@ export const getStyles = (colors: any) => StyleSheet.create({
         marginBottom: SPACING.sm,
     },
     promoTagText: {
-        color: '#fff',
+        color: colors.white,
         fontSize: 10,
         fontWeight: '800',
         textTransform: 'uppercase',
         letterSpacing: 0.6,
     },
     promoTitle: {
-        color: '#fff',
+        color: colors.white,
         fontSize: 24,
         fontWeight: '800',
         lineHeight: 30,
@@ -349,7 +349,7 @@ export const getStyles = (colors: any) => StyleSheet.create({
         justifyContent: 'center',
     },
     stepNumberText: {
-        color: '#fff',
+        color: colors.white,
         fontWeight: '800',
         fontSize: 14,
     },

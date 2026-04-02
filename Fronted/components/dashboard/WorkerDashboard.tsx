@@ -31,7 +31,7 @@ export default function WorkerDashboard() {
   };
 
   const handleAccept = async (id: number) => {
-    if (user?.profile?.verification_status !== 'APPROVED') {
+    if (user?.verification?.status !== 'APPROVED') {
       Alert.alert(
         'Perfil no verificado',
         'Debes completar la verificación de tu identidad para poder aceptar servicios.',
@@ -72,7 +72,7 @@ export default function WorkerDashboard() {
       .reduce((sum, r) => sum + Number(r.total_price), 0) || 0,
     [requests]);
 
-  const averageRating = user?.profile?.average_rating || 0;
+  const averageRating = user?.worker_info?.average_rating || 0;
 
   if (loadingRequests) {
     return (
@@ -105,27 +105,27 @@ export default function WorkerDashboard() {
         </View>
 
         {/* Verification Banner */}
-        {user?.profile?.verification_status !== 'APPROVED' && (
+        {user?.verification?.status !== 'APPROVED' && (
           <TouchableOpacity
             onPress={() => router.push('/verification')}
             activeOpacity={0.8}
             style={{ marginBottom: 16 }}
           >
             <Card variant="flat" style={{
-              backgroundColor: user?.profile?.verification_status === 'PENDING' ? colors.primary + '10' :
-                user?.profile?.verification_status === 'REJECTED' ? colors.danger + '10' :
+              backgroundColor: user?.verification?.status === 'PENDING' ? colors.primary + '10' :
+                user?.verification?.status === 'REJECTED' ? colors.danger + '10' :
                   colors.warning + '10',
-              borderColor: user?.profile?.verification_status === 'PENDING' ? colors.primary + '40' :
-                user?.profile?.verification_status === 'REJECTED' ? colors.danger + '40' :
+              borderColor: user?.verification?.status === 'PENDING' ? colors.primary + '40' :
+                user?.verification?.status === 'REJECTED' ? colors.danger + '40' :
                   colors.warning + '40',
               flexDirection: 'row',
               alignItems: 'center',
               padding: 12,
               gap: 12,
             }}>
-              {user?.profile?.verification_status === 'PENDING' ? (
+              {user?.verification?.status === 'PENDING' ? (
                 <Clock size={24} color={colors.primary} />
-              ) : user?.profile?.verification_status === 'REJECTED' ? (
+              ) : user?.verification?.status === 'REJECTED' ? (
                 <AlertCircle size={24} color={colors.danger} />
               ) : (
                 <ShieldCheck size={24} color={colors.warning} />
@@ -134,17 +134,17 @@ export default function WorkerDashboard() {
                 <Text style={{
                   fontWeight: '800',
                   fontSize: 14,
-                  color: user?.profile?.verification_status === 'PENDING' ? colors.primary :
-                    user?.profile?.verification_status === 'REJECTED' ? colors.danger :
+                  color: user?.verification?.status === 'PENDING' ? colors.primary :
+                    user?.verification?.status === 'REJECTED' ? colors.danger :
                       colors.warning
                 }}>
-                  {user?.profile?.verification_status === 'PENDING' ? 'Perfil en revisión' :
-                    user?.profile?.verification_status === 'REJECTED' ? 'Verificación rechazada' :
+                  {user?.verification?.status === 'PENDING' ? 'Perfil en revisión' :
+                    user?.verification?.status === 'REJECTED' ? 'Verificación rechazada' :
                       'Verifica tu identidad'}
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.textLight, marginTop: 2 }}>
-                  {user?.profile?.verification_status === 'PENDING' ? 'Estamos validando tus documentos.' :
-                    user?.profile?.verification_status === 'REJECTED' ? (user?.profile?.rejection_reason || 'Tus documentos no fueron aprobados.') :
+                  {user?.verification?.status === 'PENDING' ? 'Estamos validando tus documentos.' :
+                    user?.verification?.status === 'REJECTED' ? (user?.verification?.rejection_reason || 'Tus documentos no fueron aprobados.') :
                       'Necesario para aceptar servicios y recibir pagos.'}
                 </Text>
               </View>
@@ -160,7 +160,7 @@ export default function WorkerDashboard() {
           <View style={styles.availInfo}>
             <View style={[
               styles.statusIndicator,
-              { backgroundColor: isAvailable ? '#4ADE80' : colors.textMuted }
+              { backgroundColor: isAvailable ? colors.success : colors.textMuted }
             ]} />
             <Text style={[
               styles.availText,

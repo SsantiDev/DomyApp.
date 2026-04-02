@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera, FileText, CheckCircle, ChevronLeft, Upload, AlertCircle } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
+import { RADIUS } from '../constants/theme';
 import { Card } from '../components/ui/NativeCard';
 import { Button } from '../components/ui/NativeButton';
 import { useSubmitVerification } from '../hooks/useVerification';
-import { StyleSheet } from 'react-native';
-import { SPACING, RADIUS } from '../constants/theme';
+import { getStyles } from './verification.styles';
 
 export default function VerificationScreen() {
     const { colors } = useTheme();
@@ -19,6 +19,7 @@ export default function VerificationScreen() {
     const [step, setStep] = useState(1);
 
     const { mutate: submit, isPending } = useSubmitVerification();
+    const styles = useMemo(() => getStyles(colors), [colors]);
 
     const pickImage = async (side: 'front' | 'back') => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -64,45 +65,6 @@ export default function VerificationScreen() {
             }
         });
     };
-
-    const styles = StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        header: {
-            padding: SPACING.lg,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-            backgroundColor: colors.surface,
-        },
-        headerTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
-        content: { padding: SPACING.lg },
-        stepIndicator: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            gap: 8,
-            marginBottom: SPACING.xl,
-        },
-        stepDot: { width: 30, height: 6, borderRadius: 3 },
-        title: { fontSize: 24, fontWeight: '800', color: colors.text, marginBottom: 8 },
-        description: { fontSize: 15, color: colors.textLight, lineHeight: 22, marginBottom: SPACING.xl },
-        uploadCard: {
-            padding: SPACING.xl,
-            alignItems: 'center',
-            borderStyle: 'dashed',
-            borderWidth: 2,
-            borderColor: colors.primary + '40',
-            backgroundColor: colors.primary + '05',
-            borderRadius: RADIUS.xl,
-            marginBottom: SPACING.lg,
-            gap: 12,
-        },
-        preview: { width: '100%', height: 200, borderRadius: RADIUS.lg, marginTop: 12 },
-        successContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.xl, gap: 20 },
-        successTitle: { fontSize: 24, fontWeight: '800', color: colors.text, textAlign: 'center' },
-        successDesc: { fontSize: 16, color: colors.textLight, textAlign: 'center', lineHeight: 24 },
-    });
 
     if (step === 4) {
         return (

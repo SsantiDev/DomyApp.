@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
     TouchableOpacity,
     ScrollView,
-    StyleSheet,
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import { getStyles } from './profile.styles';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetProfile, useUpdateProfile } from '../../hooks/useProfile';
@@ -19,6 +19,7 @@ import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 export default function ProfileScreen() {
     const { logout } = useAuth();
     const { colors, isDark } = useTheme();
+    const styles = useMemo(() => getStyles(colors, isDark), [colors, isDark]);
     const { data: user, isLoading, isError, error, refetch } = useGetProfile();
     const updateProfile = useUpdateProfile();
 
@@ -80,71 +81,11 @@ export default function ProfileScreen() {
         );
     };
 
-    const dynamicStyles = StyleSheet.create({
-        safeArea: {
-            flex: 1,
-            backgroundColor: colors.background,
-        },
-        scroll: {
-            flex: 1,
-        },
-        centered: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: colors.background,
-            gap: 12,
-        },
-        loadingText: {
-            color: colors.textLight,
-            fontSize: 15,
-            marginTop: 8,
-        },
-        errorText: {
-            color: colors.danger,
-            fontSize: 16,
-            fontWeight: '500',
-            marginBottom: 12,
-        },
-        retryButton: {
-            paddingHorizontal: 24,
-            paddingVertical: 10,
-            backgroundColor: colors.primary,
-            borderRadius: 8,
-        },
-        retryText: {
-            color: '#FFF',
-            fontWeight: '600',
-        },
-        email: {
-            fontSize: 14,
-            color: colors.textLight,
-            marginBottom: 12,
-        },
-        logoutSection: {
-            padding: 24,
-            marginTop: 8,
-        },
-        logoutButton: {
-            backgroundColor: isDark ? `${colors.danger}22` : '#FEF2F2',
-            paddingVertical: 14,
-            borderRadius: 12,
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: isDark ? colors.danger : '#FECACA',
-        },
-        logoutText: {
-            color: colors.danger,
-            fontWeight: '700',
-            fontSize: 16,
-        },
-    });
-
     if (isLoading) {
         return (
-            <View style={dynamicStyles.centered}>
+            <View style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={dynamicStyles.loadingText}>Cargando perfil…</Text>
+                <Text style={styles.loadingText}>Cargando perfil…</Text>
             </View>
         );
     }
@@ -152,10 +93,10 @@ export default function ProfileScreen() {
     if (isError || !user) {
         const errorMessage = (error as any)?.message || 'No se pudo cargar tu perfil.';
         return (
-            <View style={dynamicStyles.centered}>
-                <Text style={dynamicStyles.errorText}>{errorMessage}</Text>
-                <TouchableOpacity style={dynamicStyles.retryButton} onPress={() => refetch()}>
-                    <Text style={dynamicStyles.retryText}>Reintentar</Text>
+            <View style={styles.centered}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+                    <Text style={styles.retryText}>Reintentar</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -163,7 +104,7 @@ export default function ProfileScreen() {
 
     return (
         <NativeMainLayout>
-            <ScrollView style={dynamicStyles.scroll} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
                 <ProfileHeader
                     user={user}
                     isEditing={isEditing}
@@ -180,9 +121,9 @@ export default function ProfileScreen() {
                     role={user.role as 'CLIENT' | 'WORKER'}
                 />
 
-                <View style={dynamicStyles.logoutSection}>
-                    <TouchableOpacity style={dynamicStyles.logoutButton} onPress={handleLogout}>
-                        <Text style={dynamicStyles.logoutText}>Cerrar sesión</Text>
+                <View style={styles.logoutSection}>
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                        <Text style={styles.logoutText}>Cerrar sesión</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

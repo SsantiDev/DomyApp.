@@ -1,5 +1,5 @@
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { ScrollView, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
@@ -9,9 +9,11 @@ import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 import { useAuthForm } from '../hooks/useAuthForm';
+import { getStyles } from './login.styles';
 
 export default function LoginScreen() {
     const { colors } = useTheme();
+    const styles = useMemo(() => getStyles(colors), [colors]);
     const {
         currentView,
         setCurrentView,
@@ -29,7 +31,7 @@ export default function LoginScreen() {
     } = useAuthForm();
 
     return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={styles.safeArea}>
             <View style={styles.themeToggleContainer}>
                 <ThemeToggle />
             </View>
@@ -76,18 +78,3 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-    },
-    themeToggleContainer: {
-        paddingHorizontal: 20,
-        paddingTop: 10,
-        alignItems: 'flex-end',
-        zIndex: 1000,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        justifyContent: 'center',
-    },
-});

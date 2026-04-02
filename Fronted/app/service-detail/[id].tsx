@@ -32,7 +32,6 @@ import {
     MapPin,
     Clock,
     Calendar,
-    Phone,
     User,
     Briefcase,
     ChevronLeft,
@@ -40,7 +39,6 @@ import {
     Star,
     Send,
     CheckCircle,
-    MessageCircle,
     ShieldAlert
 } from 'lucide-react-native';
 
@@ -96,11 +94,6 @@ export default function ServiceDetailScreen() {
     const destCoords = {
         latitude: service.latitude ? Number(service.latitude) : 6.2442,
         longitude: service.longitude ? Number(service.longitude) : -75.5812,
-    };
-
-    const originCoords = {
-        latitude: destCoords.latitude - 0.005,
-        longitude: destCoords.longitude - 0.005,
     };
 
     const handleOpenNavigation = () => {
@@ -191,7 +184,7 @@ export default function ServiceDetailScreen() {
                         style={[styles.navBtn, { backgroundColor: colors.primary, position: 'relative', bottom: 'auto', right: 'auto' }]}
                         onPress={handleOpenNavigation}
                     >
-                        <Navigation size={20} color="#FFF" />
+                        <Navigation size={20} color="#ffffff" />
                         <Text style={styles.navBtnText}>Abrir en Mapa</Text>
                     </TouchableOpacity>
                 </View>
@@ -226,7 +219,7 @@ export default function ServiceDetailScreen() {
                                 title="Iniciar Labor"
                                 onPress={handleStart}
                                 loading={startService.isPending}
-                                icon={<Clock size={20} color="#FFF" />}
+                                icon={<Clock size={20} color="#ffffff" />}
                             />
                         )}
                         {service.status === 'IN_PROGRESS' && (
@@ -235,7 +228,7 @@ export default function ServiceDetailScreen() {
                                 onPress={handleComplete}
                                 style={{ backgroundColor: colors.success }}
                                 loading={completeService.isPending}
-                                icon={<CheckCircle size={20} color="#FFF" />}
+                                icon={<CheckCircle size={20} color="#ffffff" />}
                             />
                         )}
                     </View>
@@ -377,8 +370,8 @@ export default function ServiceDetailScreen() {
                             style={[styles.commentInput, {
                                 borderColor: colors.border,
                                 color: colors.text,
-                                backgroundColor: isDark ? colors.surface : '#F9F9FB',
-                                marginTop: 16
+                                backgroundColor: colors.surface,
+                                marginTop: SPACING.md
                             }]}
                             placeholder="Describe detalladamente el incidente..."
                             placeholderTextColor={colors.textLight}
@@ -400,7 +393,7 @@ export default function ServiceDetailScreen() {
                                 onPress={handleReportIncident}
                                 disabled={reportIncident.isPending}
                             >
-                                <Text style={[styles.modalBtnText, { color: '#FFF' }]}>Enviar Reporte</Text>
+                                <Text style={[styles.modalBtnText, { color: '#ffffff' }]}>Enviar Reporte</Text>
                             </TouchableOpacity>
                         </View>
                     </Card>
@@ -437,7 +430,7 @@ export default function ServiceDetailScreen() {
                             style={[styles.commentInput, {
                                 borderColor: colors.border,
                                 color: colors.text,
-                                backgroundColor: isDark ? colors.surface : '#F9F9FB'
+                                backgroundColor: colors.surface
                             }]}
                             placeholder="Escribe un comentario opcional..."
                             placeholderTextColor={colors.textLight}
@@ -458,7 +451,7 @@ export default function ServiceDetailScreen() {
                                 style={[styles.submitBtn, { backgroundColor: colors.primary }]}
                                 onPress={handleRate}
                             >
-                                <Send size={20} color="#FFF" />
+                                <Send size={20} color="#ffffff" />
                                 <Text style={styles.submitBtnText}>Enviar</Text>
                             </TouchableOpacity>
                         </View>
@@ -506,14 +499,14 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     },
     navBtn: {
         position: 'absolute',
-        bottom: 16,
-        right: 16,
+        bottom: SPACING.md,
+        right: SPACING.md,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: SPACING.md,
         paddingVertical: 10,
         borderRadius: RADIUS.full,
-        gap: 8,
+        gap: SPACING.sm,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
@@ -521,15 +514,15 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         elevation: 6,
     },
     navBtnText: {
-        color: '#FFF',
+        color: '#ffffff',
         fontWeight: '700',
         fontSize: 14,
     },
     marker: {
-        padding: 8,
+        padding: SPACING.sm,
         borderRadius: 20,
         borderWidth: 2,
-        borderColor: '#FFF',
+        borderColor: '#ffffff',
     },
     statusSection: {
         paddingHorizontal: SPACING.lg,
@@ -575,8 +568,8 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-        marginBottom: 16,
+        gap: SPACING.smd,
+        marginBottom: SPACING.md,
     },
     sectionTitle: {
         fontSize: 13,
@@ -592,8 +585,8 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        marginTop: 4,
+        gap: SPACING.sm,
+        marginTop: SPACING.xs,
     },
     detailText: {
         fontSize: 15,
@@ -609,15 +602,15 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         fontWeight: '700',
     },
     detailsBox: {
-        marginTop: 12,
-        padding: 12,
+        marginTop: SPACING.smd,
+        padding: SPACING.smd,
         backgroundColor: 'rgba(0,0,0,0.03)',
         borderRadius: RADIUS.md,
     },
     detailsLabel: {
         fontSize: 12,
         fontWeight: '700',
-        marginBottom: 4,
+        marginBottom: SPACING.xs,
     },
     detailsText: {
         fontSize: 14,
@@ -625,12 +618,12 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     },
     ratingRow: {
         flexDirection: 'row',
-        gap: 4,
-        marginBottom: 8,
+        gap: SPACING.xs,
+        marginBottom: SPACING.sm,
     },
     reviewComment: {
-        marginTop: 8,
-        padding: 12,
+        marginTop: SPACING.sm,
+        padding: SPACING.smd,
         backgroundColor: 'rgba(0,0,0,0.02)',
         borderRadius: RADIUS.md,
         fontStyle: 'italic',
@@ -658,38 +651,38 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: '800',
-        marginBottom: 8,
+        marginBottom: SPACING.sm,
         textAlign: 'center',
     },
     modalSubtitle: {
         fontSize: 14,
         textAlign: 'center',
-        marginBottom: 24,
+        marginBottom: SPACING.lg,
         lineHeight: 20,
     },
     starsContainer: {
         flexDirection: 'row',
-        gap: 12,
-        marginBottom: 24,
+        gap: SPACING.smd,
+        marginBottom: SPACING.lg,
     },
     commentInput: {
         width: '100%',
         borderWidth: 1,
         borderRadius: RADIUS.lg,
-        padding: 16,
+        padding: SPACING.md,
         height: 120,
         textAlignVertical: 'top',
         fontSize: 15,
-        marginBottom: 24,
+        marginBottom: SPACING.lg,
     },
     modalButtons: {
         flexDirection: 'row',
-        gap: 12,
+        gap: SPACING.smd,
         width: '100%',
     },
     cancelBtn: {
         flex: 1,
-        padding: 16,
+        padding: SPACING.md,
         borderRadius: RADIUS.lg,
         borderWidth: 1,
         alignItems: 'center',
@@ -699,8 +692,8 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         fontWeight: 'bold',
     },
     incidentItem: {
-        marginTop: 12,
-        paddingTop: 12,
+        marginTop: SPACING.smd,
+        paddingTop: SPACING.smd,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },
@@ -708,7 +701,7 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: SPACING.xs,
     },
     incidentType: {
         fontSize: 14,
@@ -719,7 +712,7 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         lineHeight: 20,
     },
     miniBadge: {
-        paddingHorizontal: 8,
+        paddingHorizontal: SPACING.sm,
         paddingVertical: 2,
         borderRadius: 10,
     },
@@ -731,9 +724,9 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 16,
-        marginTop: 8,
+        gap: SPACING.sm,
+        paddingVertical: SPACING.md,
+        marginTop: SPACING.sm,
     },
     inlineButtonText: {
         fontSize: 14,
@@ -746,11 +739,11 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     typeSelector: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 8,
+        gap: SPACING.sm,
     },
     typeOption: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingHorizontal: SPACING.smd,
+        paddingVertical: SPACING.sm,
         borderRadius: RADIUS.md,
         borderWidth: 1,
     },
@@ -760,15 +753,15 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     },
     submitBtn: {
         flex: 2,
-        padding: 16,
+        padding: SPACING.md,
         borderRadius: RADIUS.lg,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: SPACING.sm,
     },
     submitBtnText: {
-        color: '#FFF',
+        color: '#ffffff',
         fontSize: 16,
         fontWeight: '800',
     },
@@ -778,7 +771,7 @@ const getStyles = (colors: any, isDark: boolean) => StyleSheet.create({
     },
     modalBtn: {
         flex: 1,
-        padding: 16,
+        padding: SPACING.md,
         borderRadius: RADIUS.lg,
         alignItems: 'center',
         justifyContent: 'center',

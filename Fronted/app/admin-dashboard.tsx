@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, StyleSheet, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, Modal, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/NativeCard';
 import { Button } from '../components/ui/NativeButton';
 import { useAdminPendingVerifications, useProcessVerification } from '../hooks/useAdmin';
-import { Shield, Users, Clock, CheckCircle, XCircle, ChevronRight, LayoutGrid, Eye, Trash2, X } from 'lucide-react-native';
-import { SPACING, RADIUS } from '../constants/theme';
+import { Shield, Users, Clock, ChevronRight, X } from 'lucide-react-native';
+import { SPACING } from '../constants/theme';
 import { API_URL } from '../config/env';
 import { AppHeader } from '../components/layout/AppHeader';
 import { NativeMainLayout } from '../components/layout/NativeMainLayout';
+import { getStyles } from './admin-dashboard.styles';
 
 export default function AdminDashboard() {
     const { colors } = useTheme();
@@ -39,62 +40,7 @@ export default function AdminDashboard() {
         return `${API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
-    const styles = useMemo(() => StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        title: { fontSize: 24, fontWeight: '900', color: colors.text, marginBottom: 4 },
-        subtitle: { fontSize: 14, color: colors.textLight, fontWeight: '600' },
-        content: { padding: SPACING.lg },
-        sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 16, color: colors.text },
-        workerCard: {
-            marginBottom: 16,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-        },
-        workerInfo: { flex: 1 },
-        workerName: { fontSize: 16, fontWeight: '700', color: colors.text },
-        workerEmail: { fontSize: 13, color: colors.textLight },
-        badge: {
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-            borderRadius: 6,
-            backgroundColor: colors.warning + '20',
-        },
-        badgeText: { fontSize: 10, fontWeight: '800', color: colors.warning, textTransform: 'uppercase' },
-        modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
-        modalContent: { backgroundColor: colors.surface, borderRadius: 24, padding: 0, maxHeight: '90%', overflow: 'hidden' },
-        modalHeader: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: 20,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.border,
-        },
-        modalTitle: { fontSize: 18, fontWeight: '900', color: colors.text },
-        modalBody: { padding: 20 },
-        docCard: {
-            backgroundColor: colors.background,
-            borderRadius: 16,
-            padding: 12,
-            marginBottom: 20,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        docLabel: { fontSize: 11, fontWeight: '800', color: colors.textLight, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-        docImage: { width: '100%', height: 260, borderRadius: 12, backgroundColor: '#1a1a1a' },
-        input: {
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 12,
-            padding: 12,
-            minHeight: 80,
-            color: colors.text,
-            textAlignVertical: 'top',
-            marginBottom: 20,
-        }
-    }), [colors]);
+    const styles = useMemo(() => getStyles(colors), [colors]);
 
     if (isLoading) {
         return (
