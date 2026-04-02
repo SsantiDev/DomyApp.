@@ -7,7 +7,7 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
-import { getStyles } from './profile.styles';
+import { getStyles } from './_profile.styles';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetProfile, useUpdateProfile } from '../../hooks/useProfile';
