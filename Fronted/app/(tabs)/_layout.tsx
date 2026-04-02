@@ -4,9 +4,7 @@ import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { AppHeader } from '../../components/layout/AppHeader';
-import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];

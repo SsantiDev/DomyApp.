@@ -5,8 +5,6 @@ import { useTheme } from '../../context/ThemeContext';
 import ClientDashboard from '../../components/dashboard/ClientDashboard';
 import WorkerDashboard from '../../components/dashboard/WorkerDashboard';
 import { Text } from '@/components/Themed';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 
 export default function TabIndexScreen() {

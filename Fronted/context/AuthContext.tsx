@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { getAccessToken, removeTokens, saveTokens } from '../services/authStorage';
 import api from '../services/api';
-import { User } from '../types/auth';
 
 interface AuthContextType {
     user: any | null; // User can be improved strictly
