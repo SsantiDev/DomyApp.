@@ -54,6 +54,14 @@ export const getStyles = (colors: any) => StyleSheet.create({
         alignItems: 'center',
         padding: SPACING.md,
         borderRadius: RADIUS.xl,
+        backgroundColor: colors.surface,
+        borderWidth: 1.5,
+        borderColor: colors.border,
+    },
+    availabilityCardOnline: {
+        backgroundColor: colors.success + '10',
+        borderColor: colors.success,
+        borderLeftWidth: 4,
     },
     availInfo: {
         flexDirection: 'row',
@@ -73,27 +81,82 @@ export const getStyles = (colors: any) => StyleSheet.create({
         lineHeight: 18,
     },
     statsRow: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         paddingHorizontal: SPACING.lg,
         gap: SPACING.md,
         marginBottom: SPACING.xl,
     },
+    statsSecondaryRow: {
+        flexDirection: 'row',
+        gap: SPACING.md,
+    },
     statCard: {
+        padding: SPACING.lg,
+        overflow: 'hidden',
+        ...Platform.select({
+            ios: {
+                shadowColor: colors.text,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.06,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
+    },
+    statCardHero: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    statCardSecondary: {
         flex: 1,
-        padding: SPACING.md,
         alignItems: 'center',
         gap: 8,
+        minHeight: 110,
+    },
+    statCardEarnings: {
+        borderTopWidth: 3,
+        borderTopColor: colors.primary,
+    },
+    statCardRating: {
+        borderTopWidth: 3,
+        borderTopColor: colors.success,
+    },
+    statCardJobs: {
+        borderTopWidth: 3,
+        borderTopColor: colors.warning,
     },
     statIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: 14,
+        width: 48,
+        height: 48,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
     },
-    statInfo: {
-        alignItems: 'center',
+    statHeroLeft: {
+        flex: 1,
+        gap: 8,
+    },
+    statHeroValue: {
+        fontSize: 32,
+        fontWeight: '900',
+        color: colors.primary,
+        letterSpacing: -1,
+    },
+    statHeroLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.8,
+        color: colors.text,
+    },
+    statHeroSub: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: colors.textMuted,
+        marginTop: 2,
     },
     statLabel: {
         fontSize: 10,
@@ -104,9 +167,8 @@ export const getStyles = (colors: any) => StyleSheet.create({
         color: colors.textLight,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: '800',
-        marginTop: 2,
+        fontSize: 28,
+        fontWeight: '900',
         color: colors.text,
     },
     mainContent: {

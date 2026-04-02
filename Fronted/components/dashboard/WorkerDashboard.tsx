@@ -155,7 +155,7 @@ export default function WorkerDashboard() {
 
         <Card variant="flat" style={[
           styles.availabilityCard,
-          { backgroundColor: isAvailable ? colors.primary : colors.surface }
+          isAvailable && styles.availabilityCardOnline,
         ]}>
           <View style={styles.availInfo}>
             <View style={[
@@ -164,7 +164,7 @@ export default function WorkerDashboard() {
             ]} />
             <Text style={[
               styles.availText,
-              { color: isAvailable ? colors.white : colors.text }
+              { color: isAvailable ? colors.success : colors.textMuted }
             ]}>
               Estas {isAvailable ? 'en línea para recibir' : 'fuera de linea, activa para ver'} solicitudes
             </Text>
@@ -173,7 +173,7 @@ export default function WorkerDashboard() {
             value={isAvailable}
             onValueChange={onToggle}
             disabled={loadingAvail}
-            trackColor={{ false: colors.border, true: 'rgba(255,255,255,0.3)' }}
+            trackColor={{ false: colors.border, true: colors.success }}
             thumbColor={colors.white}
           />
         </Card>
@@ -181,33 +181,37 @@ export default function WorkerDashboard() {
 
       {/* Stats Section */}
       <View style={styles.statsRow}>
-        <Card style={styles.statCard} variant="flat">
-          <View style={[styles.statIcon, { backgroundColor: colors.primary + '15' }]}>
-            <Wallet size={20} color={colors.primary} />
+        {/* Hero: Ganancias */}
+        <Card style={[styles.statCard, styles.statCardHero, styles.statCardEarnings]} variant="flat">
+          <View style={styles.statHeroLeft}>
+            <View style={[styles.statIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Wallet size={22} color={colors.primary} />
+            </View>
+            <View style={{ marginTop: 8 }}>
+              <Text style={styles.statHeroLabel}>Ganancias Totales</Text>
+              <Text style={styles.statHeroSub}>Total acumulado</Text>
+            </View>
           </View>
-          <View style={styles.statInfo}>
-            <Text style={styles.statLabel}>Ganancias</Text>
-            <Text style={styles.statValue}>${totalEarnings.toLocaleString()}</Text>
-          </View>
+          <Text style={styles.statHeroValue}>${totalEarnings.toLocaleString()}</Text>
         </Card>
-        <Card style={styles.statCard} variant="flat">
-          <View style={[styles.statIcon, { backgroundColor: colors.success + '15' }]}>
-            <Star size={20} color={colors.success} />
-          </View>
-          <View style={styles.statInfo}>
+
+        {/* Secondary row: Rating + Labores */}
+        <View style={styles.statsSecondaryRow}>
+          <Card style={[styles.statCard, styles.statCardSecondary, styles.statCardRating]} variant="flat">
+            <View style={[styles.statIcon, { backgroundColor: colors.success + '15' }]}>
+              <Star size={22} color={colors.success} />
+            </View>
+            <Text style={[styles.statValue, { color: colors.text }]}>{averageRating.toFixed(1)}</Text>
             <Text style={styles.statLabel}>Rating</Text>
-            <Text style={styles.statValue}>{averageRating.toFixed(1)}</Text>
-          </View>
-        </Card>
-        <Card style={styles.statCard} variant="flat">
-          <View style={[styles.statIcon, { backgroundColor: colors.warning + '15' }]}>
-            <Briefcase size={20} color={colors.warning} />
-          </View>
-          <View style={styles.statInfo}>
+          </Card>
+          <Card style={[styles.statCard, styles.statCardSecondary, styles.statCardJobs]} variant="flat">
+            <View style={[styles.statIcon, { backgroundColor: colors.warning + '15' }]}>
+              <Briefcase size={22} color={colors.warning} />
+            </View>
+            <Text style={[styles.statValue, { color: colors.text }]}>{completedCount}</Text>
             <Text style={styles.statLabel}>Labores</Text>
-            <Text style={styles.statValue}>{completedCount}</Text>
-          </View>
-        </Card>
+          </Card>
+        </View>
       </View>
 
       {/* Dynamic Sections */}
