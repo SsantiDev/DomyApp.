@@ -93,7 +93,22 @@ def submit_verification(request):
 @permission_classes([IsAdminUser])
 def get_pending_verifications(request):
     pending = WorkerVerification.objects.filter(status='PENDING').select_related('user', 'user__profile')
-    return Response([{'id': v.id, 'email': v.user.email, 'status': v.status} for v in pending])
+    data = []
+    for v in pending:
+        profile = getattr(v.user, 'profile', None)
+        data.append({
+            'id': v.id,
+            'identity_document': v.identity_document,
+            'document_front': v.document_front.url if v.document_front else None,
+            'document_back': v.document_back.url if v.document_back else None,
+            'status': v.status,
+            'user': {
+                'first_name': profile.first_name if profile else '',
+                'last_name': profile.last_name if profile else '',
+                'email': v.user.email,
+            },
+        })
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
