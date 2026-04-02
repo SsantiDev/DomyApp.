@@ -8,6 +8,7 @@ interface AuthContextType {
     login: (credentials: { email: string; password: string }) => Promise<void>;
     register: (data: any) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (partial: Record<string, any>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,8 +88,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const updateUser = (partial: Record<string, any>) => {
+        setUser((prev: any) => prev ? { ...prev, ...partial } : prev);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
