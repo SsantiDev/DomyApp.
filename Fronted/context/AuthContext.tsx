@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { getAccessToken, removeTokens, saveTokens } from '../services/authStorage';
 import api from '../services/api';
+import { queryClient } from '../services/queryClient';
 
 interface AuthContextType {
     user: any | null; // User can be improved strictly
@@ -39,13 +40,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (credentials: { email: string; password: string }) => {
         try {
-            console.log('Attempting login with credentials:', credentials);
-            // 1. Get tokens
+            // 1. Clear any stale cache from a previous user session
+            queryClient.clear();
+
+            // 2. Get tokens
             const response = await api.post('auth/token/', credentials);
             const { access, refresh } = response.data;
             await saveTokens({ access, refresh });
 
-            // 2. Fetch User Profile
+            // 3. Fetch User Profile
             const userResponse = await api.get('users/me/');
             setUser(userResponse.data);
         } catch (error: any) {
@@ -59,9 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const register = async (data: any) => {
         try {
-            console.log('Attempting register with payload:', data);
-            const response = await api.post('users/register/', data);
-            console.log('Register success:', response.data);
+            await api.post('users/register/', data);
         } catch (error: any) {
             console.error('Error during register:', error);
             if (error.response && error.response.data) {
@@ -83,6 +84,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             await removeTokens();
             setUser(null);
+            // Clear ALL cached queries so the next user starts with a clean slate
+            queryClient.clear();
         } catch (error) {
             console.error('Error during logout:', error);
         }

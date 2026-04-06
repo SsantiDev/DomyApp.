@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, ServiceRequest, Review
+from .models import Category, ServiceRequest, Review, ServiceRequestNotification
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,3 +38,15 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         validated_data['total_price'] = category.base_price
         
         return super().create(validated_data)
+
+class ServiceRequestNotificationSerializer(serializers.ModelSerializer):
+    service_request_details = ServiceRequestSerializer(source='service_request', read_only=True)
+    
+    class Meta:
+        model = ServiceRequestNotification
+        fields = [
+            'id', 'service_request', 'service_request_details', 'worker', 
+            'status', 'rejection_reason', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['worker', 'status', 'created_at', 'updated_at']
+

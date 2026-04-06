@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
-import { Category, ServiceRequest, CreateServiceRequestDTO } from '../types/services';
+import { Category, ServiceRequest, CreateServiceRequestDTO, ServiceRequestNotification } from '../types/services';
 
 export const useCategories = () => {
     return useQuery({
@@ -46,6 +46,7 @@ export const useAcceptService = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-notifications'] });
         }
     });
 };
@@ -101,3 +102,28 @@ export const useRateService = () => {
         }
     });
 };
+export const useServiceNotifications = () => {
+    return useQuery({
+        queryKey: ['service-notifications'],
+        queryFn: async () => {
+            const { data } = await api.get<ServiceRequestNotification[]>('/services/notifications/');
+            return data;
+        },
+        refetchInterval: 15000, // Poll every 15 seconds for new requests
+    });
+};
+
+export const useRejectService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+            const { data } = await api.post(`/services/requests/${id}/reject/`, { reason });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['service-notifications'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+        }
+    });
+};
+
