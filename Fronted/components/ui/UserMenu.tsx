@@ -37,7 +37,7 @@ export const UserMenu: React.FC = () => {
 
   const handleSettings = () => {
     setIsMenuVisible(false);
-    console.log('Configuración seleccionada');
+    // TODO: Navigate to settings screen
   };
 
   const handleThemeToggle = () => {
