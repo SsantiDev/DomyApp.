@@ -42,4 +42,19 @@ export interface CreateServiceRequestDTO {
     latitude?: number;
     longitude?: number;
     details: string;
+    worker?: number; // Optional direct worker assignment
 }
+
+export type NotificationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+
+export interface ServiceRequestNotification {
+    id: number;
+    service_request: number;
+    service_request_details: ServiceRequest;
+    worker: number;
+    status: NotificationStatus;
+    rejection_reason?: string;
+    created_at: string;
+    updated_at: string;
+}
+

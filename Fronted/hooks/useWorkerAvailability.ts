@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export function useWorkerAvailability() {
     const { user, updateUser } = useAuth();
-    const [isAvailable, setIsAvailable] = useState(user?.profile?.is_available || false);
+    const [isAvailable, setIsAvailable] = useState(user?.worker_info?.is_available ?? user?.profile?.is_available ?? false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     // Prevent race condition: block new toggle while one is in-flight
@@ -27,7 +27,11 @@ export function useWorkerAvailability() {
             // Confirm with the real value returned by the server
             setIsAvailable(data.is_available);
             // Sync AuthContext so the value persists across navigation
-            updateUser({ profile: { ...user?.profile, is_available: data.is_available } });
+            if (updateUser) {
+                updateUser({ 
+                    worker_info: { ...user?.worker_info, is_available: data.is_available } 
+                });
+            }
             return data.is_available;
         } catch (err: any) {
             // Rollback on failure

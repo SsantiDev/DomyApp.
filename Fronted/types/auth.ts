@@ -33,6 +33,16 @@ export interface UserDetail {
     last_name: string;
     role: UserRole;
     profile: ClientProfile | WorkerProfile | null;
+    worker_info?: {
+        bio: string;
+        is_available: boolean;
+        average_rating: number;
+    };
+    verification?: {
+        is_verified: boolean;
+        status: 'PENDING' | 'APPROVED' | 'REJECTED';
+        rejection_reason?: string;
+    };
 }
 
 // Legacy alias

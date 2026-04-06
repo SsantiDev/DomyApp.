@@ -65,3 +65,32 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review for {self.service_request.id} - Rating: {self.rating}"
+
+class ServiceRequestNotification(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pendiente'
+        ACCEPTED = 'ACCEPTED', 'Aceptada'
+        REJECTED = 'REJECTED', 'Rechazada'
+        CANCELLED = 'CANCELLED', 'Cancelada' # For when someone else takes the job
+
+    service_request = models.ForeignKey(
+        ServiceRequest,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    worker = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='service_notifications'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+    rejection_reason = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Notif para {self.worker.email} - S.R. {self.service_request.id} ({self.status})"

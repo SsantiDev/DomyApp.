@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, Text, Switch, ScrollView, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Switch, ScrollView, Alert, TouchableOpacity, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useWorkerAvailability } from '../../hooks/useWorkerAvailability';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/NativeCard';
 import { Button } from '../ui/NativeButton';
-import { useServiceRequests, useAcceptService } from '../../hooks/useServices';
+import { useServiceRequests, useAcceptService, useServiceNotifications, useRejectService } from '../../hooks/useServices';
 import {
   Briefcase, Clock, MapPin, Wallet, Calendar,
   ChevronRight, Bell, Star, AlertCircle, ShieldCheck
@@ -20,7 +20,13 @@ export default function WorkerDashboard() {
   const router = useRouter();
   const { isAvailable, loading: loadingAvail, handleToggle } = useWorkerAvailability();
   const { data: requests, isLoading: loadingRequests } = useServiceRequests();
+  const { data: notifications, isLoading: loadingNotifications } = useServiceNotifications();
   const acceptService = useAcceptService();
+  const rejectService = useRejectService();
+
+  const [rejectModalVisible, setRejectModalVisible] = React.useState(false);
+  const [selectedRequestId, setSelectedRequestId] = React.useState<number | null>(null);
+  const [rejectReason, setRejectReason] = React.useState('');
 
   const onToggle = async () => {
     try {
@@ -46,14 +52,34 @@ export default function WorkerDashboard() {
     try {
       await acceptService.mutateAsync(id);
       Alert.alert('¡Éxito!', 'Has aceptado el servicio correctamente.');
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo aceptar el servicio.');
+    } catch (error: any) {
+      Alert.alert(
+        'Servicio no disponible', 
+        error?.response?.data?.error || 'No se pudo aceptar el servicio. Es posible que otra operaria ya lo haya tomado.'
+      );
     }
   };
 
-  const pendingRequests = useMemo(() =>
-    requests?.filter(r => r.status === 'PENDING') || [],
-    [requests]);
+  const handleReject = async () => {
+    if (!selectedRequestId) return;
+    if (!rejectReason.trim()) {
+      Alert.alert('Requerido', 'Por favor ingresa un motivo para rechazar el servicio.');
+      return;
+    }
+
+    try {
+      await rejectService.mutateAsync({ id: selectedRequestId, reason: rejectReason });
+      setRejectModalVisible(false);
+      setRejectReason('');
+      setSelectedRequestId(null);
+    } catch (error: any) {
+      Alert.alert('Error', error?.response?.data?.error || 'No se pudo rechazar el servicio.');
+    }
+  };
+
+  const incomingRequests = useMemo(() =>
+    notifications?.filter(n => n.status === 'PENDING') || [],
+    [notifications]);
 
   const activeRequests = useMemo(() =>
     requests?.filter(r => r.status === 'ACCEPTED' || r.status === 'IN_PROGRESS') || [],
@@ -74,7 +100,7 @@ export default function WorkerDashboard() {
 
   const averageRating = user?.worker_info?.average_rating || 0;
 
-  if (loadingRequests) {
+  if (loadingRequests || loadingNotifications) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -287,9 +313,11 @@ export default function WorkerDashboard() {
             <Card style={styles.offlineCard}>
               <Text style={styles.offlineText}>Active su perfil para ver las solicitudes de hoy</Text>
             </Card>
-          ) : pendingRequests.length > 0 ? (
-            pendingRequests.map(req => (
-              <Card variant="flat" key={req.id} style={styles.serviceCard}>
+          ) : incomingRequests.length > 0 ? (
+            incomingRequests.map(notification => {
+              const req = notification.service_request_details;
+              return (
+              <Card variant="flat" key={notification.id} style={styles.serviceCard}>
                 <View style={styles.requestContent}>
                   <View style={styles.reqMain}>
                     <Text style={styles.categoryTitle}>{req.category_name}</Text>
@@ -308,17 +336,30 @@ export default function WorkerDashboard() {
                   </View>
                   <View style={styles.priceAction}>
                     <Text style={styles.priceTag}>${Number(req.total_price).toLocaleString()}</Text>
-                    <Button
-                      title="Tomar"
-                      onPress={() => req.id && handleAccept(req.id)}
-                      loading={acceptService.isPending}
-                      style={styles.smallBtn}
-                      textStyle={styles.smallBtnText}
-                    />
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+                      <Button
+                        title="Rechazar"
+                        variant="outline"
+                        onPress={() => {
+                          setSelectedRequestId(req.id!);
+                          setRejectModalVisible(true);
+                        }}
+                        style={[styles.smallBtn, { borderColor: colors.danger, flex: 1, paddingHorizontal: 0 }]}
+                        textStyle={[styles.smallBtnText, { color: colors.danger, fontSize: 12 }]}
+                      />
+                      <Button
+                        title="Tomar"
+                        onPress={() => req.id && handleAccept(req.id)}
+                        loading={acceptService.isPending}
+                        style={[styles.smallBtn, { flex: 1, paddingHorizontal: 0 }]}
+                        textStyle={[styles.smallBtnText, { fontSize: 12 }]}
+                      />
+                    </View>
                   </View>
                 </View>
               </Card>
-            ))
+              );
+            })
           ) : (
             <Card style={styles.emptyCard} variant="outlined">
               <Briefcase size={32} color={colors.textMuted} strokeWidth={1} />
@@ -369,6 +410,51 @@ export default function WorkerDashboard() {
           </View>
         )}
       </View>
+
+      <Modal
+        visible={rejectModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setRejectModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: colors.surface, padding: 24, borderRadius: 16, width: '100%', maxWidth: 400 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>Rechazar Servicio</Text>
+              <TouchableOpacity onPress={() => setRejectModalVisible(false)}>
+                <AlertCircle size={24} color={colors.textLight} />
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 14, color: colors.textLight, marginBottom: 16 }}>
+              Por favor indica el motivo por el cual no puedes tomar este servicio.
+            </Text>
+            <TextInput
+              style={{ 
+                backgroundColor: colors.background, 
+                borderRadius: 8, 
+                padding: 12, 
+                color: colors.text, 
+                minHeight: 100, 
+                textAlignVertical: 'top',
+                marginBottom: 20,
+                borderWidth: 1,
+                borderColor: colors.border
+              }}
+              placeholder="Ej: No estoy disponible a esa hora"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              value={rejectReason}
+              onChangeText={setRejectReason}
+            />
+            <Button 
+              title="Confirmar Rechazo" 
+              onPress={handleReject} 
+              loading={rejectService.isPending}
+              style={{ backgroundColor: colors.danger, width: '100%' }} 
+            />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
