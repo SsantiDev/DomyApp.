@@ -108,7 +108,8 @@ export const useServiceNotifications = () => {
         queryFn: async () => {
             const { data } = await api.get<ServiceRequestNotification[]>('/services/notifications/');
             return data;
-        }
+        },
+        refetchInterval: 15000, // Poll every 15 seconds for new requests
     });
 };
 
