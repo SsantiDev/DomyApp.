@@ -14,9 +14,3 @@ def create_user_profile(sender, instance, created, **kwargs):
         if instance.role == User.Role.WORKER:
             WorkerProfile.objects.get_or_create(user=instance)
             WorkerVerification.objects.get_or_create(user=instance)
-        
-        # Trigger welcome email
-        try:
-            EmailService.send_welcome_email(instance)
-        except Exception:
-            pass

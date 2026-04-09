@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'apps.payments.apps.PaymentsConfig',
     'apps.reviews.apps.ReviewsConfig',
     'apps.support.apps.SupportConfig',
+    'apps.chat.apps.ChatConfig',
 ]
 
 AUTH_USER_MODEL = 'users.User'

@@ -8,10 +8,11 @@ import { Button } from '../ui/NativeButton';
 import { useServiceRequests, useAcceptService, useServiceNotifications, useRejectService } from '../../hooks/useServices';
 import {
   Briefcase, Clock, MapPin, Wallet, Calendar,
-  ChevronRight, Bell, Star, AlertCircle, ShieldCheck
+  ChevronRight, Bell, Star, AlertCircle, ShieldCheck, MessageCircle
 } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import { getStyles } from './WorkerDashboard.styles';
+import { ChatRoom } from '../chat/ChatRoom';
 
 export default function WorkerDashboard() {
   const { colors } = useTheme();
@@ -27,6 +28,7 @@ export default function WorkerDashboard() {
   const [rejectModalVisible, setRejectModalVisible] = React.useState(false);
   const [selectedRequestId, setSelectedRequestId] = React.useState<number | null>(null);
   const [rejectReason, setRejectReason] = React.useState('');
+  const [activeChatId, setActiveChatId] = React.useState<number | null>(null);
 
   const onToggle = async () => {
     try {
@@ -286,13 +288,26 @@ export default function WorkerDashboard() {
                   </View>
                 </View>
 
-                <TouchableOpacity
-                  style={styles.cardFooter}
-                  onPress={() => router.push(`/service-detail/${req.id}`)}
-                >
-                  <Text style={styles.footerLink}>Ver detalles y mapa</Text>
-                  <ChevronRight size={16} color={colors.primary} />
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border + '50', paddingTop: 12, marginTop: 4, alignItems: 'center', justifyContent: 'space-between' }}>
+                  <TouchableOpacity
+                    style={[styles.cardFooter, { borderTopWidth: 0, paddingVertical: 8 }]}
+                    onPress={() => router.push(`/service-detail/${req.id}`)}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.primary }}>Ver detalle</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, elevation: 1 }}
+                    onPress={() => setActiveChatId(req.id!)}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#fff', marginRight: 4 }}>Chat</Text>
+                    <MessageCircle size={14} color="#fff" />
+                    {(req.unread_messages_count || 0) > 0 && (
+                        <View style={{ position: 'absolute', top: -5, right: -5, backgroundColor: colors.danger, width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: colors.surface }}>
+                            <Text style={{ color: '#fff', fontSize: 9, fontWeight: 'bold' }}>{req.unread_messages_count}</Text>
+                        </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </Card>
             ))
           ) : (
@@ -455,6 +470,16 @@ export default function WorkerDashboard() {
           </View>
         </View>
       </Modal>
+
+      {/* Chat Overlay */}
+      {activeChatId && (
+          <ChatRoom 
+              serviceId={activeChatId} 
+              visible={!!activeChatId} 
+              onClose={() => setActiveChatId(null)} 
+              defaultTab="COORDINATION" 
+          />
+      )}
     </ScrollView>
   );
 }

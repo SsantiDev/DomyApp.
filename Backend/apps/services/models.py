@@ -49,6 +49,7 @@ class ServiceRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    is_billed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.category.name} - {self.client.email} ({self.status})"
@@ -65,6 +66,17 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review for {self.service_request.id} - Rating: {self.rating}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Actualizar average_rating del worker
+        worker = self.service_request.worker
+        if worker and hasattr(worker, 'worker_info'):
+            from django.db.models import Avg
+            avg = Review.objects.filter(service_request__worker=worker).aggregate(Avg('rating'))['rating__avg']
+            if avg is not None:
+                worker.worker_info.average_rating = round(avg, 1)
+                worker.worker_info.save()
 
 class ServiceRequestNotification(models.Model):
     class Status(models.TextChoices):

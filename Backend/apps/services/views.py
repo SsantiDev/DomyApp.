@@ -192,6 +192,23 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['post'])
+    def verify_billing(self, request, pk=None):
+        try:
+            service_request = ServiceRequest.objects.get(pk=pk)
+        except ServiceRequest.DoesNotExist:
+            return Response({"error": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            
+        if request.user.role != 'ADMIN':
+            return Response({"error": "Solo verificable por administradores"}, status=status.HTTP_403_FORBIDDEN)
+        
+        if service_request.status != ServiceRequest.Status.COMPLETED:
+            return Response({"error": "Solo se pueden facturar servicios completados"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        service_request.is_billed = True
+        service_request.save()
+        return Response(self.get_serializer(service_request).data)
+
 
 class ServiceRequestNotificationViewSet(viewsets.ReadOnlyModelViewSet):
     """

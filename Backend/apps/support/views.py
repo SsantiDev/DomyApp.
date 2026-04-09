@@ -13,6 +13,9 @@ class IncidentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if user.role == 'ADMIN':
+            return Incident.objects.all()
+            
         # Users can see incidents they reported or related to services they are involved in
         return Incident.objects.filter(
             models.Q(reporter=user) |

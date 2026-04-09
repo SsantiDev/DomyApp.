@@ -1,17 +1,19 @@
 import React, { useMemo } from 'react';
-import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/NativeCard';
-import { SPACING } from '../../constants/theme';
+import { SPACING, RADIUS } from '../../constants/theme';
 import { ServiceRequestModal } from '../services/ServiceRequestModal';
 import { useClientDashboard } from '../../hooks/useClientDashboard';
+import { useRateService } from '../../hooks/useServices';
 import { getStyles } from './ClientDashboard.styles';
 import { WorkerSearch } from './WorkerSearch';
 import {
     Plus, Wrench, Zap, Home, Utensils, Sparkles,
     CheckCircle, User, ChevronRight, WashingMachine,
-    Leaf, PawPrint, ArrowRight, Star
+    Leaf, PawPrint, ArrowRight, Star, MessageCircle, Send
 } from 'lucide-react-native';
+import { ChatRoom } from '../chat/ChatRoom';
 
 const getGreeting = () => {
     const h = new Date().getHours();
@@ -50,6 +52,41 @@ export default function ClientDashboard() {
         navigateToDetail,
         toggleModal
     } = useClientDashboard();
+    
+    const rateService = useRateService();
+    // Add chat state
+    const [showChat, setShowChat] = React.useState(false);
+
+    // Rating State
+    const [ratingService, setRatingService] = React.useState<any>(null);
+    const [rating, setRating] = React.useState(0);
+    const [comment, setComment] = React.useState('');
+
+    React.useEffect(() => {
+        // Find the first unrated completed service
+        if (completedRequests && completedRequests.length > 0) {
+            const unrated = completedRequests.find(req => !req.review);
+            if (unrated && !ratingService) {
+                setRatingService(unrated);
+            }
+        }
+    }, [completedRequests]);
+
+    const handleRateSubmit = async () => {
+        if (!ratingService) return;
+        if (rating === 0) {
+            alert('Por favor selecciona una calificación.');
+            return;
+        }
+        try {
+            await rateService.mutateAsync({ id: ratingService.id, rating, comment });
+            setRatingService(null);
+            setRating(0);
+            setComment('');
+        } catch (err: any) {
+            alert(err?.message || 'No se pudo enviar la calificación.');
+        }
+    };
 
     if (isLoading && !categories) {
         return (
@@ -141,12 +178,40 @@ export default function ClientDashboard() {
                             </View>
                         )}
 
-                        <TouchableOpacity style={styles.trackButton} onPress={() => navigateToDetail(activeRequest.id)}>
-                            <Text style={styles.trackButtonText}>Seguir mi servicio</Text>
-                            <ChevronRight size={15} color={colors.primary} />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border + '50' }}>
+                            <TouchableOpacity 
+                                style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8 }} 
+                                onPress={() => navigateToDetail(activeRequest.id)}
+                            >
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.primary, marginRight: 4 }}>Ver detalle</Text>
+                                <ChevronRight size={16} color={colors.primary} />
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 25, elevation: 2, shadowColor: colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 6 }} 
+                                onPress={() => setShowChat(true)}
+                            >
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#fff', marginRight: 6 }}>Mensajes</Text>
+                                <MessageCircle size={18} color="#fff" />
+                                {(activeRequest.unread_messages_count || 0) > 0 && (
+                                    <View style={{ position: 'absolute', top: -6, right: -6, backgroundColor: colors.danger, width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.surface }}>
+                                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>{activeRequest.unread_messages_count}</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
+            )}
+
+            {/* Chat Overlay */}
+            {activeRequest && showChat && (
+                <ChatRoom 
+                    serviceId={activeRequest.id!} 
+                    visible={showChat} 
+                    onClose={() => setShowChat(false)} 
+                    defaultTab="COORDINATION" 
+                />
             )}
 
             {/* Búsqueda de operarias */}
@@ -244,6 +309,60 @@ export default function ClientDashboard() {
                     ))}
                 </View>
             )}
+
+            {/* Rating Modal forced */}
+            <Modal
+                visible={!!ratingService}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => {}} // User MUST rate!
+            >
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 }}>
+                    <View style={{ backgroundColor: colors.surface, borderRadius: RADIUS.xl, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 }}>
+                        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 8, textAlign: 'center' }}>¿Cómo fue tu experiencia?</Text>
+                        <Text style={{ fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+                            Acabas de finalizar el servicio de <Text style={{ fontWeight: 'bold' }}>{ratingService?.category_name}</Text>. Tu operaria espera tu valiosa calificación.
+                        </Text>
+
+                        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <TouchableOpacity key={s} onPress={() => setRating(s)}>
+                                    <Star
+                                        size={45}
+                                        color={s <= rating ? colors.warning : colors.border}
+                                        fill={s <= rating ? colors.warning : 'transparent'}
+                                    />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <TextInput
+                            style={{ width: '100%', borderWidth: 1, borderColor: colors.border, borderRadius: RADIUS.lg, padding: 16, height: 100, textAlignVertical: 'top', fontSize: 15, color: colors.text, backgroundColor: colors.background, marginBottom: 24 }}
+                            placeholder="Déjale un comentario a tu operaria (opcional)..."
+                            placeholderTextColor={colors.textMuted}
+                            multiline
+                            numberOfLines={3}
+                            value={comment}
+                            onChangeText={setComment}
+                        />
+
+                        <TouchableOpacity
+                            style={{ backgroundColor: colors.primary, padding: 16, borderRadius: RADIUS.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', opacity: rateService.isPending ? 0.7 : 1 }}
+                            onPress={handleRateSubmit}
+                            disabled={rateService.isPending}
+                        >
+                            {rateService.isPending ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <>
+                                    <Send size={20} color="#ffffff" style={{ marginRight: 8 }} />
+                                    <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '800' }}>Enviar Calificación</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             <ServiceRequestModal
                 visible={isModalVisible}

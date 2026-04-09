@@ -16,6 +16,8 @@ export interface Review {
     created_at: string;
 }
 
+import { Incident } from './support';
+
 export interface ServiceRequest {
     id?: number;
     client?: number;
@@ -23,6 +25,9 @@ export interface ServiceRequest {
     category: number;
     category_name?: string;
     client_email?: string;
+    client_name?: string;
+    worker_email?: string;
+    worker_name?: string;
     status?: ServiceStatus;
     scheduled_at: string;
     address: string;
@@ -32,7 +37,12 @@ export interface ServiceRequest {
     total_price?: string;
     created_at?: string;
     completed_at?: string;
+    is_billed?: boolean;
     review?: Review;
+    incidents?: Incident[];
+    unread_messages_count?: number;
+    unread_coordination_count?: number;
+    unread_support_count?: number;
 }
 
 export interface CreateServiceRequestDTO {

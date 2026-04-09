@@ -46,7 +46,7 @@ def _base_html(content: str) -> str:
                 Este correo fue enviado por <strong>Domy App</strong>.<br/>
                 Si no realizaste esta acción, puedes ignorar este mensaje.
               </p>
-              <p style="margin:12px 0 0;font-size:11px;color:#C4C9D4;">© 2025 Domy. Todos los derechos reservados.</p>
+              <p style="margin:12px 0 0;font-size:11px;color:#C4C9D4;">© 2026 Domy. Todos los derechos reservados.</p>
             </td>
           </tr>
 
