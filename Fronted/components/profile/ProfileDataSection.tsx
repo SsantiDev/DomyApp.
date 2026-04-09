@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { View, Text, TextInput } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ClientProfile, WorkerProfile } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
+import { useCategories } from '../../hooks/useServices';
 import { getStyles } from './ProfileDataSection.styles';
 
 type ProfileData = Partial<ClientProfile & WorkerProfile>;
@@ -11,6 +12,8 @@ interface Props {
     isEditing: boolean;
     onChange: (field: string, value: string) => void;
     role: 'CLIENT' | 'WORKER';
+    selectedCategories?: number[];
+    onCategoryToggle?: (id: number) => void;
 }
 
 interface FieldConfig {
@@ -21,18 +24,25 @@ interface FieldConfig {
     multiline?: boolean;
 }
 
-export default function ProfileDataSection({ data, isEditing, onChange, role }: Props) {
+export default function ProfileDataSection({
+    data,
+    isEditing,
+    onChange,
+    role,
+    selectedCategories = [],
+    onCategoryToggle,
+}: Props) {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
+    const { data: categories, isLoading: loadingCategories } = useCategories();
 
     const getFields = (): FieldConfig[] => {
         if (role === 'WORKER') {
             return [
                 { key: 'identity_document', label: 'Documento de Identidad', placeholder: 'C.C. 12345678' },
-                { key: 'bio', label: 'Biografía / Especialidad', placeholder: 'Ej: Especialista en limpieza profunda con 5 años de experiencia...', multiline: true },
+                { key: 'bio', label: 'Biografía / Presentación', placeholder: 'Ej: Especialista en limpieza profunda con 5 años de experiencia...', multiline: true },
             ];
         }
-        // CLIENT
         return [
             { key: 'city', label: 'Ciudad', placeholder: 'Ej: Medellín' },
             { key: 'address', label: 'Dirección', placeholder: 'Ej: Calle 10 # 20-30' },
@@ -47,6 +57,7 @@ export default function ProfileDataSection({ data, isEditing, onChange, role }: 
             <Text style={styles.sectionTitle}>
                 {role === 'WORKER' ? 'Información Profesional' : 'Información de contacto'}
             </Text>
+
             {fields.map(({ key, label, placeholder, keyboardType, multiline }) => (
                 <View key={key} style={styles.row}>
                     <Text style={styles.label}>{label}</Text>
@@ -67,6 +78,45 @@ export default function ProfileDataSection({ data, isEditing, onChange, role }: 
                     )}
                 </View>
             ))}
+
+            {role === 'WORKER' && (
+                <View style={styles.row}>
+                    <Text style={styles.label}>Servicios que ofrezco</Text>
+
+                    {loadingCategories ? (
+                        <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: 8 }} />
+                    ) : (
+                        <View style={styles.chipsContainer}>
+                            {categories?.map((cat) => {
+                                const selected = selectedCategories.includes(cat.id);
+                                return (
+                                    <TouchableOpacity
+                                        key={cat.id}
+                                        onPress={() => isEditing && onCategoryToggle?.(cat.id)}
+                                        activeOpacity={isEditing ? 0.7 : 1}
+                                        style={[
+                                            styles.chip,
+                                            selected && styles.chipSelected,
+                                            !isEditing && !selected && styles.chipDisabled,
+                                        ]}
+                                    >
+                                        <Text style={[
+                                            styles.chipText,
+                                            selected && styles.chipTextSelected,
+                                            !isEditing && !selected && styles.chipTextDisabled,
+                                        ]}>
+                                            {cat.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                            {!isEditing && selectedCategories.length === 0 && (
+                                <Text style={styles.empty}>No especificado</Text>
+                            )}
+                        </View>
+                    )}
+                </View>
+            )}
         </View>
     );
 }

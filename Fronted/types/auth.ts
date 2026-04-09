@@ -37,6 +37,7 @@ export interface UserDetail {
         bio: string;
         is_available: boolean;
         average_rating: number;
+        categories: number[];
     };
     verification?: {
         is_verified: boolean;

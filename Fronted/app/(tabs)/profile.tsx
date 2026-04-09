@@ -25,6 +25,7 @@ export default function ProfileScreen() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState<Partial<ClientProfile & WorkerProfile>>({});
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
 
     useEffect(() => {
         if (user?.profile) {
@@ -34,6 +35,7 @@ export default function ProfileScreen() {
             } else if (user.role === 'WORKER') {
                 const p = user.profile as WorkerProfile;
                 setForm({ bio: p.bio, identity_document: p.identity_document });
+                setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }
     }, [user]);
@@ -42,10 +44,20 @@ export default function ProfileScreen() {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
+    const handleCategoryToggle = (id: number) => {
+        setSelectedCategories((prev) =>
+            prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+        );
+    };
+
     const handleSave = () => {
         if (!user) return;
 
-        updateProfile.mutate({ data: form, role: user.role }, {
+        const payload = user.role === 'WORKER'
+            ? { ...form, categories: selectedCategories }
+            : form;
+
+        updateProfile.mutate({ data: payload, role: user.role }, {
             onSuccess: () => {
                 setIsEditing(false);
                 Alert.alert('✓ Guardado', 'Tu perfil se actualizó correctamente.');
@@ -65,6 +77,7 @@ export default function ProfileScreen() {
             } else if (user.role === 'WORKER') {
                 const p = user.profile as WorkerProfile;
                 setForm({ bio: p.bio, identity_document: p.identity_document });
+                setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }
         setIsEditing(false);
@@ -119,6 +132,8 @@ export default function ProfileScreen() {
                     isEditing={isEditing}
                     onChange={handleFieldChange}
                     role={user.role as 'CLIENT' | 'WORKER'}
+                    selectedCategories={selectedCategories}
+                    onCategoryToggle={handleCategoryToggle}
                 />
 
                 <View style={styles.logoutSection}>
