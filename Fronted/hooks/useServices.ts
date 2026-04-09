@@ -89,6 +89,20 @@ export const useCompleteService = () => {
     });
 };
 
+export const useCancelService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/cancel/`);
+            return data;
+        },
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
+
 export const useRateService = () => {
     const queryClient = useQueryClient();
     return useMutation({
