@@ -48,9 +48,25 @@ def me(request):
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
-    """Update profile (first_name, last_name, phone, etc)"""
+    """Update shared profile (first_name, last_name, phone, etc)"""
     profile, _ = Profile.objects.get_or_create(user=request.user)
     serializer = ProfileSerializer(profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(UserDetailSerializer(request.user).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_worker_profile(request):
+    """Update WorkerProfile (bio, categories)"""
+    if request.user.role != User.Role.WORKER:
+        return Response(
+            {'error': 'Solo las operarias pueden actualizar su perfil de trabajo.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    worker_profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
+    serializer = WorkerProfileSerializer(worker_profile, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(UserDetailSerializer(request.user).data)

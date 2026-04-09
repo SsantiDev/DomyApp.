@@ -9,7 +9,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('me/', views.me, name='user_me'),
     path('register/', views.register, name='user_register'),
-    path('profile/', views.update_profile, name='update_profile'), # Shared profile update
+    path('profile/', views.update_profile, name='update_profile'),
+    path('profile/worker/', views.update_worker_profile, name='update_worker_profile'),
     path('profile/toggle-availability/', views.toggle_availability, name='toggle_availability'),
     path('profile/worker/submit-verification/', views.submit_verification, name='submit_verification'),
     

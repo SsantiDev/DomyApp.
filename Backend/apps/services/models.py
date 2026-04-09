@@ -46,6 +46,7 @@ class ServiceRequest(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     details = models.TextField(blank=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    is_billed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)

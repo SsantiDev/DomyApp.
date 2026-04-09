@@ -57,6 +57,11 @@ class WorkerProfile(models.Model):
     bio = models.TextField(blank=True)
     is_available = models.BooleanField(default=False)
     average_rating = models.FloatField(default=0.0, db_index=True)
+    categories = models.ManyToManyField(
+        'services.Category',
+        blank=True,
+        related_name='workers'
+    )
 
     def __str__(self):
         return f"Worker Detail: {self.user.email}"

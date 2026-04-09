@@ -44,10 +44,11 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 status=ServiceRequestNotification.Status.PENDING
             )
         else:
-            # BROADCAST assignment to all available workers
+            # BROADCAST assignment to available workers who cover this category
             available_workers = User.objects.filter(
                 role=User.Role.WORKER,
-                worker_info__is_available=True
+                worker_info__is_available=True,
+                worker_info__categories=service_request.category
             )
             notifications = [
                 ServiceRequestNotification(
@@ -167,6 +168,38 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         
         service_request.status = ServiceRequest.Status.COMPLETED
         service_request.completed_at = timezone.now()
+        service_request.save()
+        return Response(self.get_serializer(service_request).data)
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        try:
+            service_request = ServiceRequest.objects.get(pk=pk)
+        except ServiceRequest.DoesNotExist:
+            return Response({"error": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+
+        if user.role == 'CLIENT':
+            if service_request.client != user:
+                return Response({"error": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+            if service_request.status not in [ServiceRequest.Status.PENDING, ServiceRequest.Status.ACCEPTED]:
+                return Response(
+                    {"error": "Solo puedes cancelar servicios pendientes o aceptados."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        elif user.role == 'WORKER':
+            if service_request.worker != user:
+                return Response({"error": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+            if service_request.status != ServiceRequest.Status.ACCEPTED:
+                return Response(
+                    {"error": "Solo puedes abandonar servicios que hayas aceptado y no iniciado."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return Response({"error": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+
+        service_request.status = ServiceRequest.Status.CANCELLED
         service_request.save()
         return Response(self.get_serializer(service_request).data)
 
