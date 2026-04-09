@@ -319,42 +319,41 @@ export default function WorkerDashboard() {
               return (
               <Card variant="flat" key={notification.id} style={styles.serviceCard}>
                 <View style={styles.requestContent}>
-                  <View style={styles.reqMain}>
-                    <Text style={styles.categoryTitle}>{req.category_name}</Text>
-                    <View style={styles.detailRow}>
-                      <MapPin size={14} color={colors.textLight} />
-                      <Text style={[styles.detailText, { color: colors.textLight, fontSize: 13 }]} numberOfLines={1}>
-                        {req.address}
-                      </Text>
+                  <View style={styles.requestTopRow}>
+                    <View style={styles.reqMain}>
+                      <Text style={styles.categoryTitle}>{req.category_name}</Text>
+                      <View style={styles.detailRow}>
+                        <MapPin size={14} color={colors.textLight} />
+                        <Text style={[styles.detailText, { color: colors.textLight, fontSize: 13 }]} numberOfLines={1}>
+                          {req.address}
+                        </Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Calendar size={14} color={colors.textLight} />
+                        <Text style={[styles.detailText, { color: colors.textLight, fontSize: 12 }]}>
+                          {new Date(req.scheduled_at).toLocaleDateString()} • {new Date(req.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.detailRow}>
-                      <Calendar size={14} color={colors.textLight} />
-                      <Text style={[styles.detailText, { color: colors.textLight, fontSize: 12 }]}>
-                        {new Date(req.scheduled_at).toLocaleDateString()} • {new Date(req.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.priceAction}>
                     <Text style={styles.priceTag}>${Number(req.total_price).toLocaleString()}</Text>
-                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-                      <Button
-                        title="Rechazar"
-                        variant="outline"
-                        onPress={() => {
-                          setSelectedRequestId(req.id!);
-                          setRejectModalVisible(true);
-                        }}
-                        style={[styles.smallBtn, { borderColor: colors.danger, flex: 1, paddingHorizontal: 0 }]}
-                        textStyle={[styles.smallBtnText, { color: colors.danger, fontSize: 12 }]}
-                      />
-                      <Button
-                        title="Tomar"
-                        onPress={() => req.id && handleAccept(req.id)}
-                        loading={acceptService.isPending}
-                        style={[styles.smallBtn, { flex: 1, paddingHorizontal: 0 }]}
-                        textStyle={[styles.smallBtnText, { fontSize: 12 }]}
-                      />
-                    </View>
+                  </View>
+                  <View style={styles.requestActions}>
+                    <Button
+                      title="Rechazar"
+                      variant="outline"
+                      onPress={() => {
+                        setSelectedRequestId(req.id!);
+                        setRejectModalVisible(true);
+                      }}
+                      style={[styles.actionBtn, { borderColor: colors.danger }]}
+                      textStyle={{ color: colors.danger }}
+                    />
+                    <Button
+                      title="Tomar"
+                      onPress={() => req.id && handleAccept(req.id)}
+                      loading={acceptService.isPending}
+                      style={styles.actionBtn}
+                    />
                   </View>
                 </View>
               </Card>
