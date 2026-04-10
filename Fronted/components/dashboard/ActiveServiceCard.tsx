@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, Animated, TouchableOpacity, Easing } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { CheckCircle, User, ChevronRight, Clock } from 'lucide-react-native';
+import { CheckCircle, User, ChevronRight, Clock, MessageCircle } from 'lucide-react-native';
 import { getStyles } from './ActiveServiceCard.styles';
 import { ServiceRequest } from '../../types/services';
 
@@ -12,6 +12,7 @@ type StepStatus = typeof STATUS_STEPS[number];
 interface Props {
     activeRequest: ServiceRequest;
     onNavigate: (id: number | string | undefined) => void;
+    onChat?: () => void;
 }
 
 const STATUS_COLOR_KEY: Record<StepStatus, 'warning' | 'primary' | 'success'> = {
@@ -20,7 +21,7 @@ const STATUS_COLOR_KEY: Record<StepStatus, 'warning' | 'primary' | 'success'> = 
     IN_PROGRESS: 'success',
 };
 
-export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
+export function ActiveServiceCard({ activeRequest, onNavigate, onChat }: Props) {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
 
@@ -267,17 +268,64 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
                 </View>
             )}
 
-            {/* ── Track button ──────────────────────────────────────────── */}
-            <TouchableOpacity
-                style={[styles.trackButton, { backgroundColor: statusColor + '14' }]}
-                onPress={() => onNavigate(activeRequest.id)}
-                activeOpacity={0.75}
-            >
-                <Text style={[styles.trackButtonText, { color: statusColor }]}>
-                    Seguir mi servicio
-                </Text>
-                <ChevronRight size={15} color={statusColor} />
-            </TouchableOpacity>
+            {/* ── Buttons Row ────────────────────────────────────────────── */}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+                <TouchableOpacity
+                    style={[styles.trackButton, { flex: 1, backgroundColor: statusColor + '14', justifyContent: 'center' }]}
+                    onPress={() => onNavigate(activeRequest.id)}
+                    activeOpacity={0.75}
+                >
+                    <Text style={[styles.trackButtonText, { color: statusColor }]}>
+                        Seguir
+                    </Text>
+                    <ChevronRight size={15} color={statusColor} />
+                </TouchableOpacity>
+
+                {onChat && (
+                    <TouchableOpacity
+                        style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 8,
+                            backgroundColor: colors.primary,
+                            borderRadius: 12,
+                            paddingVertical: 12,
+                            elevation: 2,
+                            shadowColor: colors.primary,
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 6
+                        }}
+                        onPress={onChat}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={{ fontSize: 14, fontWeight: '700', color: '#fff' }}>Chat</Text>
+                        <MessageCircle size={18} color="#fff" />
+                        {(activeRequest.unread_messages_count || 0) > 0 && (
+                            <View style={{
+                                position: 'absolute',
+                                top: -6,
+                                right: -6,
+                                backgroundColor: colors.danger || '#FF3B30',
+                                minWidth: 20,
+                                height: 20,
+                                borderRadius: 10,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderWidth: 2,
+                                borderColor: colors.surface,
+                                paddingHorizontal: 4
+                            }}>
+                                <Text style={{ color: '#fff', fontSize: 10, fontWeight: '900' }}>
+                                    {activeRequest.unread_messages_count}
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                )}
+            </View>
         </View>
     );
 }
