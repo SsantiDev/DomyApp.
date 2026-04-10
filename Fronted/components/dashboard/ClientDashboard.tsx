@@ -115,7 +115,12 @@ export default function ClientDashboard() {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={styles.carouselContainer}
-                    contentContainerStyle={{ paddingRight: SPACING.lg }}
+                    contentContainerStyle={{
+                        paddingLeft: SPACING.lg,
+                        paddingRight: SPACING.lg,
+                        paddingTop: SPACING.sm,
+                        paddingBottom: SPACING.md
+                    }}
                 >
                     {categories?.map((cat) => (
                         <TouchableOpacity

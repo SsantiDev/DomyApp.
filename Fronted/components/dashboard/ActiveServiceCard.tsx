@@ -3,22 +3,15 @@ import { View, Text, Animated, TouchableOpacity, Easing } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { CheckCircle, User, ChevronRight, Clock } from 'lucide-react-native';
 import { getStyles } from './ActiveServiceCard.styles';
+import { ServiceRequest } from '../../types/services';
 
 const STATUS_STEPS = ['PENDING', 'ACCEPTED', 'IN_PROGRESS'] as const;
 const STATUS_LABELS = { PENDING: 'Buscando', ACCEPTED: 'Confirmado', IN_PROGRESS: 'En curso' };
 type StepStatus = typeof STATUS_STEPS[number];
 
-interface ActiveRequest {
-    id: number;
-    status: string;
-    category_name: string;
-    address: string;
-    worker?: unknown;
-}
-
 interface Props {
-    activeRequest: ActiveRequest;
-    onNavigate: (id: number) => void;
+    activeRequest: ServiceRequest;
+    onNavigate: (id: number | string | undefined) => void;
 }
 
 const STATUS_COLOR_KEY: Record<StepStatus, 'warning' | 'primary' | 'success'> = {
@@ -31,8 +24,9 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
 
-    const currentStep = STATUS_STEPS.indexOf(activeRequest.status as StepStatus);
-    const colorKey = STATUS_COLOR_KEY[activeRequest.status as StepStatus] ?? 'primary';
+    const status = activeRequest.status || 'PENDING';
+    const currentStep = STATUS_STEPS.indexOf(status as StepStatus);
+    const colorKey = STATUS_COLOR_KEY[status as StepStatus] ?? 'primary';
     const statusColor = colors[colorKey];
 
     // Per-dot spring scale (0.3 → 1 when dot activates)
@@ -87,7 +81,7 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
         );
         loop.start();
         return () => loop.stop();
-    }, [activeRequest.status]);
+    }, [status]);
 
     // Breathing loop — restarts when status changes
     useEffect(() => {
@@ -110,7 +104,7 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
         );
         loop.start();
         return () => loop.stop();
-    }, [activeRequest.status]);
+    }, [status]);
 
     // Lines animate fill when step advances
     useEffect(() => {
@@ -127,7 +121,7 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
 
     // Avatar pulse only for IN_PROGRESS
     useEffect(() => {
-        if (activeRequest.status !== 'IN_PROGRESS') {
+        if (status !== 'IN_PROGRESS') {
             avatarPulse.setValue(1);
             return;
         }
@@ -149,7 +143,7 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
         );
         loop.start();
         return () => loop.stop();
-    }, [activeRequest.status]);
+    }, [status]);
 
     return (
         <View
@@ -259,7 +253,7 @@ export function ActiveServiceCard({ activeRequest, onNavigate }: Props) {
                         <User size={15} color="#fff" />
                     </Animated.View>
                     <Text style={styles.workerText}>
-                        {activeRequest.status === 'IN_PROGRESS'
+                        {status === 'IN_PROGRESS'
                             ? 'Tu operaria está trabajando'
                             : 'Tu operaria está en camino'}
                     </Text>

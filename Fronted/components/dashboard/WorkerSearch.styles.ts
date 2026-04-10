@@ -58,8 +58,12 @@ export const getStyles = (colors: any) => StyleSheet.create({
     filterTextActive: {
         color: '#ffffff',
     },
+    workerFlatList: {
+        height: 185,
+    },
     workerList: {
         paddingRight: SPACING.lg,
+        paddingBottom: SPACING.sm,
     },
     workerCard: {
         width: 240,
