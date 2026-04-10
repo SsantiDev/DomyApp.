@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { UserDetail } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING } from '../../constants/theme';
-import { Edit3, Check, X } from 'lucide-react-native';
+import { Edit3, Check, X, Camera } from 'lucide-react-native';
 import { getStyles } from './ProfileHeader.styles';
+import { API_URL } from '../../config/env';
 
 interface Props {
     user: UserDetail;
@@ -13,6 +14,8 @@ interface Props {
     onSave?: () => void;
     onCancel?: () => void;
     isSaving?: boolean;
+    onPhotoPress?: () => void;
+    localPhotoUri?: string | null;
 }
 
 const roleLabel: Record<string, string> = {
@@ -39,13 +42,19 @@ export default function ProfileHeader({
     onEdit,
     onSave,
     onCancel,
-    isSaving
+    isSaving,
+    onPhotoPress,
+    localPhotoUri,
 }: Props) {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
     const initials = getInitials(user.first_name, user.last_name);
     const color = roleColor[user.role] ?? colors.primary;
     const label = roleLabel[user.role] ?? user.role;
+
+    const rawPicture = (user.profile as any)?.profile_picture;
+    const photoUrl = localPhotoUri
+        ?? (rawPicture ? (rawPicture.startsWith('http') ? rawPicture : `${API_URL}${rawPicture}`) : null);
 
     return (
         <View style={styles.container}>
@@ -79,9 +88,24 @@ export default function ProfileHeader({
                 )}
             </View>
 
-            <View style={[styles.avatar, { backgroundColor: color }]}>
-                <Text style={styles.initials}>{initials}</Text>
-            </View>
+            <TouchableOpacity
+                style={styles.avatarWrapper}
+                onPress={isEditing ? onPhotoPress : undefined}
+                activeOpacity={isEditing ? 0.7 : 1}
+            >
+                {photoUrl ? (
+                    <Image source={{ uri: photoUrl }} style={styles.avatarImage} />
+                ) : (
+                    <View style={[styles.avatar, { backgroundColor: color }]}>
+                        <Text style={styles.initials}>{initials}</Text>
+                    </View>
+                )}
+                {isEditing && (
+                    <View style={styles.cameraOverlay}>
+                        <Camera size={14} color="#FFF" />
+                    </View>
+                )}
+            </TouchableOpacity>
 
             <Text style={styles.name}>
                 {user.first_name} {user.last_name}
