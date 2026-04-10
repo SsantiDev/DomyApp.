@@ -1,5 +1,16 @@
 [phases.setup]
-nixPkgs = ["python311", "gcc", "postgresql"]
+nixPkgs = [
+    "python311",
+    "gcc",
+    "postgresql",
+    "libpq",
+    "libjpeg",
+    "zlib",
+    "libwebp",
+    "libpng",
+    "freetype",
+    "openssl"
+]
 
 [phases.install]
 cmds = [
@@ -10,9 +21,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "cd Backend && /app/.venv/bin/python manage.py collectstatic --noinput",
-    "cd Backend && /app/.venv/bin/python manage.py migrate --noinput"
+    "cd Backend && /app/.venv/bin/python manage.py collectstatic --noinput"
 ]
 
 [start]
-cmd = "cd Backend && /app/.venv/bin/gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
+cmd = "cd Backend && /app/.venv/bin/python manage.py migrate --noinput && /app/.venv/bin/gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
