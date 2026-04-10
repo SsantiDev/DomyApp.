@@ -69,6 +69,14 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        # Check worker verification
+        verification = getattr(user, 'verification', None)
+        if not verification or verification.status != 'APPROVED':
+            return Response(
+                {"error": "Debes completar la verificación de identidad para aceptar servicios."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         # Atomic transaction to prevent race conditions
         with transaction.atomic():
             try:
