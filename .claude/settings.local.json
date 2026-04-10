@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat Backend/.gitignore)",
+      "Bash(cat .gitignore)"
+    ]
+  }
+}
