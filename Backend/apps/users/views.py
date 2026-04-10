@@ -109,15 +109,14 @@ def submit_verification(request):
 @permission_classes([IsAdminUser])
 def get_pending_verifications(request):
     pending = WorkerVerification.objects.filter(status='PENDING').select_related('user', 'user__profile')
+    def absolute_url(field):
+        if not field:
+            return None
+        return request.build_absolute_uri(field.url)
+
     data = []
     for v in pending:
         profile = getattr(v.user, 'profile', None)
-        def absolute_url(field):
-            if not field:
-                return None
-            url = field.url
-            return request.build_absolute_uri(url)
-
         data.append({
             'id': v.id,
             'identity_document': v.identity_document,

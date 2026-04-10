@@ -42,13 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-
-    'cloudinary',
-    'cloudinary_storage',
 
     # Apps
     'apps.users.apps.UsersConfig',
@@ -114,10 +113,11 @@ if os.getenv('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
+            conn_max_age=0,  # 0 = no persistent connections (requerido con PgBouncer)
         )
     }
     DATABASES['default']['OPTIONS'] = {'options': '-c search_path=public'}
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True  # requerido con PgBouncer
 else:
     DATABASES = {
         'default': {
@@ -129,7 +129,9 @@ else:
             'PORT': os.getenv('DB_PORT', '6543'),
             'OPTIONS': {
                 'options': '-c search_path=public'
-            }
+            },
+            'CONN_MAX_AGE': 0,
+            'DISABLE_SERVER_SIDE_CURSORS': True,
         }
     }
 
