@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ipconfig)",
+      "Bash(.venv/Scripts/python manage.py makemigrations services --name=\"add_is_billed_to_servicerequest\")",
+      "Bash(.venv/Scripts/python manage.py migrate)",
+      "Bash(.venv/Scripts/python manage.py migrate services 0004 --fake)",
+      "Bash(.venv/Scripts/python manage.py check)",
+      "Bash(.venv/Scripts/python manage.py shell -c ':*)"
+    ]
+  }
+}

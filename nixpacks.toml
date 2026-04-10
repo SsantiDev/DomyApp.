@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["python311", "libpq"]
+
+[phases.install]
+cmds = ["pip install -r Backend/requirements.txt"]
+
+[phases.build]
+cmds = [
+    "cd Backend && python manage.py collectstatic --noinput",
+    "cd Backend && python manage.py migrate --noinput"
+]
+
+[start]
+cmd = "cd Backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
