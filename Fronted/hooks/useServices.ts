@@ -18,7 +18,9 @@ export const useServiceRequests = () => {
         queryFn: async () => {
             const { data } = await api.get<ServiceRequest[]>('/services/requests/');
             return data;
-        }
+        },
+        staleTime: 0,           // Always fetch fresh data on mount
+        refetchInterval: 10000, // Poll every 10 seconds to reflect status changes from worker
     });
 };
 
@@ -80,6 +82,20 @@ export const useCompleteService = () => {
     return useMutation({
         mutationFn: async (id: number) => {
             const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/complete/`);
+            return data;
+        },
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
+
+export const useCancelService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/cancel/`);
             return data;
         },
         onSuccess: (_, id) => {

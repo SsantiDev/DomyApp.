@@ -50,4 +50,37 @@ export const getStyles = (colors: ThemeColors) => StyleSheet.create({
         backgroundColor: colors.primary + '11',
         minHeight: 40,
     },
+    chipsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.sm,
+        marginTop: SPACING.xs,
+    },
+    chip: {
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.xs,
+        borderRadius: RADIUS.full,
+        borderWidth: 1.5,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+    },
+    chipSelected: {
+        borderColor: colors.primary,
+        backgroundColor: colors.primary + '18',
+    },
+    chipDisabled: {
+        opacity: 0.35,
+    },
+    chipText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: colors.textLight,
+    },
+    chipTextSelected: {
+        color: colors.primary,
+        fontWeight: '600',
+    },
+    chipTextDisabled: {
+        color: colors.textMuted,
+    },
 });

@@ -298,24 +298,34 @@ export const getStyles = (colors: any) => StyleSheet.create({
         color: colors.textLight,
     },
     requestContent: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         padding: SPACING.lg,
-        gap: 16,
-        alignItems: 'center',
+        gap: SPACING.md,
+    },
+    requestTopRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        gap: SPACING.md,
     },
     reqMain: {
         flex: 1,
     },
-    priceAction: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        gap: 10,
+    requestActions: {
+        flexDirection: 'row',
+        gap: SPACING.md,
+    },
+    actionBtn: {
+        flex: 1,
+        minHeight: 44,
+        borderRadius: RADIUS.lg,
     },
     priceTag: {
         fontSize: 20,
         fontWeight: '900',
         letterSpacing: -0.5,
         color: colors.primary,
+        paddingTop: 2,
     },
     smallBtn: {
         minHeight: 38,

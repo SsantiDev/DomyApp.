@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, Profile, WorkerProfile, WorkerVerification
+from apps.services.models import Category
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,9 +8,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'phone_number', 'profile_picture', 'address', 'city')
 
 class WorkerProfileSerializer(serializers.ModelSerializer):
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all()
+    )
+
     class Meta:
         model = WorkerProfile
-        fields = ('bio', 'is_available', 'average_rating')
+        fields = ('bio', 'is_available', 'average_rating', 'categories')
         read_only_fields = ('average_rating',)
 
 class WorkerVerificationSerializer(serializers.ModelSerializer):
@@ -75,7 +81,8 @@ class WorkerListSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.profile.last_name')
     city = serializers.CharField(source='user.profile.city')
     email = serializers.EmailField(source='user.email')
-    
+    categories = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = WorkerProfile
-        fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating')
+        fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating', 'categories')

@@ -14,6 +14,7 @@ export interface ClientProfile {
     address: string;
     phone_number: string;
     city: string;
+    profile_picture: string | null;
 }
 
 export interface WorkerProfile {
@@ -37,6 +38,7 @@ export interface UserDetail {
         bio: string;
         is_available: boolean;
         average_rating: number;
+        categories: number[];
     };
     verification?: {
         is_verified: boolean;

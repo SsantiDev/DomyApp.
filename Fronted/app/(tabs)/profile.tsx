@@ -7,10 +7,11 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { getStyles } from './_profile.styles';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useGetProfile, useUpdateProfile } from '../../hooks/useProfile';
+import { useGetProfile, useUpdateProfile, useUploadProfilePicture } from '../../hooks/useProfile';
 import { ClientProfile, WorkerProfile } from '../../types/auth';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileDataSection from '../../components/profile/ProfileDataSection';
@@ -23,8 +24,11 @@ export default function ProfileScreen() {
     const { data: user, isLoading, isError, error, refetch } = useGetProfile();
     const updateProfile = useUpdateProfile();
 
+    const uploadPhoto = useUploadProfilePicture();
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState<Partial<ClientProfile & WorkerProfile>>({});
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+    const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
 
     useEffect(() => {
         if (user?.profile) {
@@ -34,18 +38,52 @@ export default function ProfileScreen() {
             } else if (user.role === 'WORKER') {
                 const p = user.profile as WorkerProfile;
                 setForm({ bio: p.bio, identity_document: p.identity_document });
+                setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }
     }, [user]);
+
+    const handlePhotoPress = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería para cambiar la foto.');
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        });
+        if (result.canceled) return;
+        const uri = result.assets[0].uri;
+        setLocalPhotoUri(uri);
+        uploadPhoto.mutate(uri, {
+            onError: () => {
+                setLocalPhotoUri(null);
+                Alert.alert('Error', 'No se pudo subir la foto. Intenta de nuevo.');
+            },
+        });
+    };
 
     const handleFieldChange = (field: string, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
     };
 
+    const handleCategoryToggle = (id: number) => {
+        setSelectedCategories((prev) =>
+            prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+        );
+    };
+
     const handleSave = () => {
         if (!user) return;
 
-        updateProfile.mutate({ data: form, role: user.role }, {
+        const payload = user.role === 'WORKER'
+            ? { ...form, categories: selectedCategories }
+            : form;
+
+        updateProfile.mutate({ data: payload, role: user.role }, {
             onSuccess: () => {
                 setIsEditing(false);
                 Alert.alert('✓ Guardado', 'Tu perfil se actualizó correctamente.');
@@ -65,8 +103,10 @@ export default function ProfileScreen() {
             } else if (user.role === 'WORKER') {
                 const p = user.profile as WorkerProfile;
                 setForm({ bio: p.bio, identity_document: p.identity_document });
+                setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }
+        setLocalPhotoUri(null);
         setIsEditing(false);
     };
 
@@ -112,6 +152,8 @@ export default function ProfileScreen() {
                     onSave={handleSave}
                     onCancel={handleCancelEdit}
                     isSaving={updateProfile.isPending}
+                    onPhotoPress={handlePhotoPress}
+                    localPhotoUri={localPhotoUri}
                 />
 
                 <ProfileDataSection
@@ -119,6 +161,8 @@ export default function ProfileScreen() {
                     isEditing={isEditing}
                     onChange={handleFieldChange}
                     role={user.role as 'CLIENT' | 'WORKER'}
+                    selectedCategories={selectedCategories}
+                    onCategoryToggle={handleCategoryToggle}
                 />
 
                 <View style={styles.logoutSection}>

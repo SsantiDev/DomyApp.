@@ -20,7 +20,8 @@ import {
     useGetServiceDetail,
     useStartService,
     useCompleteService,
-    useRateService
+    useRateService,
+    useCancelService
 } from '../../hooks/useServices';
 import { useReportIncident, useGetServiceIncidents } from '../../hooks/useSupport';
 import { IncidentType, INCIDENT_TYPE_LABELS } from '../../types/support';
@@ -52,6 +53,7 @@ export default function ServiceDetailScreen() {
     // Mutations
     const startService = useStartService();
     const completeService = useCompleteService();
+    const cancelService = useCancelService();
     const rateService = useRateService();
     const reportIncident = useReportIncident();
     const { data: incidents } = useGetServiceIncidents(Number(id));
@@ -89,6 +91,8 @@ export default function ServiceDetailScreen() {
     const isWorker = user?.role === 'WORKER';
     const isClient = user?.role === 'CLIENT';
     const canRate = isClient && service.status === 'COMPLETED' && !service.review;
+    const canClientCancel = isClient && ['PENDING', 'ACCEPTED'].includes(service.status);
+    const canWorkerCancel = isWorker && service.status === 'ACCEPTED';
 
     // Map Coordinates
     const destCoords = {
@@ -123,6 +127,32 @@ export default function ServiceDetailScreen() {
         } catch (err: any) {
             Alert.alert('Error', err?.message || 'No se pudo finalizar la labor');
         }
+    };
+
+    const handleCancel = () => {
+        const isWorkerAbandoning = isWorker && service?.status === 'ACCEPTED';
+        Alert.alert(
+            isWorkerAbandoning ? 'Abandonar servicio' : 'Cancelar servicio',
+            isWorkerAbandoning
+                ? '¿Seguro que quieres abandonar este servicio? El cliente será notificado.'
+                : '¿Seguro que quieres cancelar este servicio?',
+            [
+                { text: 'No', style: 'cancel' },
+                {
+                    text: isWorkerAbandoning ? 'Sí, abandonar' : 'Sí, cancelar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await cancelService.mutateAsync(Number(id));
+                            Alert.alert('Servicio cancelado', 'El servicio fue cancelado correctamente.');
+                            router.back();
+                        } catch (err: any) {
+                            Alert.alert('Error', err?.response?.data?.error || 'No se pudo cancelar el servicio.');
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleRate = async () => {
@@ -231,6 +261,30 @@ export default function ServiceDetailScreen() {
                                 icon={<CheckCircle size={20} color="#ffffff" />}
                             />
                         )}
+                        {canWorkerCancel && (
+                            <Button
+                                title="Abandonar servicio"
+                                onPress={handleCancel}
+                                variant="outline"
+                                style={{ borderColor: colors.danger, marginTop: 10 }}
+                                textStyle={{ color: colors.danger }}
+                                loading={cancelService.isPending}
+                            />
+                        )}
+                    </View>
+                )}
+
+                {/* Actions for Client */}
+                {canClientCancel && (
+                    <View style={styles.actionsContainer}>
+                        <Button
+                            title="Cancelar servicio"
+                            onPress={handleCancel}
+                            variant="outline"
+                            style={{ borderColor: colors.danger }}
+                            textStyle={{ color: colors.danger }}
+                            loading={cancelService.isPending}
+                        />
                     </View>
                 )}
 

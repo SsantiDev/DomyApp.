@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
-import { Card } from '../ui/NativeCard';
 import { SPACING, RADIUS } from '../../constants/theme';
 import { ServiceRequestModal } from '../services/ServiceRequestModal';
 import { useClientDashboard } from '../../hooks/useClientDashboard';
 import { useRateService } from '../../hooks/useServices';
 import { getStyles } from './ClientDashboard.styles';
 import { WorkerSearch } from './WorkerSearch';
+import { ActiveServiceCard } from './ActiveServiceCard';
 import {
     Plus, Wrench, Zap, Home, Utensils, Sparkles,
     CheckCircle, User, ChevronRight, WashingMachine,
@@ -37,9 +37,6 @@ const CategoryIcon = ({ name, color, size = 22 }: { name: string; color: string;
     }
 };
 
-const STATUS_STEPS = ['PENDING', 'ACCEPTED', 'IN_PROGRESS'] as const;
-const STATUS_LABELS = { PENDING: 'Buscando', ACCEPTED: 'Confirmado', IN_PROGRESS: 'En curso' };
-
 export default function ClientDashboard() {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
@@ -52,7 +49,7 @@ export default function ClientDashboard() {
         navigateToDetail,
         toggleModal
     } = useClientDashboard();
-    
+
     const rateService = useRateService();
     // Add chat state
     const [showChat, setShowChat] = React.useState(false);
@@ -96,8 +93,6 @@ export default function ClientDashboard() {
         );
     }
 
-    const currentStep = activeRequest ? STATUS_STEPS.indexOf(activeRequest.status as typeof STATUS_STEPS[number]) : -1;
-
     return (
         <ScrollView
             style={styles.container}
@@ -140,77 +135,21 @@ export default function ClientDashboard() {
             {activeRequest && (
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Servicio activo</Text>
-                    <View style={styles.statusCard}>
-                        {/* Barra de progreso */}
-                        <View style={styles.progressRow}>
-                            {STATUS_STEPS.map((step, i) => (
-                                <React.Fragment key={step}>
-                                    <View style={[styles.progressDot, i <= currentStep && styles.progressDotActive]}>
-                                        {i < currentStep && <CheckCircle size={10} color="#fff" />}
-                                    </View>
-                                    {i < STATUS_STEPS.length - 1 && (
-                                        <View style={[styles.progressLine, i < currentStep && styles.progressLineActive]} />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </View>
-                        <View style={styles.progressLabels}>
-                            {STATUS_STEPS.map((step, i) => (
-                                <Text key={step} style={[styles.progressLabel, i === currentStep && styles.progressLabelActive]}>
-                                    {STATUS_LABELS[step]}
-                                </Text>
-                            ))}
-                        </View>
-
-                        <View style={styles.statusDivider} />
-
-                        <Text style={styles.activeServiceName}>{activeRequest.category_name}</Text>
-                        <Text style={styles.addressText}>{activeRequest.address}</Text>
-
-                        {activeRequest.worker && (
-                            <View style={styles.workerRow}>
-                                <View style={styles.avatarMini}>
-                                    <User size={15} color="#fff" />
-                                </View>
-                                <Text style={styles.workerText}>
-                                    {activeRequest.status === 'IN_PROGRESS' ? 'Tu operaria está trabajando' : 'Tu operaria está en camino'}
-                                </Text>
-                            </View>
-                        )}
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.border + '50' }}>
-                            <TouchableOpacity 
-                                style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8 }} 
-                                onPress={() => navigateToDetail(activeRequest.id)}
-                            >
-                                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.primary, marginRight: 4 }}>Ver detalle</Text>
-                                <ChevronRight size={16} color={colors.primary} />
-                            </TouchableOpacity>
-                            
-                            <TouchableOpacity 
-                                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 25, elevation: 2, shadowColor: colors.primary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 6 }} 
-                                onPress={() => setShowChat(true)}
-                            >
-                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#fff', marginRight: 6 }}>Mensajes</Text>
-                                <MessageCircle size={18} color="#fff" />
-                                {(activeRequest.unread_messages_count || 0) > 0 && (
-                                    <View style={{ position: 'absolute', top: -6, right: -6, backgroundColor: colors.danger, width: 22, height: 22, borderRadius: 11, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.surface }}>
-                                        <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>{activeRequest.unread_messages_count}</Text>
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    <ActiveServiceCard
+                        activeRequest={activeRequest}
+                        onNavigate={navigateToDetail}
+                        onChat={() => setShowChat(true)}
+                    />
                 </View>
             )}
 
             {/* Chat Overlay */}
             {activeRequest && showChat && (
-                <ChatRoom 
-                    serviceId={activeRequest.id!} 
-                    visible={showChat} 
-                    onClose={() => setShowChat(false)} 
-                    defaultTab="COORDINATION" 
+                <ChatRoom
+                    serviceId={activeRequest.id!}
+                    visible={showChat}
+                    onClose={() => setShowChat(false)}
+                    defaultTab="COORDINATION"
                 />
             )}
 
@@ -224,20 +163,41 @@ export default function ClientDashboard() {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     style={styles.carouselContainer}
-                    contentContainerStyle={{ paddingRight: SPACING.lg }}
+                    contentContainerStyle={{
+                        paddingLeft: SPACING.lg,
+                        paddingRight: SPACING.lg,
+                        paddingTop: SPACING.sm,
+                        paddingBottom: SPACING.md
+                    }}
                 >
                     {categories?.map((cat) => (
                         <TouchableOpacity
                             key={cat.id}
                             style={styles.serviceCard}
                             onPress={() => toggleModal(true)}
-                            activeOpacity={0.75}
+                            activeOpacity={0.82}
                         >
-                            <View style={styles.categoryIconWrap}>
-                                <CategoryIcon name={cat.icon_name} color={colors.primary} size={24} />
+                            {/* Header */}
+                            <View style={styles.cardHeader}>
+                                <View style={styles.cardHeaderCircle1} />
+                                <View style={styles.cardHeaderCircle2} />
                             </View>
-                            <Text style={styles.categoryName} numberOfLines={2}>{cat.name}</Text>
-                            <Text style={styles.categoryPrice}>Desde ${Number(cat.base_price).toLocaleString()}</Text>
+
+                            {/* Floating badge */}
+                            <View style={styles.cardBadge}>
+                                <CategoryIcon name={cat.icon_name} color={colors.primary} size={22} />
+                            </View>
+
+                            {/* Main */}
+                            <View style={styles.cardMain}>
+                                <Text style={styles.categoryName} numberOfLines={2}>{cat.name}</Text>
+                            </View>
+
+                            {/* Footer */}
+                            <View style={styles.cardFooter}>
+                                <Text style={styles.categoryPrice}>Desde ${Number(cat.base_price).toLocaleString()}</Text>
+                                <ChevronRight size={13} color={colors.primary} />
+                            </View>
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -315,7 +275,7 @@ export default function ClientDashboard() {
                 visible={!!ratingService}
                 transparent={true}
                 animationType="slide"
-                onRequestClose={() => {}} // User MUST rate!
+                onRequestClose={() => { }} // User MUST rate!
             >
                 <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 }}>
                     <View style={{ backgroundColor: colors.surface, borderRadius: RADIUS.xl, padding: 24, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 }}>

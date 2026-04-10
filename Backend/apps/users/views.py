@@ -32,7 +32,7 @@ def register(request):
                 user = serializer.save()
                 # Send welcome email asynchronously (or directly for now)
                 transaction.on_commit(lambda: send_welcome_email(user))
-                detail_serializer = UserDetailSerializer(user)
+                detail_serializer = UserDetailSerializer(user, context={'request': request})
                 return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.exception("Error during user registration")
@@ -42,18 +42,34 @@ def register(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def me(request):
-    serializer = UserDetailSerializer(request.user)
+    serializer = UserDetailSerializer(request.user, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
-    """Update profile (first_name, last_name, phone, etc)"""
+    """Update shared profile (first_name, last_name, phone, etc)"""
     profile, _ = Profile.objects.get_or_create(user=request.user)
     serializer = ProfileSerializer(profile, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
-        return Response(UserDetailSerializer(request.user).data)
+        return Response(UserDetailSerializer(request.user, context={'request': request}).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_worker_profile(request):
+    """Update WorkerProfile (bio, categories)"""
+    if request.user.role != User.Role.WORKER:
+        return Response(
+            {'error': 'Solo las operarias pueden actualizar su perfil de trabajo.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    worker_profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
+    serializer = WorkerProfileSerializer(worker_profile, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(UserDetailSerializer(request.user, context={'request': request}).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -93,14 +109,19 @@ def submit_verification(request):
 @permission_classes([IsAdminUser])
 def get_pending_verifications(request):
     pending = WorkerVerification.objects.filter(status='PENDING').select_related('user', 'user__profile')
+    def absolute_url(field):
+        if not field:
+            return None
+        return request.build_absolute_uri(field.url)
+
     data = []
     for v in pending:
         profile = getattr(v.user, 'profile', None)
         data.append({
             'id': v.id,
             'identity_document': v.identity_document,
-            'document_front': v.document_front.url if v.document_front else None,
-            'document_back': v.document_back.url if v.document_back else None,
+            'document_front': absolute_url(v.document_front),
+            'document_back': absolute_url(v.document_back),
             'status': v.status,
             'user': {
                 'first_name': profile.first_name if profile else '',

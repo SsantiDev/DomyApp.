@@ -7,6 +7,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media
+staticfiles/
 .venv/
 env/
 venv/
@@ -38,7 +39,6 @@ Desktop.ini
 .env.development.local
 .env.test.local
 .env.production.local
-env.ts
 
 # IDEs/Editors
 .vscode/
@@ -51,6 +51,6 @@ backend/.venv/
 Fronted/node_modules/
 Fronted/.expo/
 Backend/venv/
+Backend/staticfiles/
 
 Estructura.txt
-Fronted/config/env.ts

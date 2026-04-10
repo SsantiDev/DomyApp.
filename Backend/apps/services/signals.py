@@ -12,7 +12,6 @@ def update_worker_rating(sender, instance, **kwargs):
         new_avg = stats['rating__avg'] or 0.0
         
         # Update WorkerProfile
-        if hasattr(worker, 'worker_profile'):
-            profile = worker.worker_profile
-            profile.average_rating = new_avg
-            profile.save()
+        if hasattr(worker, 'worker_info'):
+            worker.worker_info.average_rating = new_avg
+            worker.worker_info.save()

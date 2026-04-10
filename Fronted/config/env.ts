@@ -1,4 +1,5 @@
-// Export the local IP for more stable development (doesn't depend on ngrok/SSL)
-export const API_URL = 'http://192.168.1.10:8000';
+// Production backend on Render
+export const API_URL = 'https://domyapp.onrender.com';
 
-// export const API_URL = 'https://homotypic-underzealously-diane.ngrok-free.dev';
+// export const API_URL = 'http://172.20.10.65:8000'; // local dev
+// export const API_URL = 'https://homotypic-underzealously-diane.ngrok-free.dev'; // ngrok
