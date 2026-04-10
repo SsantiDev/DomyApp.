@@ -32,7 +32,7 @@ def register(request):
                 user = serializer.save()
                 # Send welcome email asynchronously (or directly for now)
                 transaction.on_commit(lambda: send_welcome_email(user))
-                detail_serializer = UserDetailSerializer(user)
+                detail_serializer = UserDetailSerializer(user, context={'request': request})
                 return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.exception("Error during user registration")
@@ -42,7 +42,7 @@ def register(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def me(request):
-    serializer = UserDetailSerializer(request.user)
+    serializer = UserDetailSerializer(request.user, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['PATCH'])
@@ -53,7 +53,7 @@ def update_profile(request):
     serializer = ProfileSerializer(profile, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
-        return Response(UserDetailSerializer(request.user).data)
+        return Response(UserDetailSerializer(request.user, context={'request': request}).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PATCH'])
@@ -69,7 +69,7 @@ def update_worker_profile(request):
     serializer = WorkerProfileSerializer(worker_profile, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
-        return Response(UserDetailSerializer(request.user).data)
+        return Response(UserDetailSerializer(request.user, context={'request': request}).data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -112,11 +112,17 @@ def get_pending_verifications(request):
     data = []
     for v in pending:
         profile = getattr(v.user, 'profile', None)
+        def absolute_url(field):
+            if not field:
+                return None
+            url = field.url
+            return request.build_absolute_uri(url)
+
         data.append({
             'id': v.id,
             'identity_document': v.identity_document,
-            'document_front': v.document_front.url if v.document_front else None,
-            'document_back': v.document_back.url if v.document_back else None,
+            'document_front': absolute_url(v.document_front),
+            'document_back': absolute_url(v.document_back),
             'status': v.status,
             'user': {
                 'first_name': profile.first_name if profile else '',
