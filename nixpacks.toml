@@ -1,13 +1,13 @@
 [phases.setup]
-nixPkgs = ["python311", "postgresql"]
+nixPkgs = ["python311", "gcc", "postgresql"]
 
 [phases.install]
-cmds = ["pip install -r Backend/requirements.txt"]
+cmds = ["python3 -m pip install --upgrade pip", "python3 -m pip install -r Backend/requirements.txt"]
 
 [phases.build]
 cmds = [
-    "cd Backend && python manage.py collectstatic --noinput",
-    "cd Backend && python manage.py migrate --noinput"
+    "cd Backend && python3 manage.py collectstatic --noinput",
+    "cd Backend && python3 manage.py migrate --noinput"
 ]
 
 [start]
