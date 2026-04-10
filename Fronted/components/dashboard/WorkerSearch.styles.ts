@@ -32,11 +32,10 @@ export const getStyles = (colors: any) => StyleSheet.create({
         marginLeft: SPACING.sm,
         color: colors.text,
         fontSize: 15,
-        paddingVertical: SPACING.sm,
     },
     filtersRow: {
         flexDirection: 'row',
-        marginBottom: SPACING.lg,
+        marginBottom: SPACING.sm,
     },
     filterChip: {
         paddingHorizontal: SPACING.md,
@@ -154,11 +153,19 @@ export const getStyles = (colors: any) => StyleSheet.create({
 
     // ── Rating Filter Row ──────────────────────────────────────────────────────
     ratingFilterRow: {
+        flexDirection: 'column',
+        marginBottom: SPACING.md,
+        gap: SPACING.sm,
+    },
+    ratingFilterLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.md,
+        gap: SPACING.xs,
+    },
+    ratingFilterRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
         flexWrap: 'wrap',
-        gap: SPACING.sm,
     },
     ratingFilterLabel: {
         fontSize: 12,
@@ -168,12 +175,12 @@ export const getStyles = (colors: any) => StyleSheet.create({
     filterChipSmall: {
         paddingVertical: SPACING.xs,
         paddingHorizontal: SPACING.smd,
+        marginRight: SPACING.sm,
     },
     sortToggle: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: SPACING.xs,
-        marginLeft: SPACING.xs,
     },
     sortToggleText: {
         fontSize: 12,

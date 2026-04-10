@@ -2,15 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { getStyles } from './WorkerSearch.styles';
-import { Search, MapPin, Star, User, Filter, CheckCircle, TrendingUp } from 'lucide-react-native';
+import { Search, MapPin, Star, User, Filter, CheckCircle, TrendingUp, ChevronUp, ChevronDown } from 'lucide-react-native';
 import { useWorkers } from '../../hooks/useWorkers';
 import { Worker } from '../../types/user';
 
 const CITIES = ['Medellín', 'Envigado', 'Sabaneta', 'Bello'];
 const RATING_FILTERS: { label: string; value: number | undefined }[] = [
     { label: 'Todas', value: undefined },
-    { label: '4+ ★', value: 4 },
-    { label: '3+ ★', value: 3 },
+    { label: '4+', value: 4 },
+    { label: '3+', value: 3 },
 ];
 
 export const WorkerSearch = () => {
@@ -95,33 +95,37 @@ export const WorkerSearch = () => {
 
             {/* Rating Filter Row */}
             <View style={styles.ratingFilterRow}>
-                <TrendingUp size={14} color={colors.textMuted} />
-                <Text style={styles.ratingFilterLabel}>Calificación mínima:</Text>
-                {RATING_FILTERS.map((rf) => {
-                    const isActive = minRating === rf.value;
-                    return (
-                        <TouchableOpacity
-                            key={String(rf.value)}
-                            style={[styles.filterChip, styles.filterChipSmall, isActive && styles.filterChipActive]}
-                            onPress={() => setMinRating(rf.value)}
-                        >
-                            <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
-                                {rf.label}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
+                <View style={styles.ratingFilterLeft}>
+                    <Star size={13} color={colors.warning} fill={colors.warning} />
+                    <Text style={styles.ratingFilterLabel}>Calificación mínima:</Text>
+                </View>
+                <View style={styles.ratingFilterRight}>
+                    {RATING_FILTERS.map((rf) => {
+                        const isActive = minRating === rf.value;
+                        return (
+                            <TouchableOpacity
+                                key={String(rf.value)}
+                                style={[styles.filterChip, styles.filterChipSmall, isActive && styles.filterChipActive]}
+                                onPress={() => setMinRating(rf.value)}
+                            >
+                                <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
+                                    {rf.label}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
 
-                {/* Sort Toggle */}
-                <TouchableOpacity
-                    style={[styles.filterChip, styles.filterChipSmall, styles.sortToggle]}
-                    onPress={() => setSortAsc(prev => !prev)}
-                >
-                    <Star size={11} color={colors.primary} fill={colors.primary} />
-                    <Text style={styles.sortToggleText}>
-                        {sortAsc ? 'Menor → Mayor' : 'Mayor → Menor'}
-                    </Text>
-                </TouchableOpacity>
+                    {/* Sort Toggle */}
+                    <TouchableOpacity
+                        style={[styles.filterChip, styles.filterChipSmall, styles.sortToggle]}
+                        onPress={() => setSortAsc(prev => !prev)}
+                    >
+                        {sortAsc ? <ChevronUp size={13} color={colors.primary} /> : <ChevronDown size={13} color={colors.primary} />}
+                        <Text style={styles.sortToggleText}>
+                            {sortAsc ? 'Menor' : 'Mayor'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Worker List - FlatList horizontal */}

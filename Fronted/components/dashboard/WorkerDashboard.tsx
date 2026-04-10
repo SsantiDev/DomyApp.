@@ -37,25 +37,21 @@ export default function WorkerDashboard() {
   };
 
   const handleAccept = async (id: number) => {
-    if (user?.verification?.status !== 'APPROVED') {
-      Alert.alert(
-        'Perfil no verificado',
-        'Debes completar la verificación de tu identidad para poder aceptar servicios.',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Verificar ahora', onPress: () => router.push('/verification') }
-        ]
-      );
-      return;
-    }
-
     try {
       await acceptService.mutateAsync(id);
       Alert.alert('¡Éxito!', 'Has aceptado el servicio correctamente.');
     } catch (error: any) {
+      const message = error?.response?.data?.error || 'No se pudo aceptar el servicio.';
+      const isVerificationError = error?.response?.status === 403 && message.includes('verificación');
       Alert.alert(
-        'Servicio no disponible', 
-        error?.response?.data?.error || 'No se pudo aceptar el servicio. Es posible que otra operaria ya lo haya tomado.'
+        isVerificationError ? 'Perfil no verificado' : 'Servicio no disponible',
+        message,
+        isVerificationError
+          ? [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Verificar ahora', onPress: () => router.push('/verification') },
+            ]
+          : [{ text: 'OK' }]
       );
     }
   };
