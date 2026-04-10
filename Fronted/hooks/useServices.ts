@@ -18,7 +18,9 @@ export const useServiceRequests = () => {
         queryFn: async () => {
             const { data } = await api.get<ServiceRequest[]>('/services/requests/');
             return data;
-        }
+        },
+        staleTime: 0,           // Always fetch fresh data on mount
+        refetchInterval: 10000, // Poll every 10 seconds to reflect status changes from worker
     });
 };
 
