@@ -219,7 +219,8 @@ export const getStyles = (colors: any) => StyleSheet.create({
     // ── Service Carousel ──────────────────────────────────────────────────────
     carouselContainer: {
         marginHorizontal: -SPACING.lg,
-        paddingLeft: SPACING.lg,
+        marginTop: SPACING.sm,
+        overflow: 'visible',
     },
     serviceCard: {
         width: 148,
@@ -228,7 +229,6 @@ export const getStyles = (colors: any) => StyleSheet.create({
         marginRight: SPACING.md,
         borderWidth: 1,
         borderColor: colors.border,
-        overflow: 'hidden',
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -239,6 +239,8 @@ export const getStyles = (colors: any) => StyleSheet.create({
         height: 72,
         backgroundColor: colors.primary,
         overflow: 'hidden',
+        borderTopLeftRadius: RADIUS.xl,
+        borderTopRightRadius: RADIUS.xl,
     },
     cardHeaderCircle1: {
         position: 'absolute',
@@ -259,12 +261,13 @@ export const getStyles = (colors: any) => StyleSheet.create({
         bottom: -18,
     },
     cardBadge: {
+        position: 'absolute',
+        top: -26,
         width: 52,
         height: 52,
         borderRadius: 26,
         backgroundColor: colors.surface,
         alignSelf: 'center',
-        marginTop: -26,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 3,

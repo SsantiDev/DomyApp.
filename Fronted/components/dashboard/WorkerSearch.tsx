@@ -143,6 +143,7 @@ export const WorkerSearch = () => {
                     data={workers}
                     keyExtractor={item => String(item.id)}
                     showsHorizontalScrollIndicator={false}
+                    style={styles.workerFlatList}
                     contentContainerStyle={styles.workerList}
                     renderItem={({ item: worker }: { item: Worker }) => (
                         <View style={styles.workerCard}>
