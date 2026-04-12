@@ -56,4 +56,24 @@ export const getStyles = (colors: ThemeColors) => StyleSheet.create({
         textAlignVertical: 'top',
         marginBottom: SPACING.lg,
     },
+    bottomTabBar: {
+        flexDirection: 'row',
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+        backgroundColor: colors.surface,
+    },
+    tabItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: 12,
+    },
+    tabEmoji: {
+        fontSize: 22,
+        marginBottom: 3,
+    },
+    tabLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
 });

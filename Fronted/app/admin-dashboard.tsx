@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image, Modal, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from '../components/ui/NativeCard';
@@ -13,16 +14,26 @@ import { NativeMainLayout } from '../components/layout/NativeMainLayout';
 import { getStyles } from './admin-dashboard.styles';
 
 import { AdminDashboard as ServiceTracking } from '../components/dashboard/AdminDashboard';
+import { UserManagement } from '../components/dashboard/UserManagement';
 
-export default function AdminDashboard() {
+const TABS = [
+    { key: 'SERVICES', emoji: '🏠', label: 'Inicio' },
+    { key: 'VERIFICATIONS', emoji: '🛡️', label: 'Verificar' },
+    { key: 'USERS', emoji: '👥', label: 'Usuarios' },
+] as const;
+
+type TabKey = typeof TABS[number]['key'];
+
+export function AdminDashboardScreen() {
     const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
     const router = useRouter();
     const { data: pending, isLoading, refetch } = useAdminPendingVerifications();
     const processMutation = useProcessVerification();
     const [selectedWorker, setSelectedWorker] = React.useState<any>(null);
     const [rejectionReason, setRejectionReason] = React.useState('');
     const [showRejectModal, setShowRejectModal] = React.useState(false);
-    const [activeView, setActiveView] = React.useState<'SERVICES' | 'VERIFICATIONS'>('SERVICES');
+    const [activeView, setActiveView] = React.useState<TabKey>('SERVICES');
 
     const handleAction = async (pk: number, action: 'approve' | 'reject', reason: string = '') => {
         try {
@@ -52,26 +63,16 @@ export default function AdminDashboard() {
         );
     }
 
+    const bottomTabHeight = 75 + (insets.bottom > 0 ? insets.bottom : 0);
+    const bottomTabPaddingBottom = insets.bottom > 0 ? insets.bottom + 8 : 16;
+
     return (
-        <NativeMainLayout>
-            <AppHeader />
-            <View style={{ flexDirection: 'row', padding: 10, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                <TouchableOpacity 
-                    style={{ flex: 1, padding: 12, alignItems: 'center', borderBottomWidth: activeView === 'SERVICES' ? 2 : 0, borderBottomColor: colors.primary }}
-                    onPress={() => setActiveView('SERVICES')}
-                >
-                    <Text style={{ fontWeight: activeView === 'SERVICES' ? 'bold' : 'normal', color: activeView === 'SERVICES' ? colors.primary : colors.textMuted }}>Seguimiento Central</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={{ flex: 1, padding: 12, alignItems: 'center', borderBottomWidth: activeView === 'VERIFICATIONS' ? 2 : 0, borderBottomColor: colors.primary }}
-                    onPress={() => setActiveView('VERIFICATIONS')}
-                >
-                    <Text style={{ fontWeight: activeView === 'VERIFICATIONS' ? 'bold' : 'normal', color: activeView === 'VERIFICATIONS' ? colors.primary : colors.textMuted }}>Verificar Identidades</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={{ flex: 1 }}>
 
             {activeView === 'SERVICES' ? (
                 <ServiceTracking />
+            ) : activeView === 'USERS' ? (
+                <UserManagement />
             ) : (
                 <View style={styles.container}>
                     <View style={{ padding: SPACING.lg, paddingBottom: 0 }}>
@@ -212,6 +213,34 @@ export default function AdminDashboard() {
                     </Modal>
                 </View>
             )}
+
+            {/* Bottom Tab Bar */}
+            <View style={[styles.bottomTabBar, { height: bottomTabHeight, paddingBottom: bottomTabPaddingBottom }]}>
+                {TABS.map((tab) => {
+                    const active = activeView === tab.key;
+                    return (
+                        <TouchableOpacity
+                            key={tab.key}
+                            style={styles.tabItem}
+                            onPress={() => setActiveView(tab.key)}
+                        >
+                            <Text style={styles.tabEmoji}>{tab.emoji}</Text>
+                            <Text style={[styles.tabLabel, { color: active ? colors.primary : colors.textMuted }]}>
+                                {tab.label}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
+        </View>
+    );
+}
+
+export default function AdminDashboardRoute() {
+    return (
+        <NativeMainLayout>
+            <AppHeader />
+            <AdminDashboardScreen />
         </NativeMainLayout>
     );
 }
