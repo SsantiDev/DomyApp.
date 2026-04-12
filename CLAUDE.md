@@ -95,3 +95,29 @@ background: '#ffffff' / '#0f0f23'
 surface:    '#f8fafc' / '#1a1a2e'
 categoryBg: '#f0f4ff' / '#1e1e3f'
 ```
+
+---
+
+## Token hygiene
+
+**This file**: stay under 200 lines. Index pointing to docs, not a repository. Never duplicate system prompt info.
+
+**Agent behavior**
+- Check conversation context before calling Read/Grep/Glob — never re-read known content.
+- Batch independent tool calls in parallel (single response, multiple tool uses).
+- Prefer direct edits when file content is already in context — skip the read.
+- Use /plan before complex multi-step tasks.
+- Delegate simple subtasks (search, grep, formatting) to Haiku via `model: "haiku"` in Agent tool.
+- Responses: short and direct. No restating user input. No trailing summaries.
+
+**Model routing**
+- Complex reasoning / architecture / code review → Opus (default)
+- Simple search / formatting / exploration → Haiku (~80% cost savings on delegated subtasks)
+
+**User tactics** (remind when asked about cost)
+- `/clear` before switching topics — stale context = #1 token waste.
+- `/compact` at ~60% context capacity (auto-compact at 95% is wasteful).
+- `/compact` before any pause >5 min (prompt cache expires after 5 min inactivity).
+- `/cost` and `/context` — check periodically to detect leaks.
+- Batch related requests in one message — 3 separate = 3x history re-reads.
+- Disconnect unused MCP servers (each injects tool defs into every message).
