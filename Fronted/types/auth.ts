@@ -33,6 +33,7 @@ export interface UserDetail {
     first_name: string;
     last_name: string;
     role: UserRole;
+    is_active: boolean;
     profile: ClientProfile | WorkerProfile | null;
     worker_info?: {
         bio: string;
@@ -41,10 +42,21 @@ export interface UserDetail {
         categories: number[];
     };
     verification?: {
+        identity_document?: string;
         is_verified: boolean;
         status: 'PENDING' | 'APPROVED' | 'REJECTED';
         rejection_reason?: string;
     };
+}
+
+export interface AdminUser {
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: 'CLIENT' | 'WORKER' | 'ADMIN';
+    is_active: boolean;
+    date_joined: string;
 }
 
 // Legacy alias

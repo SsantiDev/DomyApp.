@@ -99,6 +99,9 @@ api.interceptors.response.use(
         // Only log unexpected errors, not normal auth failures handled by the UI
         if (!isAuthEndpoint || status !== 401) {
             console.warn(`[API] [${status}] ${url}: ${error.message}`);
+            if (error.response?.data) {
+                console.warn('[API] Response data:', JSON.stringify(error.response.data));
+            }
         }
 
         return Promise.reject(error);
