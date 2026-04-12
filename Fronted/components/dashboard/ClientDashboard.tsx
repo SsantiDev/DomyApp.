@@ -43,7 +43,7 @@ export default function ClientDashboard() {
     const {
         isModalVisible,
         isLoading,
-        activeRequest,
+        activeRequests,
         completedRequests,
         categories,
         navigateToDetail,
@@ -51,8 +51,8 @@ export default function ClientDashboard() {
     } = useClientDashboard();
 
     const rateService = useRateService();
-    // Add chat state
-    const [showChat, setShowChat] = React.useState(false);
+    // Chat: track which service's chat is open
+    const [chatServiceId, setChatServiceId] = React.useState<number | null>(null);
 
     // Rating State
     const [ratingService, setRatingService] = React.useState<any>(null);
@@ -131,24 +131,44 @@ export default function ClientDashboard() {
                 <ArrowRight size={20} color="#fff" />
             </TouchableOpacity>
 
-            {/* Servicio Activo */}
-            {activeRequest && (
+            {/* Servicios Activos */}
+            {activeRequests.length > 0 && (
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Servicio activo</Text>
-                    <ActiveServiceCard
-                        activeRequest={activeRequest}
-                        onNavigate={navigateToDetail}
-                        onChat={() => setShowChat(true)}
-                    />
+                    <Text style={styles.sectionTitle}>
+                        {activeRequests.length === 1 ? 'Servicio activo' : `Servicios activos (${activeRequests.length})`}
+                    </Text>
+                    {activeRequests.length === 1 ? (
+                        <ActiveServiceCard
+                            activeRequest={activeRequests[0]}
+                            onNavigate={navigateToDetail}
+                            onChat={() => setChatServiceId(activeRequests[0].id!)}
+                        />
+                    ) : (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ gap: SPACING.md, paddingRight: SPACING.lg }}
+                        >
+                            {activeRequests.map((req) => (
+                                <View key={req.id} style={{ width: 300 }}>
+                                    <ActiveServiceCard
+                                        activeRequest={req}
+                                        onNavigate={navigateToDetail}
+                                        onChat={() => setChatServiceId(req.id!)}
+                                    />
+                                </View>
+                            ))}
+                        </ScrollView>
+                    )}
                 </View>
             )}
 
             {/* Chat Overlay */}
-            {activeRequest && showChat && (
+            {chatServiceId !== null && (
                 <ChatRoom
-                    serviceId={activeRequest.id!}
-                    visible={showChat}
-                    onClose={() => setShowChat(false)}
+                    serviceId={chatServiceId}
+                    visible={true}
+                    onClose={() => setChatServiceId(null)}
                     defaultTab="COORDINATION"
                 />
             )}

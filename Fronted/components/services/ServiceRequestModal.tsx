@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     ScrollView,
     TextInput,
-    Platform
+    Platform,
+    Alert
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/NativeButton';
@@ -18,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useCategories, useCreateServiceRequest } from '../../hooks/useServices';
 import { Category } from '../../types/services';
+import { LocationPickerMap } from './LocationPickerMap';
 
 interface Props {
     visible: boolean;
@@ -54,6 +56,8 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
     const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
     const [details, setDetails] = useState('');
     const [address, setAddress] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
 
     const formatDate = (val: Date) => {
         return val.toLocaleString('es-ES', {
@@ -97,6 +101,8 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
         setDate(new Date());
         setDetails('');
         setAddress('');
+        setLatitude(null);
+        setLongitude(null);
     };
 
     const handleClose = () => {
@@ -112,12 +118,23 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
     const handleConfirm = async () => {
         if (!selectedCategory) return;
 
+        if (address.trim() === '') {
+            Alert.alert('Error', 'Por favor ingresa una dirección válida');
+            return;
+        }
+
         try {
             await createRequest.mutateAsync({
                 category: selectedCategory.id,
                 scheduled_at: date.toISOString(),
-                address: address || 'Dirección de prueba',
-                details: details
+                address: address,
+                details: details,
+                ...(latitude !== null && longitude !== null
+                    ? {
+                        latitude: parseFloat(latitude.toFixed(6)),
+                        longitude: parseFloat(longitude.toFixed(6)),
+                    }
+                    : {}),
             });
             setStep('SUCCESS');
         } catch (error) {
@@ -213,12 +230,15 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
                                 <MapPin size={16} color={colors.primary} />
                                 <Text style={styles.sectionHeaderText}>Dirección</Text>
                             </View>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Ej: Calle 123 #45-67, Apto 501"
-                                placeholderTextColor={colors.textLight + '80'}
-                                value={address}
-                                onChangeText={setAddress}
+                            <LocationPickerMap
+                                initialAddress={address}
+                                initialLat={latitude ?? undefined}
+                                initialLng={longitude ?? undefined}
+                                onLocationSelected={(lat, lng, addr) => {
+                                    setLatitude(lat);
+                                    setLongitude(lng);
+                                    setAddress(addr);
+                                }}
                             />
                         </View>
 

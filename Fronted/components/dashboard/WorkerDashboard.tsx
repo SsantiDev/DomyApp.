@@ -252,60 +252,78 @@ export default function WorkerDashboard() {
           </View>
 
           {activeRequests.length > 0 ? (
-            activeRequests.map(req => (
-              <Card variant="flat" key={req.id} style={styles.serviceCard}>
+            activeRequests.map(req => {
+              const isInProgress = req.status === 'IN_PROGRESS';
+              const accentColor = isInProgress ? colors.warning : colors.success;
+              return (
+              <Card variant="flat" key={req.id} style={[styles.serviceCard, { borderLeftWidth: 3, borderLeftColor: accentColor }]}>
+                {/* HEADER */}
                 <View style={styles.cardHeader}>
                   <View style={styles.categoryInfo}>
                     <Text style={styles.categoryTitle}>{req.category_name}</Text>
                     <View style={styles.row}>
+                      <Calendar size={12} color={colors.textLight} />
+                      <Text style={styles.timeText}>
+                        {new Date(req.scheduled_at).toLocaleDateString([], { day: '2-digit', month: 'short' })}
+                      </Text>
+                      <Text style={[styles.timeText, { color: colors.textMuted }]}> · </Text>
                       <Clock size={12} color={colors.textLight} />
                       <Text style={styles.timeText}>
                         {new Date(req.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Text>
                     </View>
                   </View>
-                  <View style={[
-                    styles.statusBadge,
-                    { backgroundColor: req.status === 'IN_PROGRESS' ? colors.warning + '15' : colors.success + '15' }
-                  ]}>
-                    <Text style={[
-                      styles.statusText,
-                      { color: req.status === 'IN_PROGRESS' ? colors.warning : colors.success }
-                    ]}>
-                      {req.status === 'IN_PROGRESS' ? 'En Labor' : 'Asignado'}
+                  <View style={[styles.statusBadge, { backgroundColor: accentColor + '18' }]}>
+                    <View style={[styles.statusDot, { backgroundColor: accentColor }]} />
+                    <Text style={[styles.statusText, { color: accentColor }]}>
+                      {isInProgress ? 'En Labor' : 'Asignado'}
                     </Text>
                   </View>
                 </View>
 
+                {/* MAIN */}
                 <View style={styles.cardBody}>
                   <View style={styles.detailRow}>
                     <MapPin size={14} color={colors.textLight} />
-                    <Text style={styles.detailText}>{req.address}</Text>
+                    <Text style={styles.detailText} numberOfLines={2}>{req.address}</Text>
                   </View>
+                  {req.total_price && (
+                    <View style={styles.detailRow}>
+                      <Wallet size={14} color={colors.textLight} />
+                      <Text style={[styles.detailText, { color: colors.primary, fontWeight: '700' }]}>
+                        ${Number(req.total_price).toLocaleString()}
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
-                <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border + '50', paddingTop: 12, marginTop: 4, alignItems: 'center', justifyContent: 'space-between' }}>
+                {/* FOOTER */}
+                <View style={styles.activeCardFooter}>
                   <TouchableOpacity
-                    style={[styles.cardFooter, { borderTopWidth: 0, paddingVertical: 8 }]}
+                    style={styles.footerDetailBtn}
                     onPress={() => router.push(`/service-detail/${req.id}`)}
+                    activeOpacity={0.7}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.primary }}>Ver detalle</Text>
+                    <ChevronRight size={14} color={colors.primary} />
+                    <Text style={styles.footerDetailText}>Ver detalle</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, elevation: 1 }}
+                    style={styles.footerChatBtn}
                     onPress={() => setActiveChatId(req.id!)}
+                    activeOpacity={0.8}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#fff', marginRight: 4 }}>Chat</Text>
                     <MessageCircle size={14} color="#fff" />
+                    <Text style={styles.footerChatText}>Chat</Text>
                     {(req.unread_messages_count || 0) > 0 && (
-                        <View style={{ position: 'absolute', top: -5, right: -5, backgroundColor: colors.danger, width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: colors.surface }}>
-                            <Text style={{ color: '#fff', fontSize: 9, fontWeight: 'bold' }}>{req.unread_messages_count}</Text>
-                        </View>
+                      <View style={styles.unreadBadge}>
+                        <Text style={styles.unreadText}>{req.unread_messages_count}</Text>
+                      </View>
                     )}
                   </TouchableOpacity>
                 </View>
               </Card>
-            ))
+              );
+            })
           ) : (
             <Card style={styles.emptyCard} variant="outlined">
               <Clock size={32} color={colors.textMuted} strokeWidth={1} />
