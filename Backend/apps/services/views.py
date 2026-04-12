@@ -24,12 +24,22 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             return ServiceRequest.objects.none()
             
         if user.role == 'ADMIN':
-            return ServiceRequest.objects.all()
+            queryset = ServiceRequest.objects.all()
         elif user.role == 'WORKER':
             # Workers only see requests directly assigned to them in this viewset
             # Pending unassigned requests will be fetched via ServiceRequestNotificationViewSet
-            return ServiceRequest.objects.filter(worker=user)
-        return ServiceRequest.objects.filter(client=user)
+            queryset = ServiceRequest.objects.filter(worker=user)
+        else:
+            queryset = ServiceRequest.objects.filter(client=user)
+
+        status_filter = self.request.query_params.getlist('status')
+        if status_filter:
+            valid_statuses = [s[0] for s in ServiceRequest.Status.choices]
+            status_filter = [s for s in status_filter if s in valid_statuses]
+            if status_filter:
+                queryset = queryset.filter(status__in=status_filter)
+
+        return queryset.select_related('worker', 'client', 'category', 'review').order_by('-created_at')
 
     def perform_create(self, serializer):
         # Create the Service Request
