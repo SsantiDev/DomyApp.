@@ -12,7 +12,7 @@ import { getStyles } from './_profile.styles';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useGetProfile, useUpdateProfile, useUploadProfilePicture } from '../../hooks/useProfile';
-import { ClientProfile, WorkerProfile } from '../../types/auth';
+import { ClientProfile } from '../../types/auth';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileDataSection from '../../components/profile/ProfileDataSection';
 import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
@@ -36,8 +36,10 @@ export default function ProfileScreen() {
                 const p = user.profile as ClientProfile;
                 setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
             } else if (user.role === 'WORKER') {
-                const p = user.profile as WorkerProfile;
-                setForm({ bio: p.bio, identity_document: p.identity_document });
+                setForm({
+                    bio: user.worker_info?.bio ?? '',
+                    identity_document: user.verification?.identity_document ?? '',
+                });
                 setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }
@@ -101,8 +103,10 @@ export default function ProfileScreen() {
                 const p = user.profile as ClientProfile;
                 setForm({ address: p.address, phone_number: p.phone_number, city: p.city });
             } else if (user.role === 'WORKER') {
-                const p = user.profile as WorkerProfile;
-                setForm({ bio: p.bio, identity_document: p.identity_document });
+                setForm({
+                    bio: user.worker_info?.bio ?? '',
+                    identity_document: user.verification?.identity_document ?? '',
+                });
                 setSelectedCategories(user.worker_info?.categories ?? []);
             }
         }

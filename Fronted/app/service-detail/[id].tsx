@@ -12,6 +12,7 @@ import {
     TextInput,
     Alert,
 } from 'react-native';
+
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
@@ -42,6 +43,17 @@ import {
     CheckCircle,
     ShieldAlert
 } from 'lucide-react-native';
+
+// MapView and Marker are only imported on native to avoid crashing on web
+let MapView: any = null;
+let Marker: any = null;
+if (Platform.OS !== 'web') {
+    // Dynamic require so Metro does not bundle react-native-maps on web
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const RNMaps = require('react-native-maps');
+    MapView = RNMaps.default;
+    Marker = RNMaps.Marker;
+}
 
 export default function ServiceDetailScreen() {
     const { id } = useLocalSearchParams();
@@ -202,16 +214,35 @@ export default function ServiceDetailScreen() {
             />
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Map View Placeholder (react-native-maps not supported on web) */}
-                <View style={[styles.mapContainer, { borderColor: colors.border, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 12 }]}>
-                    <View style={{ alignItems: 'center', gap: 8 }}>
-                        <MapPin size={40} color={colors.primary} />
-                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, textAlign: 'center', paddingHorizontal: 16 }}>
-                            {service.address}
-                        </Text>
-                    </View>
+                {/* Map View */}
+                <View style={[styles.mapContainer, { borderColor: colors.border }]}>
+                    {Platform.OS !== 'web' ? (
+                        <MapView
+                            style={styles.map}
+                            scrollEnabled={false}
+                            region={{
+                                latitude: destCoords.latitude,
+                                longitude: destCoords.longitude,
+                                latitudeDelta: 0.005,
+                                longitudeDelta: 0.005,
+                            }}
+                        >
+                            <Marker
+                                coordinate={destCoords}
+                                draggable={false}
+                                pinColor={colors.primary}
+                            />
+                        </MapView>
+                    ) : (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+                            <MapPin size={40} color={colors.primary} />
+                            <Text style={{ color: colors.text, fontWeight: '700', fontSize: 16, textAlign: 'center', paddingHorizontal: 16 }}>
+                                {service.address}
+                            </Text>
+                        </View>
+                    )}
                     <TouchableOpacity
-                        style={[styles.navBtn, { backgroundColor: colors.primary, position: 'relative', bottom: 'auto', right: 'auto' }]}
+                        style={[styles.navBtn, { backgroundColor: colors.primary }]}
                         onPress={handleOpenNavigation}
                     >
                         <Navigation size={20} color="#ffffff" />

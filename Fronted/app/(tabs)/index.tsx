@@ -6,7 +6,7 @@ import ClientDashboard from '../../components/dashboard/ClientDashboard';
 import WorkerDashboard from '../../components/dashboard/WorkerDashboard';
 import { Text } from '@/components/Themed';
 import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
-import { AdminDashboard } from '../../components/dashboard/AdminDashboard';
+import { AdminDashboardScreen } from '../admin-dashboard';
 
 export default function TabIndexScreen() {
   const { user, isLoading } = useAuth();
@@ -30,7 +30,7 @@ export default function TabIndexScreen() {
 
   return (
     <NativeMainLayout>
-      {user.role === 'ADMIN' ? <AdminDashboard /> : user.role === 'WORKER' ? <WorkerDashboard /> : <ClientDashboard />}
+      {user.role === 'ADMIN' ? <AdminDashboardScreen /> : user.role === 'WORKER' ? <WorkerDashboard /> : <ClientDashboard />}
     </NativeMainLayout>
   );
 }
