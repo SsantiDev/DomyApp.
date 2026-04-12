@@ -8,8 +8,8 @@ export const useClientDashboard = () => {
     const { data: requests, isLoading: loadingRequests } = useServiceRequests();
     const { data: categories, isLoading: loadingCats } = useCategories();
 
-    const activeRequest = useMemo(() => {
-        if (!requests) return undefined;
+    const activeRequests = useMemo(() => {
+        if (!requests) return [];
         const statusPriority: Record<string, number> = { 'IN_PROGRESS': 0, 'ACCEPTED': 1, 'PENDING': 2 };
         return requests
             .filter(r => r.status === 'PENDING' || r.status === 'ACCEPTED' || r.status === 'IN_PROGRESS')
@@ -17,7 +17,7 @@ export const useClientDashboard = () => {
                 const pa = statusPriority[a.status ?? ''] ?? 3;
                 const pb = statusPriority[b.status ?? ''] ?? 3;
                 return pa !== pb ? pa - pb : (b.id ?? 0) - (a.id ?? 0);
-            })[0];
+            });
     }, [requests]);
 
     const completedRequests = useMemo(() =>
@@ -37,7 +37,7 @@ export const useClientDashboard = () => {
     return {
         isModalVisible,
         isLoading: loadingRequests || loadingCats,
-        activeRequest,
+        activeRequests,
         completedRequests,
         categories,
         navigateToDetail,

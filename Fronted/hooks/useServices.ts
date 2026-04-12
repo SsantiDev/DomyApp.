@@ -87,6 +87,7 @@ export const useCompleteService = () => {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ['service-requests'] });
             queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+            queryClient.invalidateQueries({ queryKey: ['service-history'] });
         }
     });
 };
@@ -101,6 +102,7 @@ export const useCancelService = () => {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ['service-requests'] });
             queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+            queryClient.invalidateQueries({ queryKey: ['service-history'] });
         }
     });
 };
@@ -142,4 +144,14 @@ export const useRejectService = () => {
         }
     });
 };
+
+export function useServiceHistory() {
+    return useQuery({
+        queryKey: ['service-history'],
+        queryFn: () =>
+            api.get<ServiceRequest[]>('/services/requests/?status=COMPLETED&status=CANCELLED')
+                .then(r => r.data),
+        staleTime: 0,
+    });
+}
 
