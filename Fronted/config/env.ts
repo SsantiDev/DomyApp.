@@ -1,5 +1,16 @@
-// Production backend on Render
-export const API_URL = 'https://domyapp.onrender.com';
+import Constants from 'expo-constants';
+import autoIp from './auto-ip.json';
 
-// export const API_URL = 'http://172.20.10.65:8000'; // local dev
-// export const API_URL = 'https://homotypic-underzealously-diane.ngrok-free.dev'; // ngrok
+const getBackendUrl = () => {
+    // En producción (cuando no es __DEV__), usamos siempre el backend en Render
+    if (!__DEV__) {
+        return 'https://domyapp.onrender.com';
+    }
+
+    // En desarrollo, usamos la IP detectada automáticamente por el script
+    const localIp = autoIp.localIp || 'localhost';
+
+    return `http://${localIp}:8000`;
+};
+
+export const API_URL = getBackendUrl();
