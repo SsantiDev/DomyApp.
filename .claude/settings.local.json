@@ -6,7 +6,10 @@
       "Bash(.venv/Scripts/python manage.py migrate)",
       "Bash(.venv/Scripts/python manage.py migrate services 0004 --fake)",
       "Bash(.venv/Scripts/python manage.py check)",
-      "Bash(.venv/Scripts/python manage.py shell -c ':*)"
+      "Bash(.venv/Scripts/python manage.py shell -c ':*)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(node -e \"const p = require\\('./node_modules/expo-location/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(grep -n \"width:|height:|fontSize:|padding:|margin:|borderWidth:|size=\\\\|#[0-9a-f]\\\\|rgba\\(\" /home/spsp/DomyApp./Fronted/app/service-detail/[id].tsx)"
     ]
   }
 }
