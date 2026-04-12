@@ -2,6 +2,7 @@ import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Clock } from 'lucide-react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { AppHeader } from '../../components/layout/AppHeader';
@@ -43,6 +44,13 @@ export default function TabLayout() {
         options={{
           title: 'Inicio',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: 'Historial',
+          tabBarIcon: ({ color }) => <Clock size={24} color={color} style={{ marginBottom: -3 }} />,
         }}
       />
       <Tabs.Screen
