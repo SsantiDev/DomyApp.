@@ -75,6 +75,15 @@ class WorkerAdminDetailSerializer(serializers.ModelSerializer):
         model = WorkerProfile
         fields = ('id', 'user', 'bio', 'is_available', 'average_rating', 'verification')
 
+class AdminUserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source='profile.first_name', read_only=True)
+    last_name = serializers.CharField(source='profile.last_name', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'is_active', 'date_joined')
+        read_only_fields = ('id', 'email', 'first_name', 'last_name', 'date_joined')
+
 class WorkerListSerializer(serializers.ModelSerializer):
     """Lite serializer for public search/listing"""
     first_name = serializers.CharField(source='user.profile.first_name')

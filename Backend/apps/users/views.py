@@ -5,13 +5,14 @@ from rest_framework import status, viewsets, pagination
 from django.db import models, transaction
 import logging
 from .serializers import (
-    UserDetailSerializer, 
+    UserDetailSerializer,
     UserRegistrationSerializer,
     WorkerVerificationSerializer,
     WorkerAdminDetailSerializer,
     ProfileSerializer,
     WorkerProfileSerializer,
-    WorkerListSerializer
+    WorkerListSerializer,
+    AdminUserSerializer,
 )
 from .models import User, Profile, WorkerProfile, WorkerVerification
 from .permissions import IsAdminUser
@@ -59,7 +60,7 @@ def update_profile(request):
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_worker_profile(request):
-    """Update WorkerProfile (bio, categories)"""
+    """Update WorkerProfile (bio, categories) and identity_document in WorkerVerification"""
     if request.user.role != User.Role.WORKER:
         return Response(
             {'error': 'Solo las operarias pueden actualizar su perfil de trabajo.'},
@@ -67,10 +68,18 @@ def update_worker_profile(request):
         )
     worker_profile, _ = WorkerProfile.objects.get_or_create(user=request.user)
     serializer = WorkerProfileSerializer(worker_profile, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(UserDetailSerializer(request.user, context={'request': request}).data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+
+    identity_document = request.data.get('identity_document')
+    if identity_document is not None:
+        verification, _ = WorkerVerification.objects.get_or_create(user=request.user)
+        if not verification.is_verified:
+            verification.identity_document = identity_document
+            verification.save(update_fields=['identity_document'])
+
+    return Response(UserDetailSerializer(request.user, context={'request': request}).data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -219,6 +228,83 @@ def confirm_password_reset(request):
         
     except PasswordResetCode.DoesNotExist:
         return Response({'error': 'Código o correo inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def admin_user_list(request):
+    """GET /admin/users/ — paginated list of all users with optional filters."""
+    queryset = User.objects.select_related('profile').all().order_by('date_joined')
+
+    role = request.query_params.get('role')
+    if role:
+        role = role.upper()
+        if role not in {User.Role.CLIENT, User.Role.WORKER, User.Role.ADMIN}:
+            return Response(
+                {'error': 'role debe ser CLIENT, WORKER o ADMIN.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        queryset = queryset.filter(role=role)
+
+    is_active_param = request.query_params.get('is_active')
+    if is_active_param is not None:
+        if is_active_param.lower() not in ('true', 'false'):
+            return Response(
+                {'error': 'is_active debe ser true o false.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        queryset = queryset.filter(is_active=is_active_param.lower() == 'true')
+
+    paginator = StandardResultsSetPagination()
+    page = paginator.paginate_queryset(queryset, request)
+    serializer = AdminUserSerializer(page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def admin_user_detail(request, pk):
+    """
+    GET  /admin/users/<pk>/ — retrieve a single user.
+    PATCH /admin/users/<pk>/ — update role and/or is_active.
+    """
+    try:
+        user = User.objects.select_related('profile').get(pk=pk)
+    except User.DoesNotExist:
+        return Response({'error': 'Usuario no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response(AdminUserSerializer(user).data)
+
+    # PATCH
+    if request.user.pk == user.pk:
+        return Response(
+            {'error': 'No puedes modificar tu propia cuenta desde este endpoint.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    allowed_fields = {'role', 'is_active'}
+    unknown = set(request.data.keys()) - allowed_fields
+    if unknown:
+        return Response(
+            {'error': f"Campos no permitidos: {', '.join(sorted(unknown))}."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Validate role if present in request data
+    if 'role' in request.data:
+        role_value = request.data['role']
+        if role_value not in User.Role.values:
+            return Response(
+                {'error': 'Invalid role'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    serializer = AdminUserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Usuario actualizado.', 'data': serializer.data})
+    return Response({'error': 'Datos inválidos.', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class StandardResultsSetPagination(pagination.PageNumberPagination):
     page_size = 10

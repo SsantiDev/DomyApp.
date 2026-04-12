@@ -81,7 +81,7 @@ def _send(subject: str, plain_text: str, html: str, to: str):
 
 def send_welcome_email(user):
     """Sends a branded HTML welcome email on registration."""
-    first_name = getattr(user.profile, 'first_name', None) or user.username or 'Usuario'
+    first_name = getattr(user.profile, 'first_name', None) or user.email.split('@')[0] or 'Usuario'
     is_worker = user.role == 'WORKER'
 
     role_msg = (
@@ -131,7 +131,7 @@ def send_welcome_email(user):
 
 def send_password_reset_email(user, code):
     """Sends a branded HTML email with the 6-digit recovery code."""
-    first_name = getattr(user.profile, 'first_name', None) or user.username or 'Usuario'
+    first_name = getattr(user.profile, 'first_name', None) or user.email.split('@')[0] or 'Usuario'
 
     # Format code with spaces for readability: 618592 → 618 592
     formatted_code = f"{code[:3]} {code[3:]}"

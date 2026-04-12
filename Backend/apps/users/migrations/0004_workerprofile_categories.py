@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('services', '0004_add_is_billed_to_servicerequest'),
+        ('services', '0004_servicerequest_is_billed'),
         ('users', '0003_passwordresetcode'),
     ]
 

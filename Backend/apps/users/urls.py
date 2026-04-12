@@ -17,6 +17,8 @@ urlpatterns = [
     # Admin View Paths
     path('admin/pending-verifications/', views.get_pending_verifications, name='admin_pending_verifications'),
     path('admin/verify-worker/<int:pk>/', views.process_verification, name='admin_process_verification'),
+    path('admin/users/', views.admin_user_list, name='admin_user_list'),
+    path('admin/users/<int:pk>/', views.admin_user_detail, name='admin_user_detail'),
     
     # Password Reset
     path('password-reset/request/', views.request_password_reset, name='password_reset_request'),
