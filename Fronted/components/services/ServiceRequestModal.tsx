@@ -14,7 +14,7 @@ import { Button } from '../ui/NativeButton';
 import { Card } from '../ui/NativeCard';
 import { SPACING, RADIUS } from '../../constants/theme';
 import { getStyles } from './ServiceRequestModal.styles';
-import { X, ChevronRight, Calendar, MapPin, ClipboardList, CheckCircle2, Sparkles, Zap, Home, Wrench, Utensils, Clock, WashingMachine, Leaf, PawPrint } from 'lucide-react-native';
+import { X, ChevronRight, Calendar, MapPin, ClipboardList, CheckCircle2, Sparkles, Zap, Home, Wrench, Utensils, Clock, WashingMachine, Leaf, PawPrint, AlertCircle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useCategories, useCreateServiceRequest } from '../../hooks/useServices';
@@ -58,6 +58,7 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
     const [address, setAddress] = useState('');
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
+    const [noWorkersAvailable, setNoWorkersAvailable] = useState(false);
 
     const formatDate = (val: Date) => {
         return val.toLocaleString('es-ES', {
@@ -124,7 +125,7 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
         }
 
         try {
-            await createRequest.mutateAsync({
+            const result = await createRequest.mutateAsync({
                 category: selectedCategory.id,
                 scheduled_at: date.toISOString(),
                 address: address,
@@ -136,6 +137,7 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
                     }
                     : {}),
             });
+            setNoWorkersAvailable(result.no_workers_available ?? false);
             setStep('SUCCESS');
         } catch (error) {
             console.error(error);
@@ -328,11 +330,23 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
             case 'SUCCESS':
                 return (
                     <View style={styles.successContainer}>
-                        <CheckCircle2 size={80} color={colors.primary} />
-                        <Text style={styles.title}>¡Solicitud Enviada!</Text>
-                        <Text style={[styles.subtitle, { textAlign: 'center' }]}>
-                            Estamos buscando la mejor operaria para tu servicio. Te notificaremos pronto.
-                        </Text>
+                        {noWorkersAvailable ? (
+                            <>
+                                <AlertCircle size={80} color={colors.warning} />
+                                <Text style={styles.title}>Solicitud Registrada</Text>
+                                <Text style={[styles.subtitle, { textAlign: 'center' }]}>
+                                    Tu solicitud fue creada, pero en este momento no hay operarias disponibles para esta categoría. Te notificaremos en cuanto una operaria esté disponible.
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle2 size={80} color={colors.primary} />
+                                <Text style={styles.title}>¡Solicitud Enviada!</Text>
+                                <Text style={[styles.subtitle, { textAlign: 'center' }]}>
+                                    Estamos buscando la mejor operaria para tu servicio. Te notificaremos pronto.
+                                </Text>
+                            </>
+                        )}
                         <Button title="Entendido" onPress={handleClose} style={{ width: '100%' }} />
                     </View>
                 );

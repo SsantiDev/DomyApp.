@@ -331,6 +331,35 @@ export default function ServiceDetailScreen() {
                     </View>
                 )}
 
+                {/* Submitted Review Display */}
+                {isClient && service.review && (
+                    <View style={[styles.actionsContainer, { marginBottom: 0 }]}>
+                        <Card variant="flat" style={[styles.infoCard, { borderTopWidth: 2, borderTopColor: colors.warning + '60' }]}>
+                            <View style={styles.sectionHeader}>
+                                <Star size={20} color={colors.warning} fill={colors.warning} />
+                                <Text style={[styles.sectionTitle, { color: colors.text }]}>Tu calificación</Text>
+                            </View>
+                            <View style={styles.ratingRow}>
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star
+                                        key={s}
+                                        size={24}
+                                        color={s <= service.review!.rating ? colors.warning : colors.border}
+                                        fill={s <= service.review!.rating ? colors.warning : 'transparent'}
+                                    />
+                                ))}
+                            </View>
+                            {!!service.review.comment && (
+                                <View style={[styles.reviewComment, { backgroundColor: colors.surface }]}>
+                                    <Text style={[styles.commentText, { color: colors.textLight }]}>
+                                        "{service.review.comment}"
+                                    </Text>
+                                </View>
+                            )}
+                        </Card>
+                    </View>
+                )}
+
                 {/* Info Cards */}
                 <View style={styles.infoSection}>
                     <Card variant="flat" style={styles.infoCard}>

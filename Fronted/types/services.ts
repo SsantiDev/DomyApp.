@@ -43,6 +43,7 @@ export interface ServiceRequest {
     unread_messages_count?: number;
     unread_coordination_count?: number;
     unread_support_count?: number;
+    no_workers_available?: boolean;
 }
 
 export interface CreateServiceRequestDTO {
