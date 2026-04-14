@@ -41,20 +41,20 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
         return queryset.select_related('worker', 'client', 'category', 'review').order_by('-created_at')
 
-    def perform_create(self, serializer):
-        # Create the Service Request
-        service_request = serializer.save(client=self.request.user)
-        
-        # Intelligent Routing: Direct vs Broadcast
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        service_request = serializer.save(client=request.user)
+
+        no_workers_available = False
+
         if service_request.worker:
-            # DIRECT assignment
             ServiceRequestNotification.objects.create(
                 service_request=service_request,
                 worker=service_request.worker,
                 status=ServiceRequestNotification.Status.PENDING
             )
         else:
-            # BROADCAST assignment to available workers who cover this category
             available_workers = User.objects.filter(
                 role=User.Role.WORKER,
                 worker_info__is_available=True,
@@ -69,6 +69,12 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 for worker in available_workers
             ]
             ServiceRequestNotification.objects.bulk_create(notifications)
+            no_workers_available = len(notifications) == 0
+
+        response_data = self.get_serializer(service_request).data
+        response_data['no_workers_available'] = no_workers_available
+        headers = self.get_success_headers(response_data)
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept(self, request, pk=None):
