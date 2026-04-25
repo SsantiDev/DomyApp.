@@ -46,6 +46,17 @@ def me(request):
     serializer = UserDetailSerializer(request.user, context={'request': request})
     return Response(serializer.data)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_push_token(request):
+    """Store the Expo push notification token for the authenticated user."""
+    token = request.data.get('push_token', '').strip()
+    if not token:
+        return Response({'error': 'push_token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    request.user.push_token = token
+    request.user.save(update_fields=['push_token'])
+    return Response({'status': 'ok'})
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
