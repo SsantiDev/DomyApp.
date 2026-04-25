@@ -103,7 +103,7 @@ export default function ServiceDetailScreen() {
     const isWorker = user?.role === 'WORKER';
     const isClient = user?.role === 'CLIENT';
     const canRate = isClient && service.status === 'COMPLETED' && !service.review;
-    const canClientCancel = isClient && ['PENDING', 'ACCEPTED'].includes(service.status);
+    const canClientCancel = isClient && service.status && ['PENDING', 'ACCEPTED'].includes(service.status);
     const canWorkerCancel = isWorker && service.status === 'ACCEPTED';
 
     // Map Coordinates
