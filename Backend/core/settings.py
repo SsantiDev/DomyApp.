@@ -37,6 +37,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,6 +58,7 @@ INSTALLED_APPS = [
     'apps.reviews.apps.ReviewsConfig',
     'apps.support.apps.SupportConfig',
     'apps.chat.apps.ChatConfig',
+    'apps.notifications.apps.NotificationsConfig',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -208,6 +211,16 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+}
+
+# ASGI
+ASGI_APPLICATION = 'core.asgi.application'
+
+# Channel Layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 from datetime import timedelta
