@@ -20,7 +20,6 @@ export const useChatMessages = (serviceId: number, isSupport: boolean) => {
             // Django DRF paginates sometimes, adjust based on standard response
             return (data as any).results ? (data as any).results as Message[] : data as Message[];
         },
-        refetchInterval: 3000, // Long-polling: Refetch every 3 seconds
         enabled: !!serviceId,
     });
 };
