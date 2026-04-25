@@ -8,6 +8,10 @@ import 'react-native-reanimated';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../services/queryClient';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { ThemeProvider as OurThemeProvider, useTheme as useOurTheme } from '../context/ThemeContext';
+import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { usePushToken } from '../hooks/usePushToken';
 
 import '../index.css';
 import '../App.css';
@@ -49,10 +53,6 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-import { ThemeProvider as OurThemeProvider, useTheme as useOurTheme } from '../context/ThemeContext';
-import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-
 function RootLayoutNav() {
   return (
     <OurThemeProvider>
@@ -68,7 +68,7 @@ function RootLayoutNav() {
 }
 
 function NavigationWrapper() {
-  const { theme, colors, isDark } = useOurTheme();
+  const { colors, isDark } = useOurTheme();
 
   const navigationTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -94,6 +94,9 @@ function RootLayoutNavigator() {
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  // Register and sync the Expo push token whenever the user is authenticated
+  usePushToken(!!user);
 
   useEffect(() => {
     if (isLoading) return;
