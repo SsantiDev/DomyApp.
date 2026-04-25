@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Modal } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { useChatMessages, useSendMessage } from '../../hooks/useChat';
+import { useChatMessages, useSendMessage, CHAT_QUERY_KEY } from '../../hooks/useChat';
 import { useGetServiceDetail } from '../../hooks/useServices';
 import { Message } from '../../types/chat';
 import { Send, X, ShieldAlert, Users } from 'lucide-react-native';
-
 import { useQueryClient } from '@tanstack/react-query';
+import { useWebSocket, RealTimeEvent } from '../../hooks/useWebSocket';
+import { getAccessToken } from '../../services/authStorage';
+import { API_URL } from '../../config/env';
 
 export const ChatRoom = ({
     serviceId,
@@ -26,6 +28,38 @@ export const ChatRoom = ({
     const [activeTab, setActiveTab] = useState<'COORDINATION' | 'SUPPORT'>(defaultTab);
     const [messageText, setMessageText] = useState('');
     const flatListRef = useRef<FlatList>(null);
+    const [token, setToken] = useState<string | null>(null);
+
+    // Derive WS base URL from API_URL: replace http(s) scheme with ws(s)
+    const WS_HOST = API_URL.replace(/^http/, 'ws');
+
+    // Load JWT token asynchronously
+    useEffect(() => {
+        getAccessToken().then(setToken);
+    }, []);
+
+    const handleWsMessage = useCallback((event: RealTimeEvent) => {
+        if (event.type === 'CHAT') {
+            // Invalidate only the active chat tab query so React Query refetches
+            const isActiveSupport = activeTab === 'SUPPORT' || user?.role === 'ADMIN';
+            queryClient.invalidateQueries({
+                queryKey: [CHAT_QUERY_KEY, serviceId, isActiveSupport],
+            });
+        }
+    }, [activeTab, serviceId, user?.role, queryClient]);
+
+    const { isConnected, sendMessage: wsSend } = useWebSocket({
+        url: `${WS_HOST}/ws/chat/${serviceId}/?token=${token}`,
+        onMessage: handleWsMessage,
+        enabled: visible === true && !!token,
+    });
+
+    // Send mark_read when WS connects
+    useEffect(() => {
+        if (isConnected) {
+            wsSend(JSON.stringify({ type: 'mark_read', service_id: serviceId }));
+        }
+    }, [isConnected, serviceId, wsSend]);
 
     const handleClose = () => {
         // Force refresh service list data to update the unread counters
