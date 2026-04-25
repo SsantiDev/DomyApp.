@@ -20,7 +20,6 @@ export const useServiceRequests = () => {
             return data;
         },
         staleTime: 0,           // Always fetch fresh data on mount
-        refetchInterval: 10000, // Poll every 10 seconds to reflect status changes from worker
     });
 };
 
@@ -127,7 +126,6 @@ export const useServiceNotifications = () => {
             const { data } = await api.get<ServiceRequestNotification[]>('/services/notifications/');
             return data;
         },
-        refetchInterval: 15000, // Poll every 15 seconds for new requests
     });
 };
 
