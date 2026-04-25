@@ -8,6 +8,7 @@ router.register(r'workers', views.WorkerViewSet, basename='worker')
 urlpatterns = [
     path('', include(router.urls)),
     path('me/', views.me, name='user_me'),
+    path('push-token/', views.save_push_token, name='save_push_token'),
     path('register/', views.register, name='user_register'),
     path('profile/', views.update_profile, name='update_profile'),
     path('profile/worker/', views.update_worker_profile, name='update_worker_profile'),
