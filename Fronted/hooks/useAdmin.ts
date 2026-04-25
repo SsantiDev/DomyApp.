@@ -39,7 +39,6 @@ export const useAdminServices = () => {
             // In Django standard, if page exists, it returns { count, next, previous, results }.
             return (data as any).results ? (data as any).results as ServiceRequest[] : data as ServiceRequest[];
         },
-        refetchInterval: 15000,
     });
 };
 
@@ -50,7 +49,6 @@ export const useAdminIncidents = () => {
             const { data } = await api.get('/support/incidents/');
             return data.results ? data.results as Incident[] : data as Incident[];
         },
-        refetchInterval: 10000,
     });
 };
 
