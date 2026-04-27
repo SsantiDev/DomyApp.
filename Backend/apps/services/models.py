@@ -101,6 +101,7 @@ class ServiceRequestNotification(models.Model):
         default=Status.PENDING
     )
     rejection_reason = models.TextField(blank=True)
+    is_priority = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
