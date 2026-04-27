@@ -92,3 +92,50 @@ class PasswordResetCode(models.Model):
 
     def __str__(self):
         return f"Reset code for {self.user.email}"
+
+
+class UserAddress(models.Model):
+    from django.conf import settings
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='addresses'
+    )
+    alias = models.CharField(max_length=50)
+    address_line = models.CharField(max_length=255)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    is_default = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                condition=models.Q(is_default=True),
+                name='unique_default_address_per_user'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.alias} — {self.user.email}"
+
+
+class FavoriteWorker(models.Model):
+    from django.conf import settings
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorites'
+    )
+    worker = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='favorited_by'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('client', 'worker')
+
+    def __str__(self):
+        return f"{self.client.email} → {self.worker.email}"
