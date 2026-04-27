@@ -15,6 +15,7 @@ import { useGetProfile, useUpdateProfile, useUploadProfilePicture } from '../../
 import { ClientProfile, WorkerProfile, UserRole } from '../../types/auth';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileDataSection from '../../components/profile/ProfileDataSection';
+import { FavoritesSection } from '../../components/profile/FavoritesSection';
 import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
 
 export default function ProfileScreen() {
@@ -168,6 +169,8 @@ export default function ProfileScreen() {
                     selectedCategories={selectedCategories}
                     onCategoryToggle={handleCategoryToggle}
                 />
+
+                {user.role === 'CLIENT' && <FavoritesSection />}
 
                 <View style={styles.logoutSection}>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
