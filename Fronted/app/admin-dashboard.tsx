@@ -15,11 +15,17 @@ import { getStyles } from './admin-dashboard.styles';
 
 import { AdminDashboard as ServiceTracking } from '../components/dashboard/AdminDashboard';
 import { UserManagement } from '../components/dashboard/UserManagement';
+import { IncidentList } from '../components/dashboard/IncidentList';
+import { IncidentDetail } from '../components/dashboard/IncidentDetail';
+import { FinanceMetrics } from '../components/dashboard/FinanceMetrics';
+import { Incident } from '../types/support';
 
 const TABS = [
     { key: 'SERVICES', emoji: '🏠', label: 'Inicio' },
     { key: 'VERIFICATIONS', emoji: '🛡️', label: 'Verificar' },
     { key: 'USERS', emoji: '👥', label: 'Usuarios' },
+    { key: 'INCIDENTS', emoji: '⚠️', label: 'Incidentes' },
+    { key: 'FINANCE', emoji: '💰', label: 'Finanzas' },
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -34,6 +40,7 @@ export function AdminDashboardScreen() {
     const [rejectionReason, setRejectionReason] = React.useState('');
     const [showRejectModal, setShowRejectModal] = React.useState(false);
     const [activeView, setActiveView] = React.useState<TabKey>('SERVICES');
+    const [selectedIncident, setSelectedIncident] = React.useState<Incident | null>(null);
 
     const handleAction = async (pk: number, action: 'approve' | 'reject', reason: string = '') => {
         try {
@@ -73,6 +80,18 @@ export function AdminDashboardScreen() {
                 <ServiceTracking />
             ) : activeView === 'USERS' ? (
                 <UserManagement />
+            ) : activeView === 'FINANCE' ? (
+                <FinanceMetrics />
+            ) : activeView === 'INCIDENTS' ? (
+                <View style={styles.container}>
+                    <View style={{ padding: SPACING.lg, paddingBottom: 0 }}>
+                        <Text style={styles.title}>Incidentes Activos</Text>
+                    </View>
+                    <View style={{ flex: 1, padding: SPACING.lg }}>
+                        <IncidentList onSelect={setSelectedIncident} />
+                    </View>
+                    <IncidentDetail incident={selectedIncident} onClose={() => setSelectedIncident(null)} />
+                </View>
             ) : (
                 <View style={styles.container}>
                     <View style={{ padding: SPACING.lg, paddingBottom: 0 }}>

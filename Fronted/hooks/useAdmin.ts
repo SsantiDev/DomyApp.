@@ -52,6 +52,40 @@ export const useAdminIncidents = () => {
     });
 };
 
+export const ADMIN_FINANCE_KEY = ['admin-finance-summary'];
+
+export const useAdminFinanceSummary = () => {
+    return useQuery({
+        queryKey: ADMIN_FINANCE_KEY,
+        queryFn: async () => {
+            const { data } = await api.get('/admin/finance/summary/');
+            return data as { total_revenue: number; platform_commissions: number; pending_payouts: number; period: string };
+        },
+    });
+};
+
+export const useEscalateIncident = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, note }: { id: number; note: string }) => {
+            const { data } = await api.patch(`/support/incidents/${id}/escalate/`, { note });
+            return data;
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ADMIN_INCIDENTS_KEY }),
+    });
+};
+
+export const useRefundFlag = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: number) => {
+            const { data } = await api.patch(`/support/incidents/${id}/refund/`, {});
+            return data;
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ADMIN_INCIDENTS_KEY }),
+    });
+};
+
 export const useVerifyBilling = () => {
     const queryClient = useQueryClient();
     return useMutation({
