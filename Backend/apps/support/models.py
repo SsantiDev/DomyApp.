@@ -12,6 +12,7 @@ class Incident(models.Model):
     class Status(models.TextChoices):
         OPEN = 'OPEN', 'Abierto'
         IN_REVIEW = 'IN_REVIEW', 'En revisión'
+        ESCALATED = 'ESCALATED', 'Escalado'
         RESOLVED = 'RESOLVED', 'Resuelto'
         DISMISSED = 'DISMISSED', 'Desestimado'
 
@@ -31,6 +32,8 @@ class Incident(models.Model):
         default=Type.OTHER
     )
     description = models.TextField()
+    needs_refund = models.BooleanField(default=False)
+    escalation_note = models.TextField(blank=True, default='')
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
