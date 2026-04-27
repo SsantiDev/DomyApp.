@@ -143,12 +143,26 @@ export const useRejectService = () => {
     });
 };
 
-export function useServiceHistory() {
+export interface ServiceHistoryFilters {
+    start_date?: string;
+    end_date?: string;
+    category?: number;
+    worker_id?: number;
+}
+
+export function useServiceHistory(filters?: ServiceHistoryFilters) {
     return useQuery({
-        queryKey: ['service-history'],
-        queryFn: () =>
-            api.get<ServiceRequest[]>('/services/requests/?status=COMPLETED&status=CANCELLED')
-                .then(r => r.data),
+        queryKey: ['service-history', filters],
+        queryFn: () => {
+            const params = new URLSearchParams();
+            params.append('status', 'COMPLETED');
+            params.append('status', 'CANCELLED');
+            if (filters?.start_date) params.set('start_date', filters.start_date);
+            if (filters?.end_date) params.set('end_date', filters.end_date);
+            if (filters?.category) params.set('category', String(filters.category));
+            if (filters?.worker_id) params.set('worker_id', String(filters.worker_id));
+            return api.get<ServiceRequest[]>(`/services/requests/?${params.toString()}`).then(r => r.data);
+        },
         staleTime: 0,
     });
 }

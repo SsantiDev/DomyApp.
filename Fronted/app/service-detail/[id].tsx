@@ -24,6 +24,7 @@ import {
     useRateService,
     useCancelService
 } from '../../hooks/useServices';
+import { AddFavoritePrompt } from '../../components/services/AddFavoritePrompt';
 import { useReportIncident, useGetServiceIncidents } from '../../hooks/useSupport';
 import { IncidentType, INCIDENT_TYPE_LABELS } from '../../types/support';
 import { NativeMainLayout } from '../../components/layout/NativeMainLayout';
@@ -75,6 +76,8 @@ export default function ServiceDetailScreen() {
     const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
+    const [submittedRating, setSubmittedRating] = useState(0);
+    const [showFavoritePrompt, setShowFavoritePrompt] = useState(false);
 
     // Incident State
     const [isIncidentModalVisible, setIsIncidentModalVisible] = useState(false);
@@ -175,6 +178,8 @@ export default function ServiceDetailScreen() {
         try {
             await rateService.mutateAsync({ id: Number(id), rating, comment });
             setIsRatingModalVisible(false);
+            setSubmittedRating(rating);
+            setShowFavoritePrompt(true);
             Alert.alert('¡Gracias!', 'Tu calificación nos ayuda a profesionalizar el servicio.');
         } catch (err: any) {
             Alert.alert('Error', err?.message || 'No se pudo enviar la calificación.');
@@ -357,6 +362,14 @@ export default function ServiceDetailScreen() {
                                 </View>
                             )}
                         </Card>
+                        {showFavoritePrompt && service.worker && (
+                            <AddFavoritePrompt
+                                workerId={service.worker}
+                                workerName={service.worker_name ?? 'la operaria'}
+                                rating={submittedRating}
+                                onDismiss={() => setShowFavoritePrompt(false)}
+                            />
+                        )}
                     </View>
                 )}
 

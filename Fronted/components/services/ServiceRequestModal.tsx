@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useCategories, useCreateServiceRequest } from '../../hooks/useServices';
 import { Category } from '../../types/services';
-import { LocationPickerMap } from './LocationPickerMap';
+import { AddressPicker } from './AddressPicker';
 
 interface Props {
     visible: boolean;
@@ -232,14 +232,14 @@ export const ServiceRequestModal = ({ visible, onClose }: Props) => {
                                 <MapPin size={16} color={colors.primary} />
                                 <Text style={styles.sectionHeaderText}>Dirección</Text>
                             </View>
-                            <LocationPickerMap
-                                initialAddress={address}
-                                initialLat={latitude ?? undefined}
-                                initialLng={longitude ?? undefined}
-                                onLocationSelected={(lat, lng, addr) => {
+                            <AddressPicker
+                                selectedAddress={address}
+                                selectedLat={latitude}
+                                selectedLng={longitude}
+                                onSelect={(addr, lat, lng) => {
+                                    setAddress(addr);
                                     setLatitude(lat);
                                     setLongitude(lng);
-                                    setAddress(addr);
                                 }}
                             />
                         </View>
