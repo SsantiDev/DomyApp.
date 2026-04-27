@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Profile, WorkerProfile, WorkerVerification
+from .models import User, Profile, WorkerProfile, WorkerVerification, UserAddress, FavoriteWorker
 from apps.services.models import Category
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -95,3 +95,45 @@ class WorkerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkerProfile
         fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating', 'categories')
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAddress
+        fields = ('id', 'alias', 'address_line', 'latitude', 'longitude', 'is_default')
+
+    def validate(self, attrs):
+        # Enforce single default: if setting is_default=True, unset others
+        if attrs.get('is_default'):
+            request = self.context.get('request')
+            if request:
+                qs = UserAddress.objects.filter(user=request.user, is_default=True)
+                if self.instance:
+                    qs = qs.exclude(pk=self.instance.pk)
+                qs.update(is_default=False)
+        return attrs
+
+
+class FavoriteWorkerSerializer(serializers.ModelSerializer):
+    worker_id = serializers.IntegerField(source='worker.id', read_only=True)
+    name = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+    avg_rating = serializers.FloatField(source='worker.worker_info.average_rating', read_only=True)
+
+    class Meta:
+        model = FavoriteWorker
+        fields = ('id', 'worker_id', 'name', 'avatar_url', 'avg_rating', 'created_at')
+        read_only_fields = ('id', 'worker_id', 'name', 'avatar_url', 'avg_rating', 'created_at')
+
+    def get_name(self, obj):
+        profile = getattr(obj.worker, 'profile', None)
+        if profile:
+            return f"{profile.first_name} {profile.last_name}".strip()
+        return obj.worker.email
+
+    def get_avatar_url(self, obj):
+        profile = getattr(obj.worker, 'profile', None)
+        if profile and profile.profile_picture:
+            request = self.context.get('request')
+            return request.build_absolute_uri(profile.profile_picture.url) if request else None
+        return None

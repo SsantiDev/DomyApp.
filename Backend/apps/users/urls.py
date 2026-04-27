@@ -1,9 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 from . import views
+from .views_ux import UserAddressViewSet, FavoriteWorkerViewSet
 
 router = SimpleRouter()
 router.register(r'workers', views.WorkerViewSet, basename='worker')
+router.register(r'addresses', UserAddressViewSet, basename='address')
+router.register(r'favorites', FavoriteWorkerViewSet, basename='favorite')
 
 urlpatterns = [
     path('', include(router.urls)),
