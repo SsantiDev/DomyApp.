@@ -1,6 +1,6 @@
-# Plan de Implementación: Seguimiento Geográfico en Vivo
+# Plan de Implementación: Seguimiento Geográfico en Vivo (Versión 100% Free)
 
-Rastreo dinámico para que el cliente vea la ubicación de la operaria en tiempo real durante el trayecto.
+Rastreo dinámico para que el cliente vea la ubicación de la operaria en tiempo real durante el trayecto, sin costos de API de Google Maps.
 
 ---
 
@@ -26,17 +26,12 @@ Flujo: `ACCEPTED → ON_WAY → IN_PROGRESS → COMPLETED`
 - **`TrackingConsumer`**
 - Group name: `service_tracking_{service_id}`
 - La operaria envía: `{"type": "location_update", "lat": 1.23, "lng": -4.56}`
-- Validar coordenadas en servidor (lat: -90..90, lng: -180..180) — rechazar valores fuera de rango
+- Validar coordenadas en servidor (lat: -90..90, lng: -180..180)
 - El servidor retransmite al grupo del cliente
-- Autorización: solo el `worker` asignado al servicio puede publicar coordenadas
 
 ### Almacenamiento
 - **Redis**: cachear última ubicación conocida con TTL de 5 min (`tracking:service:{id}`)
-- **Modelo opcional** `WorkerPathLog` para auditoría post-servicio (no crítico para MVP)
-- **No** insertar en PostgreSQL en cada update — demasiado costoso a 30s de intervalo
-
-### Channel Layer
-Mismo Redis de `real_time_communication_plan.md` — no se necesita infraestructura adicional.
+- **No** insertar en PostgreSQL en cada update.
 
 ---
 
@@ -47,77 +42,54 @@ Mismo Redis de `real_time_communication_plan.md` — no se necesita infraestruct
 npx expo install expo-location expo-task-manager
 ```
 
-### Permisos requeridos
-- **Android**: `ACCESS_FINE_LOCATION` + `ACCESS_BACKGROUND_LOCATION` en `app.json`
-- **iOS**: `NSLocationAlwaysAndWhenInUseUsageDescription` en `app.json`
-- **Nota**: los permisos de background son restrictivos en tiendas. Alternativa más simple: solo capturar cuando app en foreground (suficiente para MVP).
-
-### Tarea en segundo plano
-```ts
-import * as TaskManager from 'expo-task-manager';
-import * as Location from 'expo-location';
-
-const LOCATION_TASK = 'DOMY_TRACKING';
-
-TaskManager.defineTask(LOCATION_TASK, ({ data, error }) => {
-    if (error || !data) return;
-    const { locations } = data as any;
-    // Enviar via WS solo si servicio en estado ON_WAY
-    sendLocationUpdate(locations[0].coords);
-});
-```
-
-### Condición de activación
+### Captura de Ubicación
 - Solo iniciar tracking si `serviceRequest.status === 'ON_WAY'`
 - Detener al cambiar a `IN_PROGRESS` (ya llegó)
-- Limpiar tarea al desmontar o cerrar servicio
-
-### Envío adaptativo (batería)
-- Enviar coordenada cada 30 s si velocidad > 2 m/s
-- Enviar cada 60 s si velocidad ≤ 2 m/s (detenida en tráfico)
-- Usar `heading` de `expo-location` para rotar el marcador
+- Intervalo de envío: cada 30 segundos para balancear precisión y batería.
 
 ---
 
-## 3. Frontend Cliente (Visualizador)
+## 3. Frontend Cliente (Visualizador) — Estrategia "Zero Cost"
 
 ### Librería de mapas
 ```bash
 npx expo install react-native-maps
 ```
-Requiere configurar API Key de Google Maps en `app.json` (Android) y en `AppDelegate` (iOS).
 
-### Hook `useLiveTracking`
-```ts
-interface LocationUpdate {
-    latitude: number;
-    longitude: number;
-    heading?: number;
-    speed?: number;
-}
+### Configuración del Mapa (Sin API Key de Google)
+En lugar de depender del SDK nativo de Google en Android:
+- **iOS**: Usa Apple Maps por defecto (gratis e ilimitado).
+- **Android**: Se usa el componente `<UrlTile />` con OpenStreetMap.
 
-const { workerLocation, eta } = useLiveTracking(serviceId);
-// Conectar WS a ws/tracking/{serviceId}/?token=...
-// Solo si servicio.status === 'ON_WAY'
+```tsx
+import MapView, { UrlTile, Marker } from 'react-native-maps';
+
+<MapView style={{ flex: 1 }}>
+  {/* Capa de OpenStreetMap para Android */}
+  {Platform.OS === 'android' && (
+    <UrlTile 
+      urlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      maximumZ={19}
+      flipY={false}
+    />
+  )}
+  <Marker coordinate={workerLocation} title="Operaria Domy" />
+</MapView>
 ```
 
-### Componente mapa
-- `MapMarker` con icono "Domy" animado usando `Animated.Value` para suavizar movimiento entre coordenadas
-- Mostrar también marcador del domicilio del cliente
-- Centrar cámara automáticamente entre ambos puntos
-
-### ETA dinámico
-- API: **Google Distance Matrix** — requiere API key con billing habilitado
-- Costo: ~$5 USD por 1000 elementos. Para MVP considerar estimación local (distancia Haversine ÷ velocidad promedio).
-- Mostrar: `"La operaria está a ~5 min"` actualizado cada vez que llega nueva coordenada
+### ETA y Distancia (Alternativa Gratuita)
+En lugar de Google Distance Matrix:
+1. **Fórmula Haversine**: Cálculo matemático en el cliente para distancia en línea recta.
+2. **Factor de corrección**: `distancia_real ≈ haversine * 1.4` (estimación de calles).
+3. **OSRM API (Opcional)**: Usar el servicio público de ruteo de OpenStreetMap para obtener el camino exacto.
+   - Endpoint: `http://router.project-osrm.org/route/v1/driving/lng1,lat1;lng2,lat2`
 
 ---
 
 ## 4. Privacidad y Consentimiento
 
-- Al activar `ON_WAY`, mostrar alerta a la operaria: `"Tu ubicación será compartida con el cliente durante el trayecto"`
-- Al completar servicio (`IN_PROGRESS`), confirmar que tracking se detuvo
-- No almacenar coordenadas indefinidamente — `WorkerPathLog` con retención de 30 días máximo
+- Al activar `ON_WAY`, mostrar alerta a la operaria: `"Tu ubicación será compartida con el cliente durante el trayecto"`.
+- Al completar servicio (`IN_PROGRESS`), confirmar que tracking se detuvo.
 
 ---
 
@@ -127,6 +99,6 @@ const { workerLocation, eta } = useLiveTracking(serviceId);
 |------|-------|------------|
 | 1 | Agregar estado `ON_WAY` + migración | Ninguno |
 | 2 | `TrackingConsumer` + routing WS | Django Channels activo |
-| 3 | `expo-location` + tarea background en app operaria | Paso 1 |
-| 4 | `useLiveTracking` + mapa animado en cliente | Paso 2 |
-| 5 | Integrar ETA (Haversine primero, Google Matrix después) | Paso 4 |
+| 3 | `expo-location` en app operaria | Paso 1 |
+| 4 | Mapa con `UrlTile` (OSM) en cliente | Paso 2 |
+| 5 | Implementar `ETA` con Haversine (JS local) | Paso 4 |
