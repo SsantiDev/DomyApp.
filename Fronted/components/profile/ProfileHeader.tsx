@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SPACING } from '../../constants/theme';
 import { Edit3, Check, X, Camera } from 'lucide-react-native';
 import { getStyles } from './ProfileHeader.styles';
-import { API_URL } from '../../config/env';
+import { API_URL } from '../../config/envConfig';
 
 interface Props {
     user: UserDetail;

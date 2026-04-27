@@ -8,7 +8,7 @@ import { Button } from '../components/ui/NativeButton';
 import { useAdminPendingVerifications, useProcessVerification } from '../hooks/useAdmin';
 import { Shield, Users, Clock, ChevronRight, X } from 'lucide-react-native';
 import { SPACING } from '../constants/theme';
-import { API_URL } from '../config/env';
+import { API_URL } from '../config/envConfig';
 import { AppHeader } from '../components/layout/AppHeader';
 import { NativeMainLayout } from '../components/layout/NativeMainLayout';
 import { getStyles } from './admin-dashboard.styles';

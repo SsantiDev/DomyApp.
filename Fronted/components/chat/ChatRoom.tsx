@@ -9,7 +9,7 @@ import { Send, X, ShieldAlert, Users } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWebSocket, RealTimeEvent } from '../../hooks/useWebSocket';
 import { getAccessToken } from '../../services/authStorage';
-import { API_URL } from '../../config/env';
+import { API_URL } from '../../config/envConfig';
 
 export const ChatRoom = ({
     serviceId,
