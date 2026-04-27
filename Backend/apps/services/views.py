@@ -39,6 +39,22 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
             if status_filter:
                 queryset = queryset.filter(status__in=status_filter)
 
+        start_date = self.request.query_params.get('start_date')
+        if start_date:
+            queryset = queryset.filter(scheduled_at__date__gte=start_date)
+
+        end_date = self.request.query_params.get('end_date')
+        if end_date:
+            queryset = queryset.filter(scheduled_at__date__lte=end_date)
+
+        category_id = self.request.query_params.get('category')
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+
+        worker_id = self.request.query_params.get('worker_id')
+        if worker_id:
+            queryset = queryset.filter(worker_id=worker_id)
+
         return queryset.select_related('worker', 'client', 'category', 'review').order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
@@ -55,19 +71,26 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 status=ServiceRequestNotification.Status.PENDING
             )
         else:
+            from apps.users.models import FavoriteWorker
+            favorite_worker_ids = set(
+                FavoriteWorker.objects.filter(client=request.user)
+                .values_list('worker_id', flat=True)
+            )
             available_workers = User.objects.filter(
                 role=User.Role.WORKER,
                 worker_info__is_available=True,
                 worker_info__categories=service_request.category
             )
-            notifications = [
-                ServiceRequestNotification(
+            # Favorites get priority flag via ordering: favorites first
+            notifications = []
+            for worker in available_workers:
+                is_favorite = worker.id in favorite_worker_ids
+                notifications.append(ServiceRequestNotification(
                     service_request=service_request,
                     worker=worker,
-                    status=ServiceRequestNotification.Status.PENDING
-                )
-                for worker in available_workers
-            ]
+                    status=ServiceRequestNotification.Status.PENDING,
+                    is_priority=is_favorite,
+                ))
             ServiceRequestNotification.objects.bulk_create(notifications)
             no_workers_available = len(notifications) == 0
 
