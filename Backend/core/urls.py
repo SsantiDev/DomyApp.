@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/services/', include('apps.services.urls')),
     path('api/support/', include('apps.support.urls')),
     path('api/chat/', include('apps.chat.urls')),
+    path('api/admin/', include('core.admin_urls')),
 ]
 
 if settings.DEBUG:

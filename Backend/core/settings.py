@@ -223,6 +223,11 @@ CHANNEL_LAYERS = {
     }
 }
 
+# Business constants
+PLATFORM_FEE_PERCENTAGE = float(os.getenv('PLATFORM_FEE_PERCENTAGE', '0.20'))
+TAX_RETENTION_PERCENTAGE = float(os.getenv('TAX_RETENTION_PERCENTAGE', '0.05'))
+WORKER_REJECTION_THRESHOLD = int(os.getenv('WORKER_REJECTION_THRESHOLD', '3'))
+
 from datetime import timedelta
 
 # SIMPLE_JWT settings (access/refresh)
