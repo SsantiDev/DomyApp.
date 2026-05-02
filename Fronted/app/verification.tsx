@@ -8,7 +8,7 @@ import { RADIUS } from '../constants/theme';
 import { Card } from '../components/ui/NativeCard';
 import { Button } from '../components/ui/NativeButton';
 import { useSubmitVerification } from '../hooks/useVerification';
-import { getStyles } from './verification.styles';
+import { getStyles } from '../styles/verification.styles';
 
 export default function VerificationScreen() {
     const { colors } = useTheme();
