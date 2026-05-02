@@ -41,25 +41,33 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user: return 0
         user = request.user
-        
-        # Admin unread check just for support chats within the service
-        qs = obj.messages.filter(is_read=False).exclude(sender=user)
+        unread = getattr(obj, 'prefetched_unread', None)
+        if unread is None:
+            qs = obj.messages.filter(is_read=False).exclude(sender=user)
+            if user.role == 'ADMIN':
+                return qs.filter(is_support_chat=True).count()
+            return qs.count()
+        msgs = [m for m in unread if m.sender_id != user.id]
         if user.role == 'ADMIN':
-            return qs.filter(is_support_chat=True).count()
-        return qs.count()
+            return sum(1 for m in msgs if m.is_support_chat)
+        return len(msgs)
 
     def get_unread_coordination_count(self, obj):
         request = self.context.get('request')
         if not request or not request.user: return 0
         if request.user.role == 'ADMIN': return 0
-        qs = obj.messages.filter(is_read=False, is_support_chat=False).exclude(sender=request.user)
-        return qs.count()
+        unread = getattr(obj, 'prefetched_unread', None)
+        if unread is None:
+            return obj.messages.filter(is_read=False, is_support_chat=False).exclude(sender=request.user).count()
+        return sum(1 for m in unread if m.sender_id != request.user.id and not m.is_support_chat)
 
     def get_unread_support_count(self, obj):
         request = self.context.get('request')
         if not request or not request.user: return 0
-        qs = obj.messages.filter(is_read=False, is_support_chat=True).exclude(sender=request.user)
-        return qs.count()
+        unread = getattr(obj, 'prefetched_unread', None)
+        if unread is None:
+            return obj.messages.filter(is_read=False, is_support_chat=True).exclude(sender=request.user).count()
+        return sum(1 for m in unread if m.sender_id != request.user.id and m.is_support_chat)
 
     def get_client_name(self, obj):
         if obj.client and hasattr(obj.client, 'profile'):
