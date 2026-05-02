@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  Image,
 } from 'react-native';
-import { User, Settings, Moon, Sun, LogOut, ChevronDown } from 'lucide-react-native';
+import { User, LogOut, ChevronDown } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -20,7 +21,7 @@ export const UserMenu: React.FC = () => {
   const [dropdownTop, setDropdownTop] = useState(0);
   const triggerRef = useRef<View>(null);
   const { user, logout } = useAuth();
-  const { toggleTheme, colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const router = useRouter();
 
   const openMenu = () => {
@@ -33,16 +34,6 @@ export const UserMenu: React.FC = () => {
   const handleProfile = () => {
     setIsMenuVisible(false);
     router.push('/(tabs)/profile');
-  };
-
-  const handleSettings = () => {
-    setIsMenuVisible(false);
-    // TODO: Navigate to settings screen
-  };
-
-  const handleThemeToggle = () => {
-    toggleTheme();
-    setIsMenuVisible(false);
   };
 
   const handleLogout = () => {
@@ -80,7 +71,14 @@ export const UserMenu: React.FC = () => {
         ]}
       >
         <View style={[styles.avatarContainer, { backgroundColor: colors.border }]}>
-          <User size={20} color={colors.primary} />
+          {user?.profile?.profile_picture ? (
+            <Image
+              source={{ uri: user.profile.profile_picture }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <User size={20} color={colors.primary} />
+          )}
         </View>
         <Text style={[styles.userName, { color: colors.text }]} numberOfLines={1}>
           {userName}
@@ -113,22 +111,6 @@ export const UserMenu: React.FC = () => {
               <Text style={[styles.menuText, { color: colors.text }]}>Perfil</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={handleSettings}>
-              <Settings size={20} color={colors.textLight} style={styles.menuIcon} />
-              <Text style={[styles.menuText, { color: colors.text }]}>Configuración</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={handleThemeToggle}>
-              {isDark ? (
-                <Sun size={20} color={colors.warning} style={styles.menuIcon} />
-              ) : (
-                <Moon size={20} color={colors.primary} style={styles.menuIcon} />
-              )}
-              <Text style={[styles.menuText, { color: colors.text }]}>
-                {isDark ? 'Tema claro' : 'Tema oscuro'}
-              </Text>
-            </TouchableOpacity>
-
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
             <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
@@ -157,6 +139,12 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.full,
   },
   userName: {
     ...TYPOGRAPHY.caption,
