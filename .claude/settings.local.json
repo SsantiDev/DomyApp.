@@ -25,7 +25,10 @@
       "Bash(DJANGO_SETTINGS_MODULE=core.settings .venv/bin/python -c \"from apps.services.views import ServiceRequestViewSet; print\\('OK'\\)\")",
       "Bash(DJANGO_SETTINGS_MODULE=core.settings .venv/bin/python -c \"import django; django.setup\\(\\); from apps.services.views import ServiceRequestViewSet; print\\('OK'\\)\")",
       "Bash(git -C /home/spsp/DomyApp. remote -v)",
-      "Bash(git -C /home/spsp/DomyApp. status --short)"
+      "Bash(git -C /home/spsp/DomyApp. status --short)",
+      "Bash(python -m django --version)",
+      "Bash(pip show *)",
+      "Bash(python3 -c \"import django; print\\(django.__version__\\)\")"
     ]
   }
 }
