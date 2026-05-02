@@ -43,6 +43,14 @@ Desktop.ini
 # IDEs/Editors
 .vscode/
 .idea/
+.agent/
+!.agent/workflows/
+!.agent/skills/
+
+# Agent & Local configs
+.claude/
+.agents/
+.features/
 *.swp
 *.swo
 
