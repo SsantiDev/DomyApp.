@@ -23,7 +23,9 @@
       "Bash(curl -s http://localhost:8000/api/users/me/ -o /dev/null -w \"%{http_code}\")",
       "Bash(kill %1)",
       "Bash(DJANGO_SETTINGS_MODULE=core.settings .venv/bin/python -c \"from apps.services.views import ServiceRequestViewSet; print\\('OK'\\)\")",
-      "Bash(DJANGO_SETTINGS_MODULE=core.settings .venv/bin/python -c \"import django; django.setup\\(\\); from apps.services.views import ServiceRequestViewSet; print\\('OK'\\)\")"
+      "Bash(DJANGO_SETTINGS_MODULE=core.settings .venv/bin/python -c \"import django; django.setup\\(\\); from apps.services.views import ServiceRequestViewSet; print\\('OK'\\)\")",
+      "Bash(git -C /home/spsp/DomyApp. remote -v)",
+      "Bash(git -C /home/spsp/DomyApp. status --short)"
     ]
   }
 }
