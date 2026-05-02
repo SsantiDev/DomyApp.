@@ -1,9 +1,11 @@
 from django.utils import timezone
 from django.db import models, transaction
+from django.db.models import Prefetch
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from apps.chat.models import Message
 from .models import Category, ServiceRequest, Review, ServiceRequestNotification
 from .serializers import CategorySerializer, ServiceRequestSerializer, ReviewSerializer, ServiceRequestNotificationSerializer
 
@@ -55,7 +57,17 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         if worker_id:
             queryset = queryset.filter(worker_id=worker_id)
 
-        return queryset.select_related('worker', 'client', 'category', 'review').order_by('-created_at')
+        return queryset.select_related(
+            'worker', 'client', 'category', 'review',
+            'client__profile', 'worker__profile'
+        ).prefetch_related(
+            'incidents',
+            Prefetch(
+                'messages',
+                queryset=Message.objects.filter(is_read=False).only('sender_id', 'is_support_chat', 'service_request_id'),
+                to_attr='prefetched_unread'
+            )
+        ).order_by('-created_at')
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

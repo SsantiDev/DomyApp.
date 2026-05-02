@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { ThemeColors, RADIUS, SPACING } from '../../constants/theme';
+import { ThemeColors, RADIUS, SPACING } from '../constants/theme';
 
 export const getStyles = (colors: ThemeColors, isDark: boolean) => StyleSheet.create({
     safeArea: {
