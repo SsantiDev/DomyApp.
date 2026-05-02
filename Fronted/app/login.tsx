@@ -9,7 +9,7 @@ import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 import { useAuthForm } from '../hooks/useAuthForm';
-import { getStyles } from './login.styles';
+import { getStyles } from '../styles/login.styles';
 
 export default function LoginScreen() {
     const { colors } = useTheme();
