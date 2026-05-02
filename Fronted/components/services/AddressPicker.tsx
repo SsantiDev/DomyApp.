@@ -37,8 +37,8 @@ export const AddressPicker = ({ selectedAddress, selectedLat, selectedLng, onSel
             await createAddress.mutateAsync({
                 alias: alias.trim(),
                 address_line: newAddress,
-                latitude: newLat,
-                longitude: newLng,
+                latitude: newLat !== null ? Number(newLat.toFixed(6)) : null,
+                longitude: newLng !== null ? Number(newLng.toFixed(6)) : null,
             });
         }
         onSelect(newAddress, newLat, newLng);
@@ -131,16 +131,43 @@ export const AddressPicker = ({ selectedAddress, selectedLat, selectedLng, onSel
                             <TouchableOpacity onPress={() => setShowNewForm(false)}><X size={20} color={colors.text} /></TouchableOpacity>
                         </View>
 
-                        <LocationPickerMap
-                            initialAddress={newAddress}
-                            initialLat={newLat ?? undefined}
-                            initialLng={newLng ?? undefined}
-                            onLocationSelected={(lat, lng, addr) => {
-                                setNewLat(lat);
-                                setNewLng(lng);
-                                setNewAddress(addr);
-                            }}
-                        />
+                        {__DEV__ ? (
+                            <LocationPickerMap
+                                initialAddress={newAddress}
+                                initialLat={newLat ?? undefined}
+                                initialLng={newLng ?? undefined}
+                                onLocationSelected={(lat: number, lng: number, addr: string) => {
+                                    setNewLat(lat);
+                                    setNewLng(lng);
+                                    setNewAddress(addr);
+                                }}
+                            />
+                        ) : (
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: colors.border,
+                                borderRadius: RADIUS.md,
+                                padding: SPACING.md,
+                                backgroundColor: colors.surface,
+                                marginBottom: SPACING.sm,
+                            }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm }}>
+                                    <MapPin size={16} color={colors.primary} />
+                                    <Text style={{ marginLeft: SPACING.xs, color: colors.textLight, fontSize: 12 }}>
+                                        Ingresar dirección manualmente
+                                    </Text>
+                                </View>
+                                <TextInput
+                                    style={inputStyle}
+                                    placeholder='Ej: Calle 123 #45-67, Apto 501'
+                                    placeholderTextColor={colors.textLight + '80'}
+                                    value={newAddress}
+                                    onChangeText={setNewAddress}
+                                    autoFocus
+                                    multiline={false}
+                                />
+                            </View>
+                        )}
 
                         <TouchableOpacity
                             onPress={() => setSaveNew(!saveNew)}
