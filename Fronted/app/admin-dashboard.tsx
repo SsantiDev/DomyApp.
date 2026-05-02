@@ -11,7 +11,7 @@ import { SPACING } from '../constants/theme';
 import { API_URL } from '../config/env';
 import { AppHeader } from '../components/layout/AppHeader';
 import { NativeMainLayout } from '../components/layout/NativeMainLayout';
-import { getStyles } from './admin-dashboard.styles';
+import { getStyles } from '../styles/admin-dashboard.styles';
 
 import { AdminDashboard as ServiceTracking } from '../components/dashboard/AdminDashboard';
 import { UserManagement } from '../components/dashboard/UserManagement';
