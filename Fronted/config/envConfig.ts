@@ -1,8 +1,10 @@
 const getBackendUrl = () => {
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
     if (!__DEV__) {
         return 'https://domyapp.onrender.com';
     }
-
     try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const autoIp = require('./auto-ip.json');

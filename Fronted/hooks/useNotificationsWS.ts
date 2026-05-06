@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWebSocket, RealTimeEvent } from './useWebSocket';
-import { API_URL } from '../config/env';
+import { API_URL } from '../config/envConfig';
 import { ADMIN_SERVICES_KEY, ADMIN_INCIDENTS_KEY } from './useAdmin';
 
 interface UseNotificationsWSOptions {
