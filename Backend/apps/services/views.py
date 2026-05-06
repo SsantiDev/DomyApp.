@@ -11,6 +11,47 @@ from .serializers import CategorySerializer, ServiceRequestSerializer, ReviewSer
 
 User = get_user_model()
 
+def create_pending_notifications_for_worker(worker_user):
+    from .models import ServiceRequest, ServiceRequestNotification
+    from apps.users.models import WorkerProfile
+    
+    # Get worker categories
+    try:
+        profile = worker_user.worker_info
+    except WorkerProfile.DoesNotExist:
+        return
+        
+    if not profile.is_available:
+        return
+        
+    categories = profile.categories.all()
+    if not categories:
+        return
+        
+    # Find all unassigned pending services matching these categories
+    pending_services = ServiceRequest.objects.filter(
+        status=ServiceRequest.Status.PENDING,
+        worker__isnull=True,
+        category__in=categories
+    )
+    
+    notifications_to_create = []
+    for service in pending_services:
+        # Check if notification already exists for this worker
+        exists = ServiceRequestNotification.objects.filter(
+            service_request=service,
+            worker=worker_user
+        ).exists()
+        if not exists:
+            notifications_to_create.append(ServiceRequestNotification(
+                service_request=service,
+                worker=worker_user,
+                status=ServiceRequestNotification.Status.PENDING
+            ))
+            
+    if notifications_to_create:
+        ServiceRequestNotification.objects.bulk_create(notifications_to_create)
+
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.filter(is_active=True)
     serializer_class = CategorySerializer
@@ -285,6 +326,59 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
+    def reschedule(self, request, pk=None):
+        try:
+            service_request = ServiceRequest.objects.get(pk=pk)
+        except ServiceRequest.DoesNotExist:
+            return Response({"error": "No encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        
+        # Only client can reschedule their own service
+        if service_request.client != user:
+            return Response({"error": "No autorizado"}, status=status.HTTP_403_FORBIDDEN)
+            
+        # Can only reschedule if status is PENDING or ACCEPTED
+        if service_request.status not in [ServiceRequest.Status.PENDING, ServiceRequest.Status.ACCEPTED]:
+            return Response(
+                {"error": "Solo puedes reprogramar servicios pendientes o agendados (aceptados)."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        scheduled_at = request.data.get('scheduled_at')
+        if not scheduled_at:
+            return Response({"error": "La fecha y hora 'scheduled_at' es requerida."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            # Parse & validate datetime
+            from django.utils.dateparse import parse_datetime
+            parsed_dt = parse_datetime(scheduled_at)
+            if not parsed_dt:
+                raise ValueError()
+        except ValueError:
+            return Response({"error": "Formato de fecha inválido. Utilice formato ISO."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Update scheduled_at
+        service_request.scheduled_at = parsed_dt
+        service_request.save()
+        
+        # Create a notification message to the worker if there is one assigned!
+        if service_request.worker:
+            from apps.chat.models import Message
+            from django.utils import timezone
+            # Convert to local timezone before printing
+            local_dt = timezone.localtime(parsed_dt)
+            formatted_dt = local_dt.strftime('%d/%m/%Y a las %I:%M %p')
+            Message.objects.create(
+                service_request=service_request,
+                sender=user, # Client sends it
+                content=f"⚠️ El cliente ha reprogramado este servicio para el {formatted_dt}.",
+                is_support_chat=False
+            )
+            
+        return Response(self.get_serializer(service_request).data)
+
+    @action(detail=True, methods=['post'])
     def verify_billing(self, request, pk=None):
         try:
             service_request = ServiceRequest.objects.get(pk=pk)
@@ -313,6 +407,9 @@ class ServiceRequestNotificationViewSet(viewsets.ReadOnlyModelViewSet):
         user = self.request.user
         if not user.is_authenticated or user.role != 'WORKER':
             return ServiceRequestNotification.objects.none()
+        
+        # BEFORE listing, dynamically check and create notifications for any missed pending unassigned services matching categories!
+        create_pending_notifications_for_worker(user)
         
         # Filter by PENDING status to show in their incoming requests dashboard
         return ServiceRequestNotification.objects.filter(

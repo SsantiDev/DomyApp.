@@ -7,3 +7,5 @@ class ServicesConfig(AppConfig):
 
     def ready(self):
         import apps.services.signals
+        from .scheduler import start_reminder_scheduler
+        start_reminder_scheduler()

@@ -84,6 +84,21 @@ class AdminUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'is_active', 'date_joined')
         read_only_fields = ('id', 'email', 'first_name', 'last_name', 'date_joined')
 
+class WorkerReviewSerializer(serializers.ModelSerializer):
+    client_name = serializers.SerializerMethodField()
+
+    class Meta:
+        from apps.services.models import Review
+        model = Review
+        fields = ['id', 'rating', 'comment', 'client_name', 'created_at']
+
+    def get_client_name(self, obj):
+        client = obj.service_request.client
+        profile = getattr(client, 'profile', None)
+        if profile:
+            return f"{profile.first_name} {profile.last_name}".strip()
+        return client.email
+
 class WorkerListSerializer(serializers.ModelSerializer):
     """Lite serializer for public search/listing"""
     first_name = serializers.CharField(source='user.profile.first_name')
@@ -91,10 +106,26 @@ class WorkerListSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source='user.profile.city')
     email = serializers.EmailField(source='user.email')
     categories = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    profile_picture = serializers.SerializerMethodField()
+    reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = WorkerProfile
-        fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating', 'categories')
+        fields = ('id', 'email', 'first_name', 'last_name', 'city', 'bio', 'is_available', 'average_rating', 'categories', 'profile_picture', 'reviews')
+
+    def get_profile_picture(self, obj):
+        profile = getattr(obj.user, 'profile', None)
+        if profile and profile.profile_picture:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(profile.profile_picture.url)
+            return profile.profile_picture.url
+        return None
+
+    def get_reviews(self, obj):
+        from apps.services.models import Review
+        reviews = Review.objects.filter(service_request__worker=obj.user).order_by('-created_at')
+        return WorkerReviewSerializer(reviews, many=True, context=self.context).data
 
 
 class UserAddressSerializer(serializers.ModelSerializer):

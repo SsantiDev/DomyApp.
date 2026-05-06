@@ -102,6 +102,13 @@ def toggle_availability(request):
     profile.is_available = not profile.is_available
     profile.save()
     
+    if profile.is_available:
+        try:
+            from apps.services.views import create_pending_notifications_for_worker
+            create_pending_notifications_for_worker(request.user)
+        except Exception as e:
+            pass
+    
     return Response({
         'is_available': profile.is_available,
         'message': f"Estado cambiado a {'Disponible' if profile.is_available else 'No disponible'}"

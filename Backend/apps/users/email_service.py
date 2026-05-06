@@ -172,3 +172,57 @@ def send_password_reset_email(user, code):
         html=html,
         to=user.email,
     )
+
+
+# ─────────────────────────────────────────────
+# SERVICE REMINDER EMAIL
+# ─────────────────────────────────────────────
+
+def send_service_reminder_email(service_request, user_to_remind):
+    """Sends a branded HTML email reminding the user of a scheduled service request."""
+    from django.utils import timezone
+    first_name = getattr(user_to_remind.profile, 'first_name', None) or user_to_remind.email.split('@')[0] or 'Usuario'
+    is_client = user_to_remind.role == 'CLIENT'
+    
+    role_msg = (
+        "Recuerda que tienes un servicio programado para mañana. ¡Asegúrate de asistir puntualmente!"
+        if not is_client else
+        "Recuerda que tu hogar estará en buenas manos mañana con nuestro servicio programado."
+    )
+    
+    # Convert UTC datetime from DB to the local timezone configured in settings.TIME_ZONE
+    local_dt = timezone.localtime(service_request.scheduled_at)
+    formatted_time = local_dt.strftime("%I:%M %p")
+    formatted_date = local_dt.strftime("%d/%m/%Y")
+    
+    content = f"""
+      <h1 style="margin:0 0 4px;font-size:26px;font-weight:700;color:#1A1D23;">
+        ¡Recordatorio de tu servicio! 🏠⏰
+      </h1>
+      <p style="margin:0 0 24px;font-size:14px;color:#6B7280;">Hola <strong>{first_name}</strong>, tienes un servicio agendado para mañana.</p>
+      
+      <div style="background:#F0F4FF;border-left:4px solid #6C63FF;border-radius:8px;padding:16px 20px;margin-bottom:28px;">
+        <p style="margin:0 0 8px;font-size:15px;color:#1A1D23;font-weight:700;">Detalles de la labor:</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Servicio:</strong> {service_request.category.name}</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Fecha:</strong> {formatted_date}</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Hora:</strong> {formatted_time}</p>
+        <p style="margin:0 0 4px;font-size:14px;color:#374151;"><strong>Dirección:</strong> {service_request.address}</p>
+        <p style="margin:12px 0 0;font-size:13px;color:#374151;font-style:italic;">"{role_msg}"</p>
+      </div>
+      
+      <div style="text-align:center;margin-bottom:8px;">
+        <a href="#" style="display:inline-block;background:linear-gradient(135deg,#6C63FF,#48B2E8);color:#fff;text-decoration:none;padding:14px 36px;border-radius:50px;font-size:15px;font-weight:600;letter-spacing:0.5px;">
+          Ver Detalles en la App →
+        </a>
+      </div>
+    """
+    
+    plain = f"Hola {first_name}, recuerda que tienes un servicio programado de {service_request.category.name} para mañana ({formatted_date} a las {formatted_time})."
+    html = _base_html(content)
+    
+    _send(
+        subject=f"⏰ Recordatorio de tu Servicio de Mañana - Domy",
+        plain_text=plain,
+        html=html,
+        to=user_to_remind.email,
+    )
