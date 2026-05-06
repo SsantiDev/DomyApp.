@@ -1,3 +1,11 @@
+export interface WorkerReview {
+    id: number;
+    rating: number;
+    comment: string;
+    client_name: string;
+    created_at: string;
+}
+
 export interface Worker {
     id: number;
     email: string;
@@ -7,6 +15,8 @@ export interface Worker {
     bio: string;
     is_available: boolean;
     average_rating: number;
+    profile_picture?: string | null;
+    reviews?: WorkerReview[];
 }
 
 export interface WorkerPaginationResponse {

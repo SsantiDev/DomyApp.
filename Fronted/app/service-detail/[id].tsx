@@ -22,8 +22,10 @@ import {
     useStartService,
     useCompleteService,
     useRateService,
-    useCancelService
+    useCancelService,
+    useRescheduleService
 } from '../../hooks/useServices';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { AddFavoritePrompt } from '../../components/services/AddFavoritePrompt';
 import { useReportIncident, useGetServiceIncidents } from '../../hooks/useSupport';
 import { IncidentType, INCIDENT_TYPE_LABELS } from '../../types/support';
@@ -67,10 +69,16 @@ export default function ServiceDetailScreen() {
     const startService = useStartService();
     const completeService = useCompleteService();
     const cancelService = useCancelService();
+    const rescheduleService = useRescheduleService();
     const rateService = useRateService();
     const reportIncident = useReportIncident();
     const { data: incidents } = useGetServiceIncidents(Number(id));
     const styles = useMemo(() => getStyles(colors, isDark), [colors, isDark]);
+
+    // Reschedule State
+    const [rescheduleDate, setRescheduleDate] = useState(new Date());
+    const [showReschedulePicker, setShowReschedulePicker] = useState(false);
+    const [reschedulePickerMode, setReschedulePickerMode] = useState<'date' | 'time'>('date');
 
     // Rating State
     const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
@@ -107,6 +115,7 @@ export default function ServiceDetailScreen() {
     const isClient = user?.role === 'CLIENT';
     const canRate = isClient && service.status === 'COMPLETED' && !service.review;
     const canClientCancel = isClient && service.status && ['PENDING', 'ACCEPTED'].includes(service.status);
+    const canClientReschedule = isClient && service.status && ['PENDING', 'ACCEPTED'].includes(service.status);
     const canWorkerCancel = isWorker && service.status === 'ACCEPTED';
 
     // Map Coordinates
@@ -168,6 +177,43 @@ export default function ServiceDetailScreen() {
                 }
             ]
         );
+    };
+
+    const onReschedulePickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+        const currentDate = selectedDate || rescheduleDate;
+
+        if (Platform.OS === 'android') {
+            setShowReschedulePicker(false);
+            if (event.type === 'set') {
+                if (reschedulePickerMode === 'date') {
+                    setRescheduleDate(currentDate);
+                    setTimeout(() => {
+                        setReschedulePickerMode('time');
+                        setShowReschedulePicker(true);
+                    }, 100);
+                } else {
+                    setRescheduleDate(currentDate);
+                    setReschedulePickerMode('date');
+                    confirmReschedule(currentDate);
+                }
+            } else {
+                setReschedulePickerMode('date');
+            }
+        } else {
+            setRescheduleDate(currentDate);
+        }
+    };
+
+    const confirmReschedule = async (selectedDateTime: Date) => {
+        try {
+            await rescheduleService.mutateAsync({
+                id: Number(id),
+                scheduled_at: selectedDateTime.toISOString()
+            });
+            Alert.alert('¡Excelente!', 'El servicio ha sido reprogramado correctamente.');
+        } catch (err: any) {
+            Alert.alert('Error', err?.response?.data?.error || 'No se pudo reprogramar el servicio.');
+        }
     };
 
     const handleRate = async () => {
@@ -311,16 +357,51 @@ export default function ServiceDetailScreen() {
                 )}
 
                 {/* Actions for Client */}
-                {canClientCancel && (
-                    <View style={styles.actionsContainer}>
-                        <Button
-                            title="Cancelar servicio"
-                            onPress={handleCancel}
-                            variant="outline"
-                            style={{ borderColor: colors.danger }}
-                            textStyle={{ color: colors.danger }}
-                            loading={cancelService.isPending}
-                        />
+                {(canClientCancel || canClientReschedule) && (
+                    <View style={[styles.actionsContainer, { gap: 10 }]}>
+                        {canClientReschedule && (
+                            <Button
+                                title="Reprogramar Servicio"
+                                onPress={() => {
+                                    setReschedulePickerMode('date');
+                                    setShowReschedulePicker(true);
+                                }}
+                                loading={rescheduleService.isPending}
+                                icon={<Calendar size={20} color="#ffffff" />}
+                            />
+                        )}
+                        {canClientCancel && (
+                            <Button
+                                title="Cancelar servicio"
+                                onPress={handleCancel}
+                                variant="outline"
+                                style={{ borderColor: colors.danger }}
+                                textStyle={{ color: colors.danger }}
+                                loading={cancelService.isPending}
+                            />
+                        )}
+
+                        {showReschedulePicker && (
+                            <DateTimePicker
+                                value={rescheduleDate}
+                                mode={reschedulePickerMode}
+                                is24Hour={false}
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onChange={onReschedulePickerChange}
+                                minimumDate={new Date()}
+                            />
+                        )}
+                        {Platform.OS === 'ios' && showReschedulePicker && (
+                            <Button
+                                title="Confirmar Nueva Fecha"
+                                variant="outline"
+                                style={{ marginTop: 8 }}
+                                onPress={() => {
+                                    setShowReschedulePicker(false);
+                                    confirmReschedule(rescheduleDate);
+                                }}
+                            />
+                        )}
                     </View>
                 )}
 

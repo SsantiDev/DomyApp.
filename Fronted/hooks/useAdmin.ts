@@ -54,12 +54,22 @@ export const useAdminIncidents = () => {
 
 export const ADMIN_FINANCE_KEY = ['admin-finance-summary'];
 
-export const useAdminFinanceSummary = () => {
+export const useAdminFinanceSummary = (startDate?: string, endDate?: string) => {
     return useQuery({
-        queryKey: ADMIN_FINANCE_KEY,
+        queryKey: [...ADMIN_FINANCE_KEY, startDate, endDate],
         queryFn: async () => {
-            const { data } = await api.get('/admin/finance/summary/');
-            return data as { total_revenue: number; platform_commissions: number; pending_payouts: number; period: string };
+            const params: Record<string, string> = {};
+            if (startDate) params.start_date = startDate;
+            if (endDate) params.end_date = endDate;
+            
+            const { data } = await api.get('/admin/finance/summary/', { params });
+            return data as { 
+                total_revenue: number; 
+                platform_commissions: number; 
+                pending_payouts: number; 
+                period: string;
+                monthly_revenues?: Array<{ month: string; year: number; value: number; key: string }>;
+            };
         },
     });
 };

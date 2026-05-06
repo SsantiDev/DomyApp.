@@ -1,14 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     View,
     Text,
     FlatList,
     ActivityIndicator,
     ListRenderItemInfo,
+    TouchableOpacity,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SPACING } from '../../constants/theme';
-import { useServiceHistory } from '../../hooks/useServices';
+import { useServiceHistory, ServiceHistoryFilters } from '../../hooks/useServices';
 import { ServiceRequest } from '../../types/services';
 import { getStyles } from './WorkerHistory.styles';
 import {
@@ -20,7 +21,9 @@ import {
     CheckCircle,
     Wallet,
     Briefcase,
+    SlidersHorizontal,
 } from 'lucide-react-native';
+import { FilterSheet } from '../services/FilterSheet';
 
 const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('es-CO', {
@@ -175,7 +178,11 @@ function EmptyState({ colors, styles }: { colors: any; styles: any }) {
 export default function WorkerHistory() {
     const { colors } = useTheme();
     const styles = useMemo(() => getStyles(colors), [colors]);
-    const { data, isLoading } = useServiceHistory();
+    const [filters, setFilters] = useState<ServiceHistoryFilters>({});
+    const [showFilters, setShowFilters] = useState(false);
+    const { data, isLoading } = useServiceHistory(filters);
+
+    const hasActiveFilters = !!(filters.start_date || filters.end_date || filters.category);
 
     if (isLoading) {
         return (
@@ -188,6 +195,7 @@ export default function WorkerHistory() {
     const items = data ?? [];
 
     return (
+        <>
         <FlatList
             style={styles.container}
             contentContainerStyle={[
@@ -198,12 +206,35 @@ export default function WorkerHistory() {
             ListHeaderComponent={
                 <View>
                     <View style={styles.pageHeader}>
-                        <Text style={styles.pageTitle}>Historial</Text>
-                        <Text style={styles.pageSubtitle}>
-                            {items.length > 0
-                                ? `${items.length} servicio${items.length !== 1 ? 's' : ''} en tu historial`
-                                : 'Sin servicios anteriores'}
-                        </Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.pageTitle}>Historial</Text>
+                                <Text style={styles.pageSubtitle}>
+                                    {items.length > 0
+                                        ? `${items.length} servicio${items.length !== 1 ? 's' : ''} en tu historial`
+                                        : 'Sin servicios anteriores'}
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setShowFilters(true)}
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    paddingHorizontal: SPACING.sm,
+                                    paddingVertical: SPACING.xs,
+                                    borderRadius: 20,
+                                    borderWidth: 1,
+                                    borderColor: hasActiveFilters ? colors.primary : colors.border,
+                                    backgroundColor: hasActiveFilters ? colors.primary + '15' : 'transparent',
+                                    gap: 4,
+                                }}
+                            >
+                                <SlidersHorizontal size={14} color={hasActiveFilters ? colors.primary : colors.textLight} />
+                                <Text style={{ fontSize: 12, fontWeight: '600', color: hasActiveFilters ? colors.primary : colors.textLight }}>
+                                    Filtros{hasActiveFilters ? ' ●' : ''}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     {items.length > 0 && (
                         <StatsHeader data={items} colors={colors} styles={styles} />
@@ -221,5 +252,12 @@ export default function WorkerHistory() {
             ItemSeparatorComponent={() => <View style={{ height: SPACING.xs }} />}
             ListEmptyComponent={<EmptyState colors={colors} styles={styles} />}
         />
+        <FilterSheet
+            visible={showFilters}
+            filters={filters}
+            onApply={setFilters}
+            onClose={() => setShowFilters(false)}
+        />
+        </>
     );
 }

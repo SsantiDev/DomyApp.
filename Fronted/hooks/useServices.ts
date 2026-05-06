@@ -106,6 +106,20 @@ export const useCancelService = () => {
     });
 };
 
+export const useRescheduleService = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, scheduled_at }: { id: number; scheduled_at: string }) => {
+            const { data } = await api.post<ServiceRequest>(`/services/requests/${id}/reschedule/`, { scheduled_at });
+            return data;
+        },
+        onSuccess: (_, { id }) => {
+            queryClient.invalidateQueries({ queryKey: ['service-requests'] });
+            queryClient.invalidateQueries({ queryKey: ['service-requests', id] });
+        }
+    });
+};
+
 export const useRateService = () => {
     const queryClient = useQueryClient();
     return useMutation({
