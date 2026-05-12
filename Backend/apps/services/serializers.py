@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.support.serializers import IncidentSerializer
 from .models import Category, ServiceRequest, Review, ServiceRequestNotification
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -10,8 +11,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'rating', 'comment', 'created_at']
-
-from apps.support.serializers import IncidentSerializer
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
@@ -39,7 +38,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     def get_unread_messages_count(self, obj):
         request = self.context.get('request')
-        if not request or not request.user: return 0
+        if not request or not request.user:
+            return 0
         user = request.user
         unread = getattr(obj, 'prefetched_unread', None)
         if unread is None:
@@ -54,8 +54,10 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     def get_unread_coordination_count(self, obj):
         request = self.context.get('request')
-        if not request or not request.user: return 0
-        if request.user.role == 'ADMIN': return 0
+        if not request or not request.user:
+            return 0
+        if request.user.role == 'ADMIN':
+            return 0
         unread = getattr(obj, 'prefetched_unread', None)
         if unread is None:
             return obj.messages.filter(is_read=False, is_support_chat=False).exclude(sender=request.user).count()
@@ -63,7 +65,8 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
 
     def get_unread_support_count(self, obj):
         request = self.context.get('request')
-        if not request or not request.user: return 0
+        if not request or not request.user:
+            return 0
         unread = getattr(obj, 'prefetched_unread', None)
         if unread is None:
             return obj.messages.filter(is_read=False, is_support_chat=True).exclude(sender=request.user).count()
