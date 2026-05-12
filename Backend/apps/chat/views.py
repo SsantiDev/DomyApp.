@@ -1,4 +1,6 @@
 from django.db import models
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from rest_framework import viewsets, permissions
 from .models import Message
 from .serializers import MessageSerializer
@@ -51,3 +53,20 @@ class MessageViewSet(viewsets.ModelViewSet):
                 if not message.content.startswith('⚠️ [Respuesta a Incidencia]'):
                     message.content = f"⚠️ [Respuesta a Incidencia]\n{message.content}"
                     message.save(update_fields=['content'])
+
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            return
+
+        async_to_sync(channel_layer.group_send)(
+            f'chat_service_{message.service_request_id}',
+            {
+                'type': 'chat_message',
+                'id': message.id,
+                'sender_id': message.sender_id,
+                'sender_name': message.sender.get_full_name() or message.sender.email,
+                'sender_role': message.sender.role,
+                'content': message.content,
+                'created_at': message.created_at.isoformat(),
+            }
+        )
