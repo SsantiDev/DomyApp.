@@ -1,12 +1,12 @@
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import transaction
 from django.db.models import Prefetch
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from apps.chat.models import Message
-from .models import Category, ServiceRequest, Review, ServiceRequestNotification
+from .models import Category, ServiceRequest, ServiceRequestNotification
 from .serializers import CategorySerializer, ServiceRequestSerializer, ReviewSerializer, ServiceRequestNotificationSerializer
 
 User = get_user_model()
