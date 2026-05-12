@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 import dj_database_url
+from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -186,8 +188,6 @@ STORAGES = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
-
-from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'ngrok-skip-browser-warning',
 ]
@@ -227,8 +227,6 @@ CHANNEL_LAYERS = {
 PLATFORM_FEE_PERCENTAGE = float(os.getenv('PLATFORM_FEE_PERCENTAGE', '0.20'))
 TAX_RETENTION_PERCENTAGE = float(os.getenv('TAX_RETENTION_PERCENTAGE', '0.05'))
 WORKER_REJECTION_THRESHOLD = int(os.getenv('WORKER_REJECTION_THRESHOLD', '3'))
-
-from datetime import timedelta
 
 # SIMPLE_JWT settings (access/refresh)
 SIMPLE_JWT = {
