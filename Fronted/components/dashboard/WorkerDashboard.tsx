@@ -391,7 +391,18 @@ export default function WorkerDashboard() {
           ) : (
             <Card style={styles.emptyCard} variant="outlined">
               <Briefcase size={32} color={colors.textMuted} strokeWidth={1} />
-              <Text style={styles.emptyText}>Buscando solicitudes cerca de ti</Text>
+              {(!user?.worker_info?.categories || user.worker_info.categories.length === 0) ? (
+                <>
+                  <Text style={styles.emptyText}>Sin categorías configuradas</Text>
+                  <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}>
+                    <Text style={[styles.emptyText, { color: colors.primary, fontSize: 13, marginTop: 4 }]}>
+                      Ir al perfil y seleccionar los servicios que ofreces →
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <Text style={styles.emptyText}>Buscando solicitudes cerca de ti</Text>
+              )}
             </Card>
           )}
         </View>

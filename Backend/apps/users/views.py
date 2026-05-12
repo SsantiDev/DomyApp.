@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets, pagination
 from django.db import models, transaction
+import threading
 import logging
 from .serializers import (
     UserDetailSerializer,
@@ -30,10 +31,11 @@ def register(request):
         try:
             with transaction.atomic():
                 user = serializer.save()
-                # Send welcome email asynchronously (or directly for now)
-                transaction.on_commit(lambda: send_welcome_email(user))
                 detail_serializer = UserDetailSerializer(user, context={'request': request})
-                return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+                response_data = detail_serializer.data
+            # Send email in background after transaction commits — avoids SMTP blocking response
+            threading.Thread(target=send_welcome_email, args=(user,), daemon=True).start()
+            return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.exception("Error during user registration")
             return Response({'error': f"Error al crear usuario: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -88,6 +90,14 @@ def update_worker_profile(request):
         if not verification.is_verified:
             verification.identity_document = identity_document
             verification.save(update_fields=['identity_document'])
+
+    # If categories were updated and worker is available, catch up on any existing pending services
+    if 'categories' in request.data and worker_profile.is_available:
+        try:
+            from apps.services.views import create_pending_notifications_for_worker
+            create_pending_notifications_for_worker(request.user)
+        except Exception:
+            pass
 
     return Response(UserDetailSerializer(request.user, context={'request': request}).data)
 

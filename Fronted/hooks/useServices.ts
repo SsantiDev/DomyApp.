@@ -19,7 +19,8 @@ export const useServiceRequests = () => {
             const { data } = await api.get<ServiceRequest[]>('/services/requests/');
             return data;
         },
-        staleTime: 0,           // Always fetch fresh data on mount
+        staleTime: 0,
+        refetchInterval: 15000, // Fallback poll every 15s if WS misses an event
     });
 };
 
@@ -140,6 +141,7 @@ export const useServiceNotifications = () => {
             const { data } = await api.get<ServiceRequestNotification[]>('/services/notifications/');
             return data;
         },
+        refetchInterval: 15000,
     });
 };
 

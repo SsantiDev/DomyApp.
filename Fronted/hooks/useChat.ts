@@ -21,6 +21,7 @@ export const useChatMessages = (serviceId: number, isSupport: boolean) => {
             return (data as any).results ? (data as any).results as Message[] : data as Message[];
         },
         enabled: !!serviceId,
+        refetchInterval: 5000, // Fallback poll if WS is not connected
     });
 };
 
