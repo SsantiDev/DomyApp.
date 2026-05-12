@@ -221,7 +221,7 @@ def send_service_reminder_email(service_request, user_to_remind):
     html = _base_html(content)
     
     _send(
-        subject=f"⏰ Recordatorio de tu Servicio de Mañana - Domy",
+        subject="⏰ Recordatorio de tu Servicio de Mañana - Domy",
         plain_text=plain,
         html=html,
         to=user_to_remind.email,
