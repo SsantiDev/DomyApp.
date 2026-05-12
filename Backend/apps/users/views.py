@@ -8,7 +8,6 @@ from .serializers import (
     UserDetailSerializer,
     UserRegistrationSerializer,
     WorkerVerificationSerializer,
-    WorkerAdminDetailSerializer,
     ProfileSerializer,
     WorkerProfileSerializer,
     WorkerListSerializer,
@@ -106,7 +105,7 @@ def toggle_availability(request):
         try:
             from apps.services.views import create_pending_notifications_for_worker
             create_pending_notifications_for_worker(request.user)
-        except Exception as e:
+        except Exception:
             pass
     
     return Response({
