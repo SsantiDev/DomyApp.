@@ -5,7 +5,6 @@ from openpyxl.styles import Font as XLFont, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import timedelta
 from django.utils import timezone
-from django.db import models, transaction
 from django.db.models import Sum, Count
 from django.conf import settings
 from django.http import HttpResponse
