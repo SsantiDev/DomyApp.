@@ -6,6 +6,6 @@ class ServicesConfig(AppConfig):
     name = 'apps.services'
 
     def ready(self):
-        import apps.services.signals
+        from . import signals  # noqa: F401
         from .scheduler import start_reminder_scheduler
         start_reminder_scheduler()
